@@ -1,7 +1,7 @@
-import { IsString } from "class-validator"
-import { validator } from "../../../../utils/validator"
-import RegionService from "../../../../services/region"
-import { defaultAdminRegionFields, defaultAdminRegionRelations } from "."
+import { IsString } from "class-validator";
+import { validator } from "../../../../utils/validator";
+import RegionService from "../../../../services/region";
+import { defaultAdminRegionFields, defaultAdminRegionRelations } from ".";
 
 /**
  * @oas [delete] /regions/{id}/payment-providers/{provider_id}
@@ -26,28 +26,28 @@ import { defaultAdminRegionFields, defaultAdminRegionRelations } from "."
  *               $ref: "#/components/schemas/region"
  */
 export default async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params;
 
   const validated = await validator(
     AdminPostRegionsRegionPaymentProvidersProviderReq,
     req.body
-  )
+  );
 
-  const regionService: RegionService = req.scope.resolve("regionService")
-  await regionService.setMetadata(id, validated.key, validated.value)
+  const regionService: RegionService = req.scope.resolve("regionService");
+  await regionService.setMetadata(id, validated.key, validated.value);
 
   const region = await regionService.retrieve(id, {
     select: defaultAdminRegionFields,
     relations: defaultAdminRegionRelations,
-  })
+  });
 
-  res.status(200).json({ region })
-}
+  res.status(200).json({ region });
+};
 
 export class AdminPostRegionsRegionPaymentProvidersProviderReq {
   @IsString()
-  key: string
+  key: string;
 
   @IsString()
-  value: string
+  value: string;
 }

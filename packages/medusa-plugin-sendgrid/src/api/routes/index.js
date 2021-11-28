@@ -1,16 +1,16 @@
-import { Router } from "express"
-import bodyParser from "body-parser"
-import middlewares from "../middleware"
+import { Router } from "express";
+import bodyParser from "body-parser";
+import middlewares from "../middleware";
 
-const route = Router()
+const route = Router();
 
 export default (app) => {
-  app.use("/sendgrid", route)
+  app.use("/sendgrid", route);
 
   route.post(
     "/send",
     bodyParser.raw({ type: "application/json" }),
     middlewares.wrap(require("./send-email").default)
-  )
-  return app
-}
+  );
+  return app;
+};

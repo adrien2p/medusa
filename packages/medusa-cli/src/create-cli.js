@@ -1,76 +1,78 @@
-const path = require(`path`)
-const resolveCwd = require(`resolve-cwd`)
-const yargs = require(`yargs`)
-const existsSync = require(`fs-exists-cached`).sync
-const { setTelemetryEnabled } = require("medusa-telemetry")
+const path = require(`path`);
+const resolveCwd = require(`resolve-cwd`);
+const yargs = require(`yargs`);
+const existsSync = require(`fs-exists-cached`).sync;
+const { setTelemetryEnabled } = require("medusa-telemetry");
 
-const { getLocalMedusaVersion } = require(`./util/version`)
-const { didYouMean } = require(`./did-you-mean`)
+const { getLocalMedusaVersion } = require(`./util/version`);
+const { didYouMean } = require(`./did-you-mean`);
 
-const reporter = require("./reporter").default
-const { newStarter } = require("./commands/new")
-const { whoami } = require("./commands/whoami")
-const { login } = require("./commands/login")
-const { link } = require("./commands/link")
+const reporter = require("./reporter").default;
+const { newStarter } = require("./commands/new");
+const { whoami } = require("./commands/whoami");
+const { login } = require("./commands/login");
+const { link } = require("./commands/link");
 
-const handlerP = fn => (...args) => {
-  Promise.resolve(fn(...args)).then(
-    () => process.exit(0),
-    err => console.log(err)
-  )
-}
+const handlerP =
+  (fn) =>
+  (...args) => {
+    Promise.resolve(fn(...args)).then(
+      () => process.exit(0),
+      (err) => console.log(err)
+    );
+  };
 
 function buildLocalCommands(cli, isLocalProject) {
-  const defaultHost = `localhost`
-  const defaultPort = `9000`
-  const directory = path.resolve(`.`)
+  const defaultHost = `localhost`;
+  const defaultPort = `9000`;
+  const directory = path.resolve(`.`);
 
-  const projectInfo = { directory }
-  const useYarn = existsSync(path.join(directory, `yarn.lock`))
+  const projectInfo = { directory };
+  const useYarn = existsSync(path.join(directory, `yarn.lock`));
 
   if (isLocalProject) {
-    const json = require(path.join(directory, `package.json`))
-    projectInfo.sitePackageJson = json
+    const json = require(path.join(directory, `package.json`));
+    projectInfo.sitePackageJson = json;
   }
 
   function getLocalMedusaMajorVersion() {
-    let version = getLocalMedusaVersion()
+    let version = getLocalMedusaVersion();
 
     if (version) {
-      version = Number(version.split(`.`)[0])
+      version = Number(version.split(`.`)[0]);
     }
 
-    return version
+    return version;
   }
 
   function resolveLocalCommand(command) {
     if (!isLocalProject) {
-      cli.showHelp()
+      cli.showHelp();
     }
 
     try {
       const cmdPath = resolveCwd.silent(
         `@medusajs/medusa/dist/commands/${command}`
-      )
-      return require(cmdPath).default
+      );
+      return require(cmdPath).default;
     } catch (err) {
-      cli.showHelp()
+      cli.showHelp();
     }
   }
 
   function getCommandHandler(command, handler) {
-    return argv => {
-      const localCmd = resolveLocalCommand(command)
-      const args = { ...argv, ...projectInfo, useYarn }
+    return (argv) => {
+      const localCmd = resolveLocalCommand(command);
+      const args = { ...argv, ...projectInfo, useYarn };
 
-      return handler ? handler(args, localCmd) : localCmd(args)
-    }
+      return handler ? handler(args, localCmd) : localCmd(args);
+    };
   }
 
   cli
     .command({
       command: `new [root] [starter]`,
-      builder: _ =>
+      builder: (_) =>
         _.option(`seed`, {
           type: `boolean`,
           describe: `If flag is set the command will attempt to seed the database after setup.`,
@@ -123,7 +125,7 @@ function buildLocalCommands(cli, isLocalProject) {
     .command({
       command: `telemetry`,
       describe: `Enable or disable collection of anonymous usage data.`,
-      builder: yargs =>
+      builder: (yargs) =>
         yargs
           .option(`enable`, {
             type: `boolean`,
@@ -135,17 +137,17 @@ function buildLocalCommands(cli, isLocalProject) {
           }),
 
       handler: handlerP(({ enable, disable }) => {
-        const enabled = Boolean(enable) || !disable
-        setTelemetryEnabled(enabled)
+        const enabled = Boolean(enable) || !disable;
+        setTelemetryEnabled(enabled);
         reporter.info(
           `Telemetry collection ${enabled ? `enabled` : `disabled`}`
-        )
+        );
       }),
     })
     .command({
       command: `seed`,
       desc: `Migrates and populates the database with the provided file.`,
-      builder: _ =>
+      builder: (_) =>
         _.option(`f`, {
           alias: `seed-file`,
           type: `string`,
@@ -159,8 +161,8 @@ function buildLocalCommands(cli, isLocalProject) {
         }),
       handler: handlerP(
         getCommandHandler(`seed`, (args, cmd) => {
-          process.env.NODE_ENV = process.env.NODE_ENV || `development`
-          return cmd(args)
+          process.env.NODE_ENV = process.env.NODE_ENV || `development`;
+          return cmd(args);
         })
       ),
     })
@@ -175,8 +177,8 @@ function buildLocalCommands(cli, isLocalProject) {
       },
       handler: handlerP(
         getCommandHandler(`migrate`, (args, cmd) => {
-          process.env.NODE_ENV = process.env.NODE_ENV || `development`
-          return cmd(args)
+          process.env.NODE_ENV = process.env.NODE_ENV || `development`;
+          return cmd(args);
         })
       ),
     })
@@ -188,7 +190,7 @@ function buildLocalCommands(cli, isLocalProject) {
     .command({
       command: `link`,
       desc: `Creates your Medusa Cloud user in your local database for local testing.`,
-      builder: _ =>
+      builder: (_) =>
         _.option(`su`, {
           alias: `skip-local-user`,
           type: `boolean`,
@@ -199,15 +201,15 @@ function buildLocalCommands(cli, isLocalProject) {
           default: false,
           describe: `If set medusa develop will be run after successful linking.`,
         }),
-      handler: handlerP(argv => {
+      handler: handlerP((argv) => {
         if (!isLocalProject) {
-          console.log("must be a local project")
-          cli.showHelp()
+          console.log("must be a local project");
+          cli.showHelp();
         }
 
-        const args = { ...argv, ...projectInfo, useYarn }
+        const args = { ...argv, ...projectInfo, useYarn };
 
-        return link(args)
+        return link(args);
       }),
     })
     .command({
@@ -218,7 +220,7 @@ function buildLocalCommands(cli, isLocalProject) {
     .command({
       command: `develop`,
       desc: `Start development server. Watches file and rebuilds when something changes`,
-      builder: _ =>
+      builder: (_) =>
         _.option(`H`, {
           alias: `host`,
           type: `string`,
@@ -234,19 +236,19 @@ function buildLocalCommands(cli, isLocalProject) {
         }),
       handler: handlerP(
         getCommandHandler(`develop`, (args, cmd) => {
-          process.env.NODE_ENV = process.env.NODE_ENV || `development`
-          cmd(args)
+          process.env.NODE_ENV = process.env.NODE_ENV || `development`;
+          cmd(args);
           // Return an empty promise to prevent handlerP from exiting early.
           // The development server shouldn't ever exit until the user directly
           // kills it so this is fine.
-          return new Promise(resolve => {})
+          return new Promise((resolve) => {});
         })
       ),
     })
     .command({
       command: `start`,
       desc: `Start development server.`,
-      builder: _ =>
+      builder: (_) =>
         _.option(`H`, {
           alias: `host`,
           type: `string`,
@@ -262,19 +264,19 @@ function buildLocalCommands(cli, isLocalProject) {
         }),
       handler: handlerP(
         getCommandHandler(`start`, (args, cmd) => {
-          process.env.NODE_ENV = process.env.NODE_ENV || `development`
-          cmd(args)
+          process.env.NODE_ENV = process.env.NODE_ENV || `development`;
+          cmd(args);
           // Return an empty promise to prevent handlerP from exiting early.
           // The development server shouldn't ever exit until the user directly
           // kills it so this is fine.
-          return new Promise(resolve => {})
+          return new Promise((resolve) => {});
         })
       ),
     })
     .command({
       command: `user`,
       desc: `Create a user`,
-      builder: _ =>
+      builder: (_) =>
         _.option(`e`, {
           alias: `email`,
           type: `string`,
@@ -292,52 +294,52 @@ function buildLocalCommands(cli, isLocalProject) {
           }),
       handler: handlerP(
         getCommandHandler(`user`, (args, cmd) => {
-          cmd(args)
+          cmd(args);
           // Return an empty promise to prevent handlerP from exiting early.
           // The development server shouldn't ever exit until the user directly
           // kills it so this is fine.
-          return new Promise(resolve => {})
+          return new Promise((resolve) => {});
         })
       ),
-    })
+    });
 }
 
 function isLocalMedusaProject() {
-  let inMedusaProject = false
+  let inMedusaProject = false;
   try {
     const { dependencies, devDependencies } = require(path.resolve(
       `./package.json`
-    ))
+    ));
     inMedusaProject =
       (dependencies && dependencies["@medusajs/medusa"]) ||
-      (devDependencies && devDependencies["@medusajs/medusa"])
+      (devDependencies && devDependencies["@medusajs/medusa"]);
   } catch (err) {
     /* ignore */
   }
-  return !!inMedusaProject
+  return !!inMedusaProject;
 }
 
 function getVersionInfo() {
-  const { version } = require(`../package.json`)
-  const isMedusaProject = isLocalMedusaProject()
+  const { version } = require(`../package.json`);
+  const isMedusaProject = isLocalMedusaProject();
   if (isMedusaProject) {
-    let medusaVersion = getLocalMedusaVersion()
+    let medusaVersion = getLocalMedusaVersion();
 
     if (!medusaVersion) {
-      medusaVersion = `unknown`
+      medusaVersion = `unknown`;
     }
 
     return `Medusa CLI version: ${version}
 Medusa version: ${medusaVersion}
-  Note: this is the Medusa version for the site at: ${process.cwd()}`
+  Note: this is the Medusa version for the site at: ${process.cwd()}`;
   } else {
-    return `Medusa CLI version: ${version}`
+    return `Medusa CLI version: ${version}`;
   }
 }
 
-module.exports = argv => {
-  const cli = yargs()
-  const isLocalProject = isLocalMedusaProject()
+module.exports = (argv) => {
+  const cli = yargs();
+  const isLocalProject = isLocalMedusaProject();
 
   cli
     .scriptName(`medusa`)
@@ -362,16 +364,16 @@ module.exports = argv => {
       default: false,
       type: `boolean`,
       global: true,
-    })
+    });
 
-  buildLocalCommands(cli, isLocalProject)
+  buildLocalCommands(cli, isLocalProject);
 
   try {
     cli.version(
       `version`,
       `Show the version of the Medusa CLI and the Medusa package in the current project`,
       getVersionInfo()
-    )
+    );
   } catch (e) {
     // ignore
   }
@@ -381,16 +383,18 @@ module.exports = argv => {
     .demandCommand(1, `Pass --help to see all available commands and options.`)
     .strict()
     .fail((msg, err, yargs) => {
-      const availableCommands = yargs.getCommands().map(commandDescription => {
-        const [command] = commandDescription
-        return command.split(` `)[0]
-      })
-      const arg = argv.slice(2)[0]
-      const suggestion = arg ? didYouMean(arg, availableCommands) : ``
+      const availableCommands = yargs
+        .getCommands()
+        .map((commandDescription) => {
+          const [command] = commandDescription;
+          return command.split(` `)[0];
+        });
+      const arg = argv.slice(2)[0];
+      const suggestion = arg ? didYouMean(arg, availableCommands) : ``;
 
-      cli.showHelp()
-      reporter.info(suggestion)
-      reporter.info(msg)
+      cli.showHelp();
+      reporter.info(suggestion);
+      reporter.info(msg);
     })
-    .parse(argv.slice(2))
-}
+    .parse(argv.slice(2));
+};

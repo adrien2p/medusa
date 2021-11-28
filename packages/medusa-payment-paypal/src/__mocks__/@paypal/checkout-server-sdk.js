@@ -2,9 +2,9 @@ export const PayPalClientMock = {
   execute: jest.fn().mockImplementation((r) => {
     return {
       result: r.result,
-    }
+    };
   }),
-}
+};
 
 export const PayPalMock = {
   core: {
@@ -12,16 +12,16 @@ export const PayPalMock = {
       this.env = {
         sandbox: true,
         live: false,
-      }
+      };
     },
     LiveEnvironment: function () {
       this.env = {
         sandbox: false,
         live: true,
-      }
+      };
     },
     PayPalHttpClient: function () {
-      return PayPalClientMock
+      return PayPalClientMock;
     },
   },
 
@@ -34,7 +34,7 @@ export const PayPalMock = {
           id: "test",
         },
         capture: true,
-      }
+      };
     }),
     CapturesRefundRequest: jest.fn().mockImplementation(() => {
       return {
@@ -43,9 +43,9 @@ export const PayPalMock = {
         },
         body: null,
         requestBody: function (d) {
-          this.body = d
+          this.body = d;
         },
-      }
+      };
     }),
   },
 
@@ -58,9 +58,9 @@ export const PayPalMock = {
         order: true,
         body: null,
         requestBody: function (d) {
-          this.body = d
+          this.body = d;
         },
-      }
+      };
     }),
     OrdersPatchRequest: jest.fn().mockImplementation(() => {
       return {
@@ -70,18 +70,18 @@ export const PayPalMock = {
         order: true,
         body: null,
         requestBody: function (d) {
-          this.body = d
+          this.body = d;
         },
-      }
+      };
     }),
     OrdersGetRequest: jest.fn().mockImplementation(() => {
       return {
         result: {
           id: "test",
         },
-      }
+      };
     }),
   },
-}
+};
 
-export default PayPalMock
+export default PayPalMock;

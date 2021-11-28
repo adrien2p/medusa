@@ -1,4 +1,4 @@
-import { Type } from "class-transformer"
+import { Type } from "class-transformer";
 import {
   IsArray,
   IsBoolean,
@@ -9,11 +9,11 @@ import {
   IsString,
   Validate,
   ValidateNested,
-} from "class-validator"
-import { defaultAdminProductFields, defaultAdminProductRelations } from "."
-import { ProductService, ProductVariantService } from "../../../../services"
-import { XorConstraint } from "../../../../types/validators/xor"
-import { validator } from "../../../../utils/validator"
+} from "class-validator";
+import { defaultAdminProductFields, defaultAdminProductRelations } from ".";
+import { ProductService, ProductVariantService } from "../../../../services";
+import { XorConstraint } from "../../../../types/validators/xor";
+import { validator } from "../../../../utils/validator";
 
 /**
  * @oas [post] /products/{id}/variants/{variant_id}
@@ -119,131 +119,131 @@ import { validator } from "../../../../utils/validator"
  *               $ref: "#/components/schemas/product"
  */
 export default async (req, res) => {
-  const { id, variant_id } = req.params
+  const { id, variant_id } = req.params;
 
   const validated = await validator(
     AdminPostProductsProductVariantsVariantReq,
     req.body
-  )
+  );
 
-  const productService: ProductService = req.scope.resolve("productService")
+  const productService: ProductService = req.scope.resolve("productService");
   const productVariantService: ProductVariantService = req.scope.resolve(
     "productVariantService"
-  )
+  );
 
   await productVariantService.update(variant_id, {
     product_id: id,
     ...validated,
-  })
+  });
 
   const product = await productService.retrieve(id, {
     select: defaultAdminProductFields,
     relations: defaultAdminProductRelations,
-  })
+  });
 
-  res.json({ product })
-}
+  res.json({ product });
+};
 
 class ProductVariantOptionReq {
   @IsString()
-  value: string
+  value: string;
 
   @IsString()
-  option_id: string
+  option_id: string;
 }
 
 class ProductVariantPricesReq {
   @Validate(XorConstraint, ["currency_code"])
-  region_id?: string
+  region_id?: string;
 
   @Validate(XorConstraint, ["region_id"])
-  currency_code?: string
+  currency_code?: string;
 
   @IsInt()
-  amount: number
+  amount: number;
 
   @IsOptional()
   @IsInt()
-  sale_amount?: number
+  sale_amount?: number;
 }
 
 class AdminPostProductsProductVariantsVariantReq {
   @IsString()
   @IsOptional()
-  title?: string
+  title?: string;
 
   @IsString()
   @IsOptional()
-  sku?: string
+  sku?: string;
 
   @IsString()
   @IsOptional()
-  ean?: string
+  ean?: string;
 
   @IsString()
   @IsOptional()
-  upc?: string
+  upc?: string;
 
   @IsString()
   @IsOptional()
-  barcode?: string
+  barcode?: string;
 
   @IsString()
   @IsOptional()
-  hs_code?: string
+  hs_code?: string;
 
   @IsNumber()
   @IsOptional()
-  inventory_quantity: number
+  inventory_quantity: number;
 
   @IsBoolean()
   @IsOptional()
-  allow_backorder?: boolean
+  allow_backorder?: boolean;
 
   @IsBoolean()
   @IsOptional()
-  manage_inventory?: boolean
+  manage_inventory?: boolean;
 
   @IsNumber()
   @IsOptional()
-  weight?: number
+  weight?: number;
 
   @IsNumber()
   @IsOptional()
-  length?: number
+  length?: number;
 
   @IsNumber()
   @IsOptional()
-  height?: number
+  height?: number;
 
   @IsNumber()
   @IsOptional()
-  width?: number
+  width?: number;
 
   @IsString()
   @IsOptional()
-  origin_country?: string
+  origin_country?: string;
 
   @IsString()
   @IsOptional()
-  mid_code?: string
+  mid_code?: string;
 
   @IsString()
   @IsOptional()
-  material?: string
+  material?: string;
 
   @IsObject()
   @IsOptional()
-  metadata?: object
+  metadata?: object = {};
 
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ProductVariantPricesReq)
-  prices: ProductVariantPricesReq[]
+  prices: ProductVariantPricesReq[];
 
   @Type(() => ProductVariantOptionReq)
   @ValidateNested({ each: true })
   @IsOptional()
   @IsArray()
-  options: ProductVariantOptionReq[] = []
+  options: ProductVariantOptionReq[] = [];
 }

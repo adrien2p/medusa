@@ -14,53 +14,53 @@ import {
   ManyToMany,
   JoinColumn,
   JoinTable,
-} from "typeorm"
-import { DbAwareColumn } from "../utils/db-aware-column"
+} from "typeorm";
+import { DbAwareColumn } from "../utils/db-aware-column";
 
-import { ReturnReason } from "./return-reason"
-import { Return } from "./return"
-import { LineItem } from "./line-item"
+import { ReturnReason } from "./return-reason";
+import { Return } from "./return";
+import { LineItem } from "./line-item";
 
 @Entity()
 export class ReturnItem {
   @PrimaryColumn()
-  return_id: string
+  return_id: string;
 
   @PrimaryColumn()
-  item_id: string
+  item_id: string;
 
   @ManyToOne(() => Return)
   @JoinColumn({ name: "return_id" })
-  return_order: Return
+  return_order: Return;
 
   @ManyToOne(() => LineItem)
   @JoinColumn({ name: "item_id" })
-  item: LineItem
+  item: LineItem;
 
   @Column({ type: "int" })
-  quantity: number
+  quantity: number;
 
   @Column({ type: "boolean", default: true })
-  is_requested: boolean
+  is_requested: boolean;
 
   @Column({ type: "int", nullable: true })
-  requested_quantity: number
+  requested_quantity: number;
 
   @Column({ type: "int", nullable: true })
-  received_quantity: number
+  received_quantity: number;
 
   @Column({ nullable: true })
-  reason_id: string
+  reason_id: string;
 
   @ManyToOne(() => ReturnReason)
   @JoinColumn({ name: "reason_id" })
-  reason: ReturnReason
+  reason: ReturnReason;
 
   @Column({ nullable: true })
-  note: string
+  note: string;
 
   @DbAwareColumn({ type: "jsonb", nullable: true })
-  metadata: any
+  metadata: any;
 }
 
 /**

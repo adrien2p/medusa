@@ -1,7 +1,7 @@
-import { IdMap, MockManager, MockRepository } from "medusa-test-utils"
-import idMap from "medusa-test-utils/dist/id-map"
-import ReturnService from "../return"
-import { InventoryServiceMock } from "../__mocks__/inventory"
+import { IdMap, MockManager, MockRepository } from "medusa-test-utils";
+import idMap from "medusa-test-utils/dist/id-map";
+import ReturnService from "../return";
+import { InventoryServiceMock } from "../__mocks__/inventory";
 
 describe("ReturnService", () => {
   // describe("requestReturn", () => {
@@ -144,7 +144,7 @@ describe("ReturnService", () => {
 
   describe("receive", () => {
     const returnRepository = MockRepository({
-      findOne: query => {
+      findOne: (query) => {
         switch (query.where.id) {
           case IdMap.getId("test-return-2"):
             return Promise.resolve({
@@ -163,11 +163,11 @@ describe("ReturnService", () => {
                   quantity: 10,
                 },
               ],
-            })
+            });
           case IdMap.getId("test-return-3"):
             return Promise.resolve({
               status: "canceled",
-            })
+            });
           default:
             return Promise.resolve({
               id: IdMap.getId("test-return"),
@@ -182,19 +182,19 @@ describe("ReturnService", () => {
                   quantity: 10,
                 },
               ],
-            })
+            });
         }
       },
-    })
+    });
 
     const totalsService = {
-      getTotal: jest.fn().mockImplementation(cart => {
-        return 1000
+      getTotal: jest.fn().mockImplementation((cart) => {
+        return 1000;
       }),
       getRefundedTotal: jest.fn().mockImplementation((order, lineItems) => {
-        return 0
+        return 0;
       }),
-    }
+    };
 
     const orderService = {
       retrieve: jest.fn().mockImplementation(() => {
@@ -214,38 +214,38 @@ describe("ReturnService", () => {
             },
           ],
           payments: [{ id: "payment_test" }],
-        })
+        });
       }),
-      withTransaction: function() {
-        return this
+      withTransaction: function () {
+        return this;
       },
-    }
+    };
 
     const lineItemService = {
-      retrieve: jest.fn().mockImplementation(data => {
-        return Promise.resolve({ ...data, returned_quantity: 0 })
+      retrieve: jest.fn().mockImplementation((data) => {
+        return Promise.resolve({ ...data, returned_quantity: 0 });
       }),
       update: jest.fn(),
-      withTransaction: function() {
-        return this
+      withTransaction: function () {
+        return this;
       },
-    }
+    };
 
     const inventoryService = {
       adjustInventory: jest.fn((variantId, quantity) => {
-        return Promise.resolve({})
+        return Promise.resolve({});
       }),
       confirmInventory: jest.fn((variantId, quantity) => {
         if (quantity < 10) {
-          return true
+          return true;
         } else {
-          return false
+          return false;
         }
       }),
-      withTransaction: function() {
-        return this
+      withTransaction: function () {
+        return this;
       },
-    }
+    };
 
     const returnService = new ReturnService({
       manager: MockManager,
@@ -254,20 +254,20 @@ describe("ReturnService", () => {
       orderService,
       returnRepository,
       inventoryService,
-    })
+    });
 
     beforeEach(async () => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     it("successfully receives a return", async () => {
       await returnService.receive(
         IdMap.getId("test-return"),
         [{ item_id: IdMap.getId("test-line"), quantity: 10 }],
         1000
-      )
+      );
 
-      expect(returnRepository.save).toHaveBeenCalledTimes(1)
+      expect(returnRepository.save).toHaveBeenCalledTimes(1);
       expect(returnRepository.save).toHaveBeenCalledWith({
         id: IdMap.getId("test-return"),
         order: {
@@ -286,22 +286,22 @@ describe("ReturnService", () => {
         ],
         refund_amount: 1000,
         received_at: expect.anything(),
-      })
+      });
 
-      expect(lineItemService.update).toHaveBeenCalledTimes(1)
+      expect(lineItemService.update).toHaveBeenCalledTimes(1);
       expect(lineItemService.update).toHaveBeenCalledWith(
         IdMap.getId("test-line"),
         {
           returned_quantity: 10,
         }
-      )
+      );
 
-      expect(inventoryService.adjustInventory).toHaveBeenCalledTimes(1)
+      expect(inventoryService.adjustInventory).toHaveBeenCalledTimes(1);
       expect(inventoryService.adjustInventory).toHaveBeenCalledWith(
         "test-variant",
         10
-      )
-    })
+      );
+    });
 
     it("successfully receives a return with requires_action status", async () => {
       await returnService.receive(
@@ -311,19 +311,19 @@ describe("ReturnService", () => {
           { item_id: IdMap.getId("test-line-2"), quantity: 10 },
         ],
         1000
-      )
+      );
 
-      expect(inventoryService.adjustInventory).toHaveBeenCalledTimes(2)
+      expect(inventoryService.adjustInventory).toHaveBeenCalledTimes(2);
       expect(inventoryService.adjustInventory).toHaveBeenCalledWith(
         "test-variant",
         10
-      )
+      );
       expect(inventoryService.adjustInventory).toHaveBeenCalledWith(
         "test-variant-2",
         10
-      )
+      );
 
-      expect(returnRepository.save).toHaveBeenCalledTimes(1)
+      expect(returnRepository.save).toHaveBeenCalledTimes(1);
       expect(returnRepository.save).toHaveBeenCalledWith({
         id: IdMap.getId("test-return-2"),
         order: {
@@ -353,8 +353,8 @@ describe("ReturnService", () => {
         ],
         refund_amount: 1000,
         received_at: expect.anything(),
-      })
-    })
+      });
+    });
 
     it("fails to receive a return which has been canceled", async () => {
       await expect(
@@ -362,114 +362,114 @@ describe("ReturnService", () => {
           { item_id: IdMap.getId("test-line"), quantity: 10 },
           { item_id: IdMap.getId("test-line-2"), quantity: 10 },
         ])
-      ).rejects.toThrow("Cannot receive a canceled return")
-    })
-  })
+      ).rejects.toThrow("Cannot receive a canceled return");
+    });
+  });
 
   describe("canceled", () => {
     const returnRepository = MockRepository({
-      findOne: query => {
+      findOne: (query) => {
         switch (query.where.id) {
           case IdMap.getId("test-return"):
             return Promise.resolve({
               status: "pending",
               refund_amount: 0,
-            })
+            });
           case IdMap.getId("test-return-2"):
             return Promise.resolve({
               status: "received",
               refund_amount: 0,
-            })
+            });
           default:
-            return Promise.resolve({})
+            return Promise.resolve({});
         }
       },
-      save: f => f,
-    })
+      save: (f) => f,
+    });
 
     const returnService = new ReturnService({
       manager: MockManager,
       returnRepository,
-    })
+    });
 
     beforeEach(async () => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     it("successfully cancels return", async () => {
-      await returnService.cancel(IdMap.getId("test-return"))
+      await returnService.cancel(IdMap.getId("test-return"));
 
-      expect(returnRepository.save).toHaveBeenCalledTimes(1)
+      expect(returnRepository.save).toHaveBeenCalledTimes(1);
       expect(returnRepository.save).toHaveBeenCalledWith({
         status: "canceled",
         refund_amount: 0,
-      })
-    })
+      });
+    });
 
     it("fails to cancel return when already received", async () => {
       await expect(
         returnService.cancel(IdMap.getId("test-return-2"))
-      ).rejects.toThrow("Can't cancel a return which has been returned")
-    })
-  })
+      ).rejects.toThrow("Can't cancel a return which has been returned");
+    });
+  });
 
   describe("fulfilled", () => {
     const returnRepository = MockRepository({
-      findOne: query => {
+      findOne: (query) => {
         switch (query.where.id) {
           case IdMap.getId("test-return"):
             return Promise.resolve({
               status: "canceled",
-            })
+            });
           default:
-            return Promise.resolve({})
+            return Promise.resolve({});
         }
       },
-    })
+    });
 
     const returnService = new ReturnService({
       manager: MockManager,
       returnRepository,
-    })
+    });
 
     beforeEach(async () => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     it("fails to fulfill when return is canceled", async () => {
       await expect(
         returnService.fulfill(IdMap.getId("test-return"))
-      ).rejects.toThrow("Cannot fulfill a canceled return")
-    })
-  })
+      ).rejects.toThrow("Cannot fulfill a canceled return");
+    });
+  });
 
   describe("update", () => {
     const returnRepository = MockRepository({
-      findOne: query => {
+      findOne: (query) => {
         switch (query.where.id) {
           case IdMap.getId("test-return"):
             return Promise.resolve({
               status: "canceled",
-            })
+            });
           default:
-            return Promise.resolve({})
+            return Promise.resolve({});
         }
       },
-    })
+    });
 
     const returnService = new ReturnService({
       manager: MockManager,
       returnRepository,
-    })
+    });
 
     beforeEach(async () => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     it("fails to update when return is canceled", async () => {
       await expect(
         returnService.update(IdMap.getId("test-return"), {})
-      ).rejects.toThrow("Cannot update a canceled return")
-    })
-  })
-})
+      ).rejects.toThrow("Cannot update a canceled return");
+    });
+  });
+});

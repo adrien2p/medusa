@@ -1,4 +1,4 @@
-import path from "path"
+import path from "path";
 
 /**
  * Attempts to resolve the config file in a given root directory.
@@ -7,17 +7,17 @@ import path from "path"
  * @return {object} an object containing the config module and its path.
  */
 function getConfigFile(rootDir, configName) {
-  const configPath = path.join(rootDir, configName)
-  let configFilePath = ``
-  let configModule
+  const configPath = path.join(rootDir, configName);
+  let configFilePath = ``;
+  let configModule;
   try {
-    configFilePath = require.resolve(configPath)
-    configModule = require(configFilePath)
+    configFilePath = require.resolve(configPath);
+    configModule = require(configFilePath);
   } catch (err) {
-    return {}
+    return {};
   }
 
-  return { configModule, configFilePath }
+  return { configModule, configFilePath };
 }
 
-export default getConfigFile
+export default getConfigFile;

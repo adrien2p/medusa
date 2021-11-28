@@ -1,4 +1,4 @@
-import { Transform, Type } from "class-transformer"
+import { Transform, Type } from "class-transformer";
 import {
   IsArray,
   IsBoolean,
@@ -8,10 +8,10 @@ import {
   IsOptional,
   IsString,
   ValidateNested,
-} from "class-validator"
-import { defaultAdminOrdersRelations, defaultAdminOrdersFields } from "."
-import { OrderService } from "../../../../services"
-import { validator } from "../../../../utils/validator"
+} from "class-validator";
+import { defaultAdminOrdersRelations, defaultAdminOrdersFields } from ".";
+import { OrderService } from "../../../../services";
+import { validator } from "../../../../utils/validator";
 /**
  * @oas [post] /orders/{id}/fulfillments
  * operationId: "PostOrdersOrderFulfillments"
@@ -57,50 +57,50 @@ import { validator } from "../../../../utils/validator"
  *               $ref: "#/components/schemas/order"
  */
 export default async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params;
 
   const validated = await validator(
     AdminPostOrdersOrderFulfillmentsReq,
     req.body
-  )
+  );
 
-  const orderService: OrderService = req.scope.resolve("orderService")
+  const orderService: OrderService = req.scope.resolve("orderService");
 
   await orderService.createFulfillment(id, validated.items, {
     metadata: validated.metadata,
     no_notification: validated.no_notification,
-  })
+  });
 
   const order = await orderService.retrieve(id, {
     select: defaultAdminOrdersFields,
     relations: defaultAdminOrdersRelations,
-  })
+  });
 
-  res.json({ order })
-}
+  res.json({ order });
+};
 
 export class AdminPostOrdersOrderFulfillmentsReq {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => Item)
-  items: Item[]
+  items: Item[] = [];
 
   @IsBoolean()
   @IsOptional()
-  @Transform(({ value }) => value === "true")
-  no_notification?: boolean
+  @Transform(({ value }) => Boolean(value))
+  no_notification?: boolean;
 
   @IsObject()
   @IsOptional()
-  metadata?: object
+  metadata?: object = {};
 }
 
 class Item {
   @IsString()
   @IsNotEmpty()
-  item_id: string
+  item_id: string;
 
   @IsInt()
   @IsNotEmpty()
-  quantity: number
+  quantity: number;
 }

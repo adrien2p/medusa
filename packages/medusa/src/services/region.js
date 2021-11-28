@@ -1,6 +1,6 @@
-import { MedusaError } from "medusa-core-utils"
-import { BaseService } from "medusa-interfaces"
-import { countries } from "../utils/countries"
+import { MedusaError } from "medusa-core-utils";
+import { BaseService } from "medusa-interfaces";
+import { countries } from "../utils/countries";
 
 /**
  * Provides layer to manipulate regions.
@@ -11,7 +11,7 @@ class RegionService extends BaseService {
     UPDATED: "region.updated",
     CREATED: "region.created",
     DELETED: "region.deleted",
-  }
+  };
 
   constructor({
     manager,
@@ -25,42 +25,42 @@ class RegionService extends BaseService {
     paymentProviderService,
     fulfillmentProviderService,
   }) {
-    super()
+    super();
 
     /** @private @const {EntityManager} */
-    this.manager_ = manager
+    this.manager_ = manager;
 
     /** @private @const {RegionRepository} */
-    this.regionRepository_ = regionRepository
+    this.regionRepository_ = regionRepository;
 
     /** @private @const {CountryRepository} */
-    this.countryRepository_ = countryRepository
+    this.countryRepository_ = countryRepository;
 
     /** @private @const {StoreService} */
-    this.storeService_ = storeService
+    this.storeService_ = storeService;
 
     /** @private @const {EventBus} */
-    this.eventBus_ = eventBusService
+    this.eventBus_ = eventBusService;
 
     /** @private @const {CurrencyRepository} */
-    this.currencyRepository_ = currencyRepository
+    this.currencyRepository_ = currencyRepository;
 
     /** @private @const {PaymentProviderRepository} */
-    this.paymentProviderRepository_ = paymentProviderRepository
+    this.paymentProviderRepository_ = paymentProviderRepository;
 
     /** @private @const {FulfillmentProviderRepository} */
-    this.fulfillmentProviderRepository_ = fulfillmentProviderRepository
+    this.fulfillmentProviderRepository_ = fulfillmentProviderRepository;
 
     /** @private @const {PaymentProviderService} */
-    this.paymentProviderService_ = paymentProviderService
+    this.paymentProviderService_ = paymentProviderService;
 
     /** @private @const {FulfillmentProviderService} */
-    this.fulfillmentProviderService_ = fulfillmentProviderService
+    this.fulfillmentProviderService_ = fulfillmentProviderService;
   }
 
   withTransaction(transactionManager) {
     if (!transactionManager) {
-      return this
+      return this;
     }
 
     const cloned = new RegionService({
@@ -74,11 +74,11 @@ class RegionService extends BaseService {
       paymentProviderService: this.paymentProviderService_,
       fulfillmentProviderRepository: this.fulfillmentProviderRepository_,
       fulfillmentProviderService: this.fulfillmentProviderService_,
-    })
+    });
 
-    cloned.transactionManager_ = transactionManager
+    cloned.transactionManager_ = transactionManager;
 
-    return cloned
+    return cloned;
   }
 
   /**
@@ -90,52 +90,52 @@ class RegionService extends BaseService {
     return this.atomicPhase_(async (manager) => {
       const regionRepository = manager.getCustomRepository(
         this.regionRepository_
-      )
+      );
       const currencyRepository = manager.getCustomRepository(
         this.currencyRepository_
-      )
+      );
 
-      const { metadata, currency_code, ...toValidate } = regionObject
+      const { metadata, currency_code, ...toValidate } = regionObject;
 
-      const validated = await this.validateFields_(toValidate)
+      const validated = await this.validateFields_(toValidate);
 
       if (currency_code) {
         // will throw if currency is not added to store currencies
-        await this.validateCurrency_(currency_code)
+        await this.validateCurrency_(currency_code);
         const currency = await currencyRepository.findOne({
           where: { code: currency_code.toLowerCase() },
-        })
+        });
 
         if (!currency) {
           throw new MedusaError(
             MedusaError.Types.INVALID_DATA,
             `Could not find currency with code ${currency_code}`
-          )
+          );
         }
 
-        regionObject.currency = currency
-        regionObject.currency_code = currency_code.toLowerCase()
+        regionObject.currency = currency;
+        regionObject.currency_code = currency_code.toLowerCase();
       }
 
       if (metadata) {
-        regionObject.metadata = this.setMetadata_(regionObject, metadata)
+        regionObject.metadata = this.setMetadata_(regionObject, metadata);
       }
 
       for (const [key, value] of Object.entries(validated)) {
-        regionObject[key] = value
+        regionObject[key] = value;
       }
 
-      const created = regionRepository.create(regionObject)
-      const result = await regionRepository.save(created)
+      const created = regionRepository.create(regionObject);
+      const result = await regionRepository.save(created);
 
       await this.eventBus_
         .withTransaction(manager)
         .emit(RegionService.Events.CREATED, {
           id: result.id,
-        })
+        });
 
-      return result
-    })
+      return result;
+    });
   }
 
   /**
@@ -148,53 +148,53 @@ class RegionService extends BaseService {
     return this.atomicPhase_(async (manager) => {
       const regionRepository = manager.getCustomRepository(
         this.regionRepository_
-      )
+      );
       const currencyRepository = manager.getCustomRepository(
         this.currencyRepository_
-      )
+      );
 
-      const region = await this.retrieve(regionId)
+      const region = await this.retrieve(regionId);
 
-      const { metadata, currency_code, ...toValidate } = update
+      const { metadata, currency_code, ...toValidate } = update;
 
-      const validated = await this.validateFields_(toValidate, region.id)
+      const validated = await this.validateFields_(toValidate, region.id);
 
       if (currency_code) {
         // will throw if currency is not added to store currencies
-        await this.validateCurrency_(currency_code)
+        await this.validateCurrency_(currency_code);
         const currency = await currencyRepository.findOne({
           where: { code: currency_code.toLowerCase() },
-        })
+        });
 
         if (!currency) {
           throw new MedusaError(
             MedusaError.Types.INVALID_DATA,
             `Could not find currency with code ${currency_code}`
-          )
+          );
         }
 
-        region.currency_code = currency_code.toLowerCase()
+        region.currency_code = currency_code.toLowerCase();
       }
 
       if (metadata) {
-        region.metadata = this.setMetadata_(region, metadata)
+        region.metadata = this.setMetadata_(region, metadata);
       }
 
       for (const [key, value] of Object.entries(validated)) {
-        region[key] = value
+        region[key] = value;
       }
 
-      const result = await regionRepository.save(region)
+      const result = await regionRepository.save(region);
 
       await this.eventBus_
         .withTransaction(manager)
         .emit(RegionService.Events.UPDATED, {
           id: result.id,
           fields: Object.keys(update),
-        })
+        });
 
-      return result
-    })
+      return result;
+    });
   }
 
   /**
@@ -207,13 +207,13 @@ class RegionService extends BaseService {
   async validateFields_(region, id = undefined) {
     const ppRepository = this.manager_.getCustomRepository(
       this.paymentProviderRepository_
-    )
+    );
     const fpRepository = this.manager_.getCustomRepository(
       this.fulfillmentProviderRepository_
-    )
+    );
 
     if (region.tax_rate) {
-      this.validateTaxRate_(region.tax_rate)
+      this.validateTaxRate_(region.tax_rate);
     }
 
     if (region.countries) {
@@ -222,43 +222,43 @@ class RegionService extends BaseService {
           this.validateCountry_(countryCode, id)
         )
       ).catch((err) => {
-        throw err
-      })
+        throw err;
+      });
     }
 
     if (region.payment_providers) {
       region.payment_providers = await Promise.all(
         region.payment_providers.map(async (pId) => {
-          const pp = await ppRepository.findOne({ where: { id: pId } })
+          const pp = await ppRepository.findOne({ where: { id: pId } });
           if (!pp) {
             throw new MedusaError(
               MedusaError.Types.INVALID_DATA,
               "Payment provider not found"
-            )
+            );
           }
 
-          return pp
+          return pp;
         })
-      )
+      );
     }
 
     if (region.fulfillment_providers) {
       region.fulfillment_providers = await Promise.all(
         region.fulfillment_providers.map(async (fId) => {
-          const fp = await fpRepository.findOne({ where: { id: fId } })
+          const fp = await fpRepository.findOne({ where: { id: fId } });
           if (!fp) {
             throw new MedusaError(
               MedusaError.Types.INVALID_DATA,
               "Fulfillment provider not found"
-            )
+            );
           }
 
-          return fp
+          return fp;
         })
-      )
+      );
     }
 
-    return region
+    return region;
   }
 
   /**
@@ -270,7 +270,7 @@ class RegionService extends BaseService {
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
         "The tax_rate must be between 0 and 1"
-      )
+      );
     }
   }
 
@@ -281,15 +281,15 @@ class RegionService extends BaseService {
   async validateCurrency_(currencyCode) {
     const store = await this.storeService_
       .withTransaction(this.transactionManager_)
-      .retrieve(["currencies"])
+      .retrieve(["currencies"]);
 
-    const storeCurrencies = store.currencies.map((curr) => curr.code)
+    const storeCurrencies = store.currencies.map((curr) => curr.code);
 
     if (!storeCurrencies.includes(currencyCode.toLowerCase())) {
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
         "Invalid currency code"
-      )
+      );
     }
   }
 
@@ -302,38 +302,38 @@ class RegionService extends BaseService {
   async validateCountry_(code, regionId) {
     const countryRepository = this.manager_.getCustomRepository(
       this.countryRepository_
-    )
+    );
 
-    const countryCode = code.toUpperCase()
-    const validCountry = countries.find((c) => c.alpha2 === countryCode)
+    const countryCode = code.toUpperCase();
+    const validCountry = countries.find((c) => c.alpha2 === countryCode);
     if (!validCountry) {
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
         "Invalid country code"
-      )
+      );
     }
 
     const country = await countryRepository.findOne({
       where: {
         iso_2: code.toLowerCase(),
       },
-    })
+    });
 
     if (!country) {
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
         `Country with code ${code} not found`
-      )
+      );
     }
 
     if (country.region_id && country.region_id !== regionId) {
       throw new MedusaError(
         MedusaError.Types.DUPLICATE_ERROR,
         `${country.name} already exists in ${country.name}, delete it in that region before adding it`
-      )
+      );
     }
 
-    return country
+    return country;
   }
 
   /**
@@ -345,19 +345,19 @@ class RegionService extends BaseService {
   async retrieve(regionId, config = {}) {
     const regionRepository = this.manager_.getCustomRepository(
       this.regionRepository_
-    )
+    );
 
-    const validatedId = this.validateId_(regionId)
-    const query = this.buildQuery_({ id: validatedId }, config)
-    const region = await regionRepository.findOne(query)
+    const validatedId = this.validateId_(regionId);
+    const query = this.buildQuery_({ id: validatedId }, config);
+    const region = await regionRepository.findOne(query);
 
     if (!region) {
       throw new MedusaError(
         MedusaError.Types.NOT_FOUND,
         `Region with ${regionId} was not found`
-      )
+      );
     }
-    return region
+    return region;
   }
 
   /**
@@ -367,10 +367,12 @@ class RegionService extends BaseService {
    * @return {Promise} result of the find operation
    */
   async list(selector = {}, config = { relations: [], skip: 0, take: 10 }) {
-    const regionRepo = this.manager_.getCustomRepository(this.regionRepository_)
+    const regionRepo = this.manager_.getCustomRepository(
+      this.regionRepository_
+    );
 
-    const query = this.buildQuery_(selector, config)
-    return regionRepo.find(query)
+    const query = this.buildQuery_(selector, config);
+    return regionRepo.find(query);
   }
 
   /**
@@ -380,24 +382,24 @@ class RegionService extends BaseService {
    */
   async delete(regionId) {
     return this.atomicPhase_(async (manager) => {
-      const regionRepo = manager.getCustomRepository(this.regionRepository_)
+      const regionRepo = manager.getCustomRepository(this.regionRepository_);
 
-      const region = await regionRepo.findOne({ where: { id: regionId } })
+      const region = await regionRepo.findOne({ where: { id: regionId } });
 
       if (!region) {
-        return Promise.resolve()
+        return Promise.resolve();
       }
 
-      await regionRepo.softRemove(region)
+      await regionRepo.softRemove(region);
 
       await this.eventBus_
         .withTransaction(manager)
         .emit(RegionService.Events.DELETED, {
           id: regionId,
-        })
+        });
 
-      return Promise.resolve()
-    })
+      return Promise.resolve();
+    });
   }
 
   /**
@@ -408,33 +410,35 @@ class RegionService extends BaseService {
    */
   async addCountry(regionId, code) {
     return this.atomicPhase_(async (manager) => {
-      const regionRepo = manager.getCustomRepository(this.regionRepository_)
+      const regionRepo = manager.getCustomRepository(this.regionRepository_);
 
-      const country = await this.validateCountry_(code, regionId)
+      const country = await this.validateCountry_(code, regionId);
 
-      const region = await this.retrieve(regionId, { relations: ["countries"] })
+      const region = await this.retrieve(regionId, {
+        relations: ["countries"],
+      });
 
       // Check if region already has country
       if (
         region.countries &&
         region.countries.map((c) => c.iso_2).includes(country.iso_2)
       ) {
-        return region
+        return region;
       }
 
-      region.countries = [...(region.countries || []), country]
+      region.countries = [...(region.countries || []), country];
 
-      const updated = await regionRepo.save(region)
+      const updated = await regionRepo.save(region);
 
       await this.eventBus_
         .withTransaction(manager)
         .emit(RegionService.Events.UPDATED, {
           id: updated.id,
           fields: ["countries"],
-        })
+        });
 
-      return updated
-    })
+      return updated;
+    });
   }
 
   /**
@@ -445,31 +449,33 @@ class RegionService extends BaseService {
    */
   async removeCountry(regionId, code) {
     return this.atomicPhase_(async (manager) => {
-      const regionRepo = manager.getCustomRepository(this.regionRepository_)
+      const regionRepo = manager.getCustomRepository(this.regionRepository_);
 
-      const region = await this.retrieve(regionId, { relations: ["countries"] })
+      const region = await this.retrieve(regionId, {
+        relations: ["countries"],
+      });
 
       // Check if region contains country. If not, we simpy resolve
       if (
         region.countries &&
         !region.countries.map((c) => c.iso_2).includes(code)
       ) {
-        return region
+        return region;
       }
 
       region.countries = region.countries.filter(
         (country) => country.iso_2 !== code
-      )
+      );
 
-      const updated = await regionRepo.save(region)
+      const updated = await regionRepo.save(region);
       await this.eventBus_
         .withTransaction(manager)
         .emit(RegionService.Events.UPDATED, {
           id: updated.id,
           fields: ["countries"],
-        })
-      return updated
-    })
+        });
+      return updated;
+    });
   }
 
   /**
@@ -481,42 +487,42 @@ class RegionService extends BaseService {
    */
   async addPaymentProvider(regionId, providerId) {
     return this.atomicPhase_(async (manager) => {
-      const regionRepo = manager.getCustomRepository(this.regionRepository_)
+      const regionRepo = manager.getCustomRepository(this.regionRepository_);
       const ppRepo = manager.getCustomRepository(
         this.paymentProviderRepository_
-      )
+      );
 
       const region = await this.retrieve(regionId, {
         relations: ["payment_providers"],
-      })
+      });
 
       // Check if region already has payment provider
       if (region.payment_providers.find(({ id }) => id === providerId)) {
-        return region
+        return region;
       }
 
-      const pp = await ppRepo.findOne({ where: { id: providerId } })
+      const pp = await ppRepo.findOne({ where: { id: providerId } });
 
       if (!pp) {
         throw new MedusaError(
           MedusaError.Types.NOT_FOUND,
           `Payment provider ${providerId} was not found`
-        )
+        );
       }
 
-      region.payment_providers = [...region.payment_providers, pp]
+      region.payment_providers = [...region.payment_providers, pp];
 
-      const updated = await regionRepo.save(region)
+      const updated = await regionRepo.save(region);
 
       await this.eventBus_
         .withTransaction(manager)
         .emit(RegionService.Events.UPDATED, {
           id: updated.id,
           fields: ["payment_providers"],
-        })
+        });
 
-      return updated
-    })
+      return updated;
+    });
   }
 
   /**
@@ -528,40 +534,40 @@ class RegionService extends BaseService {
    */
   async addFulfillmentProvider(regionId, providerId) {
     return this.atomicPhase_(async (manager) => {
-      const regionRepo = manager.getCustomRepository(this.regionRepository_)
+      const regionRepo = manager.getCustomRepository(this.regionRepository_);
       const fpRepo = manager.getCustomRepository(
         this.fulfillmentProviderRepository_
-      )
+      );
 
       const region = await this.retrieve(regionId, {
         relations: ["fulfillment_providers"],
-      })
+      });
 
       // Check if region already has payment provider
       if (region.fulfillment_providers.find(({ id }) => id === providerId)) {
-        return Promise.resolve()
+        return Promise.resolve();
       }
 
-      const fp = await fpRepo.findOne({ where: { id: providerId } })
+      const fp = await fpRepo.findOne({ where: { id: providerId } });
 
       if (!fp) {
         throw new MedusaError(
           MedusaError.Types.NOT_FOUND,
           `Fulfillment provider ${providerId} was not found`
-        )
+        );
       }
 
-      region.fulfillment_providers = [...region.fulfillment_providers, fp]
+      region.fulfillment_providers = [...region.fulfillment_providers, fp];
 
-      const updated = await regionRepo.save(region)
+      const updated = await regionRepo.save(region);
       await this.eventBus_
         .withTransaction(manager)
         .emit(RegionService.Events.UPDATED, {
           id: updated.id,
           fields: ["fulfillment_providers"],
-        })
-      return updated
-    })
+        });
+      return updated;
+    });
   }
 
   /**
@@ -572,30 +578,30 @@ class RegionService extends BaseService {
    */
   async removePaymentProvider(regionId, providerId) {
     return this.atomicPhase_(async (manager) => {
-      const regionRepo = manager.getCustomRepository(this.regionRepository_)
+      const regionRepo = manager.getCustomRepository(this.regionRepository_);
 
       const region = await this.retrieve(regionId, {
         relations: ["payment_providers"],
-      })
+      });
 
       // Check if region already has payment provider
       if (!region.payment_providers.find(({ id }) => id === providerId)) {
-        return Promise.resolve()
+        return Promise.resolve();
       }
 
       region.payment_providers = region.payment_providers.filter(
         ({ id }) => id !== providerId
-      )
+      );
 
-      const updated = await regionRepo.save(region)
+      const updated = await regionRepo.save(region);
       await this.eventBus_
         .withTransaction(manager)
         .emit(RegionService.Events.UPDATED, {
           id: updated.id,
           fields: ["payment_providers"],
-        })
-      return updated
-    })
+        });
+      return updated;
+    });
   }
 
   /**
@@ -606,31 +612,31 @@ class RegionService extends BaseService {
    */
   async removeFulfillmentProvider(regionId, providerId) {
     return this.atomicPhase_(async (manager) => {
-      const regionRepo = manager.getCustomRepository(this.regionRepository_)
+      const regionRepo = manager.getCustomRepository(this.regionRepository_);
 
       const region = await this.retrieve(regionId, {
         relations: ["fulfillment_providers"],
-      })
+      });
 
       // Check if region already has payment provider
       if (!region.fulfillment_providers.find(({ id }) => id === providerId)) {
-        return Promise.resolve()
+        return Promise.resolve();
       }
 
       region.fulfillment_providers = region.fulfillment_providers.filter(
         ({ id }) => id !== providerId
-      )
+      );
 
-      const updated = await regionRepo.save(region)
+      const updated = await regionRepo.save(region);
       await this.eventBus_
         .withTransaction(manager)
         .emit(RegionService.Events.UPDATED, {
           id: updated.id,
           fields: ["fulfillment_providers"],
-        })
-      return updated
-    })
+        });
+      return updated;
+    });
   }
 }
 
-export default RegionService
+export default RegionService;

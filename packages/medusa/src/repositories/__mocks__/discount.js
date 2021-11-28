@@ -1,4 +1,4 @@
-import { IdMap } from "medusa-test-utils"
+import { IdMap } from "medusa-test-utils";
 
 export const discounts = {
   dynamic: {
@@ -119,42 +119,42 @@ export const discounts = {
     },
     regions: [IdMap.getId("fr-cart")],
   },
-}
+};
 
 export const DiscountModelMock = {
-  create: jest.fn().mockImplementation(data => Promise.resolve(data)),
+  create: jest.fn().mockImplementation((data) => Promise.resolve(data)),
   updateOne: jest.fn().mockImplementation((query, update) => {
-    return Promise.resolve()
+    return Promise.resolve();
   }),
   deleteOne: jest.fn().mockReturnValue(Promise.resolve()),
-  findOne: jest.fn().mockImplementation(query => {
+  findOne: jest.fn().mockImplementation((query) => {
     if (query._id === IdMap.getId("dynamic")) {
-      return Promise.resolve(discounts.dynamic)
+      return Promise.resolve(discounts.dynamic);
     }
     if (query._id === IdMap.getId("total10")) {
-      return Promise.resolve(discounts.total10Percent)
+      return Promise.resolve(discounts.total10Percent);
     }
     if (query._id === IdMap.getId("item10Percent")) {
-      return Promise.resolve(discounts.item10Percent)
+      return Promise.resolve(discounts.item10Percent);
     }
     if (query._id === IdMap.getId("total10Fixed")) {
-      return Promise.resolve(discounts.total10Fixed)
+      return Promise.resolve(discounts.total10Fixed);
     }
     if (query._id === IdMap.getId("item2Fixed")) {
-      return Promise.resolve(discounts.item2Fixed)
+      return Promise.resolve(discounts.item2Fixed);
     }
     if (query._id === IdMap.getId("item10FixedNoVariants")) {
-      return Promise.resolve(discounts.item10FixedNoVariants)
+      return Promise.resolve(discounts.item10FixedNoVariants);
     }
     if (query._id === IdMap.getId("expired")) {
-      return Promise.resolve(discounts.expiredDiscount)
+      return Promise.resolve(discounts.expiredDiscount);
     }
     if (query.code === "10%OFF") {
-      return Promise.resolve(discounts.total10Percent)
+      return Promise.resolve(discounts.total10Percent);
     }
     if (query.code === "aLrEaDyExIsts") {
-      return Promise.resolve(discounts.alreadyExists)
+      return Promise.resolve(discounts.alreadyExists);
     }
-    return Promise.resolve(undefined)
+    return Promise.resolve(undefined);
   }),
-}
+};

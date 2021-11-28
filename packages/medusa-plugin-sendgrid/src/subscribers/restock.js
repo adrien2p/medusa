@@ -5,20 +5,20 @@ class RestockNotification {
       async (eventData) => {
         const templateId = await sendgridService.getTemplateId(
           "restock-notification.restocked"
-        )
+        );
 
         if (!templateId) {
-          return
+          return;
         }
 
         const data = await sendgridService.fetchData(
           "restock-notification.restocked",
           eventData,
           null
-        )
+        );
 
         if (!data.emails) {
-          return
+          return;
         }
 
         return await Promise.all(
@@ -28,14 +28,14 @@ class RestockNotification {
               from: sendgridService.options_.from,
               to: e,
               dynamic_template_data: data,
-            }
+            };
 
-            return await sendgridService.sendEmail(sendOptions)
+            return await sendgridService.sendEmail(sendOptions);
           })
-        )
+        );
       }
-    )
+    );
   }
 }
 
-export default RestockNotification
+export default RestockNotification;

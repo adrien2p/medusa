@@ -1,5 +1,5 @@
-const path = require(`path`)
-const os = require(`os`)
+const path = require(`path`);
+const os = require(`os`);
 
 const verdaccioConfig = {
   storage: path.join(os.tmpdir(), `verdaccio`, `storage`),
@@ -24,10 +24,10 @@ const verdaccioConfig = {
       max_fails: 10,
     },
   },
-}
+};
 
-exports.verdaccioConfig = verdaccioConfig
+exports.verdaccioConfig = verdaccioConfig;
 
-const registryUrl = `http://localhost:${verdaccioConfig.port}`
+const registryUrl = `http://localhost:${verdaccioConfig.port}`;
 
-exports.registryUrl = registryUrl
+exports.registryUrl = registryUrl;

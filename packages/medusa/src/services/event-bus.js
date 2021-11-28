@@ -1,5 +1,5 @@
-import Bull from "bull"
-import Redis from "ioredis"
+import Bull from "bull";
+import Redis from "ioredis";
 
 /**
  * Can keep track of multiple subscribers to different events and run the
@@ -16,59 +16,59 @@ class EventBusService {
       createClient: (type) => {
         switch (type) {
           case "client":
-            return redisClient
+            return redisClient;
           case "subscriber":
-            return redisSubscriber
+            return redisSubscriber;
           default:
             if (config.projectConfig.redis_url) {
-              return new Redis(config.projectConfig.redis_url)
+              return new Redis(config.projectConfig.redis_url);
             }
-            return redisClient
+            return redisClient;
         }
       },
-    }
+    };
 
-    this.config_ = config
+    this.config_ = config;
 
     /** @private {EntityManager} */
-    this.manager_ = manager
+    this.manager_ = manager;
 
     /** @private {logger} */
-    this.logger_ = logger
+    this.logger_ = logger;
 
-    this.stagedJobRepository_ = stagedJobRepository
+    this.stagedJobRepository_ = stagedJobRepository;
 
     if (singleton) {
       /** @private {object} */
-      this.observers_ = {}
+      this.observers_ = {};
 
       /** @private {BullQueue} */
-      this.queue_ = new Bull(`${this.constructor.name}:queue`, opts)
+      this.queue_ = new Bull(`${this.constructor.name}:queue`, opts);
 
       /** @private {object} to handle cron jobs */
-      this.cronHandlers_ = {}
+      this.cronHandlers_ = {};
 
-      this.redisClient_ = redisClient
-      this.redisSubscriber_ = redisSubscriber
+      this.redisClient_ = redisClient;
+      this.redisSubscriber_ = redisSubscriber;
 
       /** @private {BullQueue} used for cron jobs */
-      this.cronQueue_ = new Bull(`cron-jobs:queue`, opts)
+      this.cronQueue_ = new Bull(`cron-jobs:queue`, opts);
 
       // Register our worker to handle emit calls
-      this.queue_.process(this.worker_)
+      this.queue_.process(this.worker_);
 
       // Register cron worker
-      this.cronQueue_.process(this.cronWorker_)
+      this.cronQueue_.process(this.cronWorker_);
 
       if (process.env.NODE_ENV !== "test") {
-        this.startEnqueuer()
+        this.startEnqueuer();
       }
     }
   }
 
   withTransaction(transactionManager) {
     if (!transactionManager) {
-      return this
+      return this;
     }
 
     const cloned = new EventBusService(
@@ -81,12 +81,12 @@ class EventBusService {
       },
       this.config_,
       false
-    )
+    );
 
-    cloned.transactionManager_ = transactionManager
-    cloned.queue_ = this.queue_
+    cloned.transactionManager_ = transactionManager;
+    cloned.queue_ = this.queue_;
 
-    return cloned
+    return cloned;
   }
 
   /**
@@ -97,13 +97,13 @@ class EventBusService {
    */
   subscribe(event, subscriber) {
     if (typeof subscriber !== "function") {
-      throw new Error("Subscriber must be a function")
+      throw new Error("Subscriber must be a function");
     }
 
     if (this.observers_[event]) {
-      this.observers_[event].push(subscriber)
+      this.observers_[event].push(subscriber);
     } else {
-      this.observers_[event] = [subscriber]
+      this.observers_[event] = [subscriber];
     }
   }
 
@@ -115,13 +115,13 @@ class EventBusService {
    */
   unsubscribe(event, subscriber) {
     if (typeof subscriber !== "function") {
-      throw new Error("Subscriber must be a function")
+      throw new Error("Subscriber must be a function");
     }
 
     if (this.observers_[event]) {
-      const index = this.observers_[event].indexOf(subscriber)
+      const index = this.observers_[event].indexOf(subscriber);
       if (index !== -1) {
-        this.observers_[event].splice(index, 1)
+        this.observers_[event].splice(index, 1);
       }
     }
   }
@@ -134,13 +134,13 @@ class EventBusService {
    */
   registerCronHandler_(event, subscriber) {
     if (typeof subscriber !== "function") {
-      throw new Error("Handler must be a function")
+      throw new Error("Handler must be a function");
     }
 
     if (this.observers_[event]) {
-      this.cronHandlers_[event].push(subscriber)
+      this.cronHandlers_[event].push(subscriber);
     } else {
-      this.cronHandlers_[event] = [subscriber]
+      this.cronHandlers_[event] = [subscriber];
     }
   }
 
@@ -154,33 +154,33 @@ class EventBusService {
     if (this.transactionManager_) {
       const stagedJobRepository = this.transactionManager_.getCustomRepository(
         this.stagedJobRepository_
-      )
+      );
 
       const created = await stagedJobRepository.create({
         event_name: eventName,
         data,
-      })
+      });
 
-      return stagedJobRepository.save(created)
+      return stagedJobRepository.save(created);
     } else {
-      this.queue_.add({ eventName, data }, { removeOnComplete: true })
+      this.queue_.add({ eventName, data }, { removeOnComplete: true });
     }
   }
 
   async sleep(ms) {
     return new Promise((resolve) => {
-      setTimeout(resolve, ms)
-    })
+      setTimeout(resolve, ms);
+    });
   }
 
   async startEnqueuer() {
-    this.enRun_ = true
-    this.enqueue_ = this.enqueuer_()
+    this.enRun_ = true;
+    this.enqueue_ = this.enqueuer_();
   }
 
   async stopEnqueuer() {
-    this.enRun_ = false
-    await this.enqueue_
+    this.enRun_ = false;
+    await this.enqueue_;
   }
 
   async enqueuer_() {
@@ -189,12 +189,12 @@ class EventBusService {
         relations: [],
         skip: 0,
         take: 1000,
-      }
+      };
 
       const sjRepo = this.manager_.getCustomRepository(
         this.stagedJobRepository_
-      )
-      const jobs = await sjRepo.find({}, listConfig)
+      );
+      const jobs = await sjRepo.find({}, listConfig);
 
       await Promise.all(
         jobs.map((job) => {
@@ -204,12 +204,12 @@ class EventBusService {
               { removeOnComplete: true }
             )
             .then(async () => {
-              await sjRepo.remove(job)
-            })
+              await sjRepo.remove(job);
+            });
         })
-      )
+      );
 
-      await this.sleep(3000)
+      await this.sleep(3000);
     }
   }
 
@@ -219,28 +219,28 @@ class EventBusService {
    * @return {Promise} resolves to the results of the subscriber calls.
    */
   worker_ = (job) => {
-    const { eventName, data } = job.data
-    const eventObservers = this.observers_[eventName] || []
-    const wildcardObservers = this.observers_["*"] || []
+    const { eventName, data } = job.data;
+    const eventObservers = this.observers_[eventName] || [];
+    const wildcardObservers = this.observers_["*"] || [];
 
-    const observers = eventObservers.concat(wildcardObservers)
+    const observers = eventObservers.concat(wildcardObservers);
 
     this.logger_.info(
       `Processing ${eventName} which has ${eventObservers.length} subscribers`
-    )
+    );
 
     return Promise.all(
       observers.map((subscriber) => {
         return subscriber(data, eventName).catch((err) => {
           this.logger_.warn(
             `An error occured while processing ${eventName}: ${err}`
-          )
-          console.log(err)
-          return err
-        })
+          );
+          console.log(err);
+          return err;
+        });
       })
-    )
-  }
+    );
+  };
 
   /**
    * Handles incoming jobs.
@@ -248,21 +248,21 @@ class EventBusService {
    * @return {Promise} resolves to the results of the subscriber calls.
    */
   cronWorker_ = (job) => {
-    const { eventName, data } = job.data
-    const observers = this.cronHandlers_[eventName] || []
-    this.logger_.info(`Processing cron job: ${eventName}`)
+    const { eventName, data } = job.data;
+    const observers = this.cronHandlers_[eventName] || [];
+    this.logger_.info(`Processing cron job: ${eventName}`);
 
     return Promise.all(
       observers.map((subscriber) => {
         return subscriber(data, eventName).catch((err) => {
           this.logger_.warn(
             `An error occured while processing ${eventName}: ${err}`
-          )
-          return err
-        })
+          );
+          return err;
+        });
       })
-    )
-  }
+    );
+  };
 
   /**
    * Registers a cron job.
@@ -273,16 +273,16 @@ class EventBusService {
    * @return {void}
    */
   createCronJob(eventName, data, cron, handler) {
-    this.logger_.info(`Registering ${eventName}`)
-    this.registerCronHandler_(eventName, handler)
+    this.logger_.info(`Registering ${eventName}`);
+    this.registerCronHandler_(eventName, handler);
     return this.cronQueue_.add(
       {
         eventName,
         data,
       },
       { repeat: { cron } }
-    )
+    );
   }
 }
 
-export default EventBusService
+export default EventBusService;

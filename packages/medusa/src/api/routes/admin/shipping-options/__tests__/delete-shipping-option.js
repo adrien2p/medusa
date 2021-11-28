@@ -1,10 +1,10 @@
-import { IdMap } from "medusa-test-utils"
-import { request } from "../../../../../helpers/test-request"
-import { ShippingOptionServiceMock } from "../../../../../services/__mocks__/shipping-option"
+import { IdMap } from "medusa-test-utils";
+import { request } from "../../../../../helpers/test-request";
+import { ShippingOptionServiceMock } from "../../../../../services/__mocks__/shipping-option";
 
 describe("DELETE /admin/shipping-options/{id}", () => {
   describe("successful deletion", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
       subject = await request(
@@ -17,18 +17,18 @@ describe("DELETE /admin/shipping-options/{id}", () => {
             },
           },
         }
-      )
-    })
+      );
+    });
 
     it("returns 200", () => {
-      expect(subject.status).toEqual(200)
-    })
+      expect(subject.status).toEqual(200);
+    });
 
     it("calls service delete", () => {
-      expect(ShippingOptionServiceMock.delete).toHaveBeenCalledTimes(1)
+      expect(ShippingOptionServiceMock.delete).toHaveBeenCalledTimes(1);
       expect(ShippingOptionServiceMock.delete).toHaveBeenCalledWith(
         IdMap.getId("validId")
-      )
-    })
-  })
-})
+      );
+    });
+  });
+});

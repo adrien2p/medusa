@@ -1,7 +1,7 @@
-import { MedusaError } from "medusa-core-utils"
-import { BaseService } from "medusa-interfaces"
-import randomize from "randomatic"
-import { Brackets } from "typeorm"
+import { MedusaError } from "medusa-core-utils";
+import { BaseService } from "medusa-interfaces";
+import randomize from "randomatic";
+import { Brackets } from "typeorm";
 
 /**
  * Provides layer to manipulate gift cards.
@@ -10,7 +10,7 @@ import { Brackets } from "typeorm"
 class GiftCardService extends BaseService {
   static Events = {
     CREATED: "gift_card.created",
-  }
+  };
 
   constructor({
     manager,
@@ -19,27 +19,27 @@ class GiftCardService extends BaseService {
     regionService,
     eventBusService,
   }) {
-    super()
+    super();
 
     /** @private @const {EntityManager} */
-    this.manager_ = manager
+    this.manager_ = manager;
 
     /** @private @const {GiftCardRepository} */
-    this.giftCardRepository_ = giftCardRepository
+    this.giftCardRepository_ = giftCardRepository;
 
     /** @private @const {GiftCardRepository} */
-    this.giftCardTransactionRepo_ = giftCardTransactionRepository
+    this.giftCardTransactionRepo_ = giftCardTransactionRepository;
 
     /** @private @const {RegionService} */
-    this.regionService_ = regionService
+    this.regionService_ = regionService;
 
     /** @private @const {EventBus} */
-    this.eventBus_ = eventBusService
+    this.eventBus_ = eventBusService;
   }
 
   withTransaction(transactionManager) {
     if (!transactionManager) {
-      return this
+      return this;
     }
 
     const cloned = new GiftCardService({
@@ -48,11 +48,11 @@ class GiftCardService extends BaseService {
       giftCardTransactionRepository: this.giftCardTransactionRepo_,
       regionService: this.regionService_,
       eventBusService: this.eventBus_,
-    })
+    });
 
-    cloned.transactionManager_ = transactionManager
+    cloned.transactionManager_ = transactionManager;
 
-    return cloned
+    return cloned;
   }
 
   /**
@@ -65,9 +65,9 @@ class GiftCardService extends BaseService {
       randomize("A0", 4),
       randomize("A0", 4),
       randomize("A0", 4),
-    ].join("-")
+    ].join("-");
 
-    return code
+    return code;
   }
 
   /**
@@ -78,22 +78,22 @@ class GiftCardService extends BaseService {
   async list(selector = {}, config = { relations: [], skip: 0, take: 10 }) {
     const giftCardRepo = this.manager_.getCustomRepository(
       this.giftCardRepository_
-    )
+    );
 
-    let q
+    let q;
     if ("q" in selector) {
-      q = selector.q
-      delete selector.q
+      q = selector.q;
+      delete selector.q;
     }
 
-    const query = this.buildQuery_(selector, config)
+    const query = this.buildQuery_(selector, config);
 
-    const rels = query.relations
-    delete query.relations
+    const rels = query.relations;
+    delete query.relations;
 
     if (q) {
-      const where = query.where
-      delete where.id
+      const where = query.where;
+      delete where.id;
 
       const raw = await giftCardRepo
         .createQueryBuilder("gift_card")
@@ -104,26 +104,28 @@ class GiftCardService extends BaseService {
           new Brackets((qb) => {
             return qb
               .where(`gift_card.code ILIKE :q`, { q: `%${q}%` })
-              .orWhere(`display_id::varchar(255) ILIKE :dId`, { dId: `${q}` })
+              .orWhere(`display_id::varchar(255) ILIKE :dId`, { dId: `${q}` });
           })
         )
-        .getMany()
+        .getMany();
 
       return giftCardRepo.findWithRelations(
         rels,
         raw.map((i) => i.id)
-      )
+      );
     }
-    return giftCardRepo.findWithRelations(rels, query)
+    return giftCardRepo.findWithRelations(rels, query);
   }
 
   async createTransaction(data) {
     return this.atomicPhase_(async (manager) => {
-      const gctRepo = manager.getCustomRepository(this.giftCardTransactionRepo_)
-      const created = gctRepo.create(data)
-      const saved = await gctRepo.save(created)
-      return saved.id
-    })
+      const gctRepo = manager.getCustomRepository(
+        this.giftCardTransactionRepo_
+      );
+      const created = gctRepo.create(data);
+      const saved = await gctRepo.save(created);
+      return saved.id;
+    });
   }
 
   /**
@@ -133,37 +135,39 @@ class GiftCardService extends BaseService {
    */
   async create(giftCard) {
     return this.atomicPhase_(async (manager) => {
-      const giftCardRepo = manager.getCustomRepository(this.giftCardRepository_)
+      const giftCardRepo = manager.getCustomRepository(
+        this.giftCardRepository_
+      );
 
       if (!giftCard.region_id) {
         throw new MedusaError(
           MedusaError.Types.NOT_FOUND,
           `Gift card is missing region_id`
-        )
+        );
       }
 
       // Will throw if region does not exist
-      const region = await this.regionService_.retrieve(giftCard.region_id)
+      const region = await this.regionService_.retrieve(giftCard.region_id);
 
-      const code = this.generateCode_()
+      const code = this.generateCode_();
 
       const toCreate = {
         code,
         region_id: region.id,
         ...giftCard,
-      }
+      };
 
-      const created = await giftCardRepo.create(toCreate)
-      const result = await giftCardRepo.save(created)
+      const created = await giftCardRepo.create(toCreate);
+      const result = await giftCardRepo.save(created);
 
       await this.eventBus_
         .withTransaction(manager)
         .emit(GiftCardService.Events.CREATED, {
           id: result.id,
-        })
+        });
 
-      return result
-    })
+      return result;
+    });
   }
 
   /**
@@ -175,67 +179,67 @@ class GiftCardService extends BaseService {
   async retrieve(giftCardId, config = {}) {
     const giftCardRepo = this.manager_.getCustomRepository(
       this.giftCardRepository_
-    )
+    );
 
-    const validatedId = this.validateId_(giftCardId)
+    const validatedId = this.validateId_(giftCardId);
 
     const query = {
       where: { id: validatedId },
-    }
+    };
 
     if (config.select) {
-      query.select = config.select
+      query.select = config.select;
     }
 
     if (config.relations) {
-      query.relations = config.relations
+      query.relations = config.relations;
     }
 
-    const rels = query.relations
-    delete query.relations
+    const rels = query.relations;
+    delete query.relations;
 
-    const giftCard = await giftCardRepo.findOneWithRelations(rels, query)
+    const giftCard = await giftCardRepo.findOneWithRelations(rels, query);
 
     if (!giftCard) {
       throw new MedusaError(
         MedusaError.Types.NOT_FOUND,
         `Gift card with ${giftCardId} was not found`
-      )
+      );
     }
 
-    return giftCard
+    return giftCard;
   }
 
   async retrieveByCode(code, config = {}) {
     const giftCardRepo = this.manager_.getCustomRepository(
       this.giftCardRepository_
-    )
+    );
 
     const query = {
       where: { code },
-    }
+    };
 
     if (config.select) {
-      query.select = config.select
+      query.select = config.select;
     }
 
     if (config.relations) {
-      query.relations = config.relations
+      query.relations = config.relations;
     }
 
-    const rels = query.relations
-    delete query.relations
+    const rels = query.relations;
+    delete query.relations;
 
-    const giftCard = await giftCardRepo.findOneWithRelations(rels, query)
+    const giftCard = await giftCardRepo.findOneWithRelations(rels, query);
 
     if (!giftCard) {
       throw new MedusaError(
         MedusaError.Types.NOT_FOUND,
         `Gift card with ${code} was not found`
-      )
+      );
     }
 
-    return giftCard
+    return giftCard;
   }
 
   /**
@@ -246,19 +250,21 @@ class GiftCardService extends BaseService {
    */
   async update(giftCardId, update) {
     return this.atomicPhase_(async (manager) => {
-      const giftCardRepo = manager.getCustomRepository(this.giftCardRepository_)
+      const giftCardRepo = manager.getCustomRepository(
+        this.giftCardRepository_
+      );
 
-      const giftCard = await this.retrieve(giftCardId)
+      const giftCard = await this.retrieve(giftCardId);
 
-      const { region_id, metadata, balance, ...rest } = update
+      const { region_id, metadata, balance, ...rest } = update;
 
       if (region_id && region_id !== giftCard.region_id) {
-        const region = await this.regionService_.retrieve(region_id)
-        giftCard.region_id = region.id
+        const region = await this.regionService_.retrieve(region_id);
+        giftCard.region_id = region.id;
       }
 
       if (metadata) {
-        giftCard.metadata = await this.setMetadata_(giftCard.id, metadata)
+        giftCard.metadata = await this.setMetadata_(giftCard.id, metadata);
       }
 
       if (balance) {
@@ -266,18 +272,18 @@ class GiftCardService extends BaseService {
           throw new MedusaError(
             MedusaError.Types.INVALID_ARGUMENT,
             "new balance is invalid"
-          )
+          );
         }
-        giftCard.balance = balance
+        giftCard.balance = balance;
       }
 
       for (const [key, value] of Object.entries(rest)) {
-        giftCard[key] = value
+        giftCard[key] = value;
       }
 
-      const updated = await giftCardRepo.save(giftCard)
-      return updated
-    })
+      const updated = await giftCardRepo.save(giftCard);
+      return updated;
+    });
   }
 
   /**
@@ -287,19 +293,23 @@ class GiftCardService extends BaseService {
    */
   async delete(giftCardId) {
     return this.atomicPhase_(async (manager) => {
-      const giftCardRepo = manager.getCustomRepository(this.giftCardRepository_)
+      const giftCardRepo = manager.getCustomRepository(
+        this.giftCardRepository_
+      );
 
-      const giftCard = await giftCardRepo.findOne({ where: { id: giftCardId } })
+      const giftCard = await giftCardRepo.findOne({
+        where: { id: giftCardId },
+      });
 
       if (!giftCard) {
-        return Promise.resolve()
+        return Promise.resolve();
       }
 
-      await giftCardRepo.softRemove(giftCard)
+      await giftCardRepo.softRemove(giftCard);
 
-      return Promise.resolve()
-    })
+      return Promise.resolve();
+    });
   }
 }
 
-export default GiftCardService
+export default GiftCardService;

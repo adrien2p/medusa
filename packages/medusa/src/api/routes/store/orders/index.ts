@@ -1,22 +1,22 @@
-import { Router } from "express"
-import "reflect-metadata"
-import { Order } from "../../../.."
-import middlewares from "../../../middlewares"
+import { Router } from "express";
+import "reflect-metadata";
+import { Order } from "../../../..";
+import middlewares from "../../../middlewares";
 
-const route = Router()
+const route = Router();
 
 export default (app) => {
-  app.use("/orders", route)
+  app.use("/orders", route);
 
   /**
    * Lookup
    */
-  route.get("/", middlewares.wrap(require("./lookup-order").default))
+  route.get("/", middlewares.wrap(require("./lookup-order").default));
 
   /**
    * Retrieve Order
    */
-  route.get("/:id", middlewares.wrap(require("./get-order").default))
+  route.get("/:id", middlewares.wrap(require("./get-order").default));
 
   /**
    * Retrieve by Cart Id
@@ -24,10 +24,10 @@ export default (app) => {
   route.get(
     "/cart/:cart_id",
     middlewares.wrap(require("./get-order-by-cart").default)
-  )
+  );
 
-  return app
-}
+  return app;
+};
 
 export const defaultStoreOrdersRelations = [
   "shipping_address",
@@ -43,7 +43,7 @@ export const defaultStoreOrdersRelations = [
   "customer",
   "payments",
   "region",
-]
+];
 
 export const defaultStoreOrdersFields = [
   "id",
@@ -66,7 +66,7 @@ export const defaultStoreOrdersFields = [
   "gift_card_total",
   "subtotal",
   "total",
-]
+];
 
 export const allowedStoreOrdersRelations = [
   "shipping_address",
@@ -83,7 +83,7 @@ export const allowedStoreOrdersRelations = [
   "customer",
   "payments",
   "region",
-]
+];
 
 export const allowedStoreOrdersFields = [
   "id",
@@ -106,10 +106,10 @@ export const allowedStoreOrdersFields = [
   "gift_card_total",
   "subtotal",
   "total",
-]
+];
 
 export type StoreOrdersRes = {
-  order: Order
-}
+  order: Order;
+};
 
-export * from "./lookup-order"
+export * from "./lookup-order";

@@ -79,7 +79,14 @@ async function watch(
 
   const copyPath = (oldPath, newPath, quiet, packageName) =>
     new Promise((resolve, reject) => {
-      const argObj = { oldPath, newPath, quiet, packageName, resolve, reject };
+      const argObj = {
+        oldPath,
+        newPath,
+        quiet,
+        packageName,
+        resolve,
+        reject,
+      };
       if (afterPackageInstallation) {
         realCopyPath(argObj);
       } else {
@@ -258,10 +265,8 @@ async function watch(
           waitFor.add(didDepsChangedPromise);
         }
 
-        const {
-          didDepsChanged,
-          packageNotInstalled,
-        } = await didDepsChangedPromise;
+        const { didDepsChanged, packageNotInstalled } =
+          await didDepsChangedPromise;
 
         if (packageNotInstalled) {
           anyPackageNotInstalled = true;

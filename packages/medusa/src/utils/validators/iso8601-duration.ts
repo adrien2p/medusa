@@ -2,7 +2,7 @@ import {
   registerDecorator,
   ValidationArguments,
   ValidationOptions,
-} from "class-validator"
+} from "class-validator";
 
 export function IsISO8601Duration(validationOptions?: ValidationOptions) {
   return function (object: any, propertyName: string): void {
@@ -14,13 +14,13 @@ export function IsISO8601Duration(validationOptions?: ValidationOptions) {
       validator: {
         validate(value: any, args: ValidationArguments) {
           const isoDurationRegex =
-            /^P(?!$)(\d+Y)?(\d+M)?(\d+W)?(\d+D)?(T(?=\d)(\d+H)?(\d+M)?(\d+S)?)?$/
-          return isoDurationRegex.test(value)
+            /^P(?!$)(\d+Y)?(\d+M)?(\d+W)?(\d+D)?(T(?=\d)(\d+H)?(\d+M)?(\d+S)?)?$/;
+          return isoDurationRegex.test(value);
         },
         defaultMessage(args?: ValidationArguments): string {
-          return `"${propertyName}" must be a valid ISO 8601 duration`
+          return `"${propertyName}" must be a valid ISO 8601 duration`;
         },
       },
-    })
-  }
+    });
+  };
 }

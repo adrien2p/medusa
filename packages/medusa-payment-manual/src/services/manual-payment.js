@@ -1,10 +1,10 @@
-import { PaymentService } from "medusa-interfaces"
+import { PaymentService } from "medusa-interfaces";
 
 class ManualPaymentService extends PaymentService {
-  static identifier = "manual"
+  static identifier = "manual";
 
   constructor() {
-    super()
+    super();
   }
 
   /**
@@ -13,8 +13,8 @@ class ManualPaymentService extends PaymentService {
    * @returns {string} the status of the payment
    */
   async getStatus(paymentData) {
-    const { status } = paymentData
-    return status
+    const { status } = paymentData;
+    return status;
   }
 
   /**
@@ -23,7 +23,7 @@ class ManualPaymentService extends PaymentService {
    * @returns {object} an object with staus
    */
   async createPayment() {
-    return { status: "pending" }
+    return { status: "pending" };
   }
 
   /**
@@ -32,7 +32,7 @@ class ManualPaymentService extends PaymentService {
    * @returns {Promise<object>} returns data
    */
   async retrievePayment(data) {
-    return data
+    return data;
   }
 
   /**
@@ -40,7 +40,7 @@ class ManualPaymentService extends PaymentService {
    * @returns {Promise<{ status: string, data: object }>} result with data and status
    */
   async authorizePayment() {
-    return { status: "authorized", data: { status: "authorized" } }
+    return { status: "authorized", data: { status: "authorized" } };
   }
 
   /**
@@ -49,11 +49,11 @@ class ManualPaymentService extends PaymentService {
    * @returns {object} same data
    */
   async updatePayment(sessionData) {
-    return sessionData.data
+    return sessionData.data;
   }
 
   async deletePayment() {
-    return
+    return;
   }
 
   /**
@@ -62,7 +62,7 @@ class ManualPaymentService extends PaymentService {
    * @returns {object} object with updated status
    */
   async capturePayment() {
-    return { status: "captured" }
+    return { status: "captured" };
   }
 
   /**
@@ -71,7 +71,7 @@ class ManualPaymentService extends PaymentService {
    * @returns {object} the current data
    */
   async getPaymentData(session) {
-    return session.data
+    return session.data;
   }
 
   /**
@@ -80,7 +80,7 @@ class ManualPaymentService extends PaymentService {
    * @returns {string} same data
    */
   async refundPayment(payment) {
-    return payment.data
+    return payment.data;
   }
 
   /**
@@ -88,8 +88,8 @@ class ManualPaymentService extends PaymentService {
    * @returns {object} object with canceled status
    */
   async cancelPayment() {
-    return { status: "canceled" }
+    return { status: "canceled" };
   }
 }
 
-export default ManualPaymentService
+export default ManualPaymentService;

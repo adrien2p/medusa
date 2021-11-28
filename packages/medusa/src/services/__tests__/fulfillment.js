@@ -1,37 +1,37 @@
-import { IdMap, MockManager, MockRepository } from "medusa-test-utils"
-import FulfillmentService from "../fulfillment"
+import { IdMap, MockManager, MockRepository } from "medusa-test-utils";
+import FulfillmentService from "../fulfillment";
 
 describe("FulfillmentService", () => {
   describe("createFulfillment", () => {
-    const fulfillmentRepository = MockRepository({})
+    const fulfillmentRepository = MockRepository({});
 
     const fulfillmentProviderService = {
-      createFulfillment: jest.fn().mockImplementation(data => {
-        return Promise.resolve(data)
+      createFulfillment: jest.fn().mockImplementation((data) => {
+        return Promise.resolve(data);
       }),
-    }
+    };
 
     const shippingProfileService = {
-      retrieve: jest.fn().mockImplementation(data => {
+      retrieve: jest.fn().mockImplementation((data) => {
         return Promise.resolve({
           id: IdMap.getId("default"),
           name: "default_profile",
           products: [IdMap.getId("product")],
           shipping_options: [],
-        })
+        });
       }),
-    }
+    };
 
     const fulfillmentService = new FulfillmentService({
       manager: MockManager,
       fulfillmentProviderService,
       fulfillmentRepository,
       shippingProfileService,
-    })
+    });
 
     beforeEach(async () => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     it("successfully create a fulfillment", async () => {
       await fulfillmentService.createFulfillment(
@@ -53,17 +53,17 @@ describe("FulfillmentService", () => {
           },
         ],
         { order_id: "test", metadata: {} }
-      )
+      );
 
-      expect(fulfillmentRepository.create).toHaveBeenCalledTimes(1)
+      expect(fulfillmentRepository.create).toHaveBeenCalledTimes(1);
       expect(fulfillmentRepository.create).toHaveBeenCalledWith({
         order_id: "test",
         provider_id: "GLS Express",
         items: [{ item_id: IdMap.getId("test-line"), quantity: 10 }],
         data: expect.anything(),
         metadata: {},
-      })
-    })
+      });
+    });
 
     it("throws if too many items are requested fulfilled", async () => {
       await expect(
@@ -90,9 +90,9 @@ describe("FulfillmentService", () => {
             },
           ]
         )
-      ).rejects.toThrow("Cannot fulfill more items than have been purchased")
-    })
-  })
+      ).rejects.toThrow("Cannot fulfill more items than have been purchased");
+    });
+  });
 
   describe("cancelFulfillment", () => {
     const fulfillmentRepository = MockRepository({
@@ -101,8 +101,8 @@ describe("FulfillmentService", () => {
           canceled_at: new Date(),
           items: [{ item_id: 1, quantity: 2 }],
         }),
-      save: f => f,
-    })
+      save: (f) => f,
+    });
 
     const lineItemService = {
       retrieve: jest
@@ -111,77 +111,77 @@ describe("FulfillmentService", () => {
           Promise.resolve({ id: 1, fulfilled_quantity: 2 })
         ),
       update: jest.fn(),
-      withTransaction: function() {
-        return this
+      withTransaction: function () {
+        return this;
       },
-    }
+    };
 
     const fulfillmentProviderService = {
-      cancelFulfillment: f => f,
-    }
+      cancelFulfillment: (f) => f,
+    };
 
     const fulfillmentService = new FulfillmentService({
       manager: MockManager,
       fulfillmentProviderService,
       fulfillmentRepository,
       lineItemService,
-    })
+    });
 
     beforeEach(async () => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     it("correctly cancels fulfillment", async () => {
-      await fulfillmentService.cancelFulfillment(IdMap.getId("fulfillment"))
+      await fulfillmentService.cancelFulfillment(IdMap.getId("fulfillment"));
 
-      expect(fulfillmentRepository.save).toHaveBeenCalledTimes(1)
+      expect(fulfillmentRepository.save).toHaveBeenCalledTimes(1);
       expect(fulfillmentRepository.save).toHaveBeenCalledWith({
         canceled_at: expect.any(Date),
         items: expect.any(Array),
-      })
+      });
 
-      expect(lineItemService.retrieve).toHaveBeenCalledTimes(1)
-      expect(lineItemService.retrieve).toHaveBeenCalledWith(1)
-      expect(lineItemService.update).toHaveBeenCalledTimes(1)
+      expect(lineItemService.retrieve).toHaveBeenCalledTimes(1);
+      expect(lineItemService.retrieve).toHaveBeenCalledWith(1);
+      expect(lineItemService.update).toHaveBeenCalledTimes(1);
       expect(lineItemService.update).toHaveBeenCalledWith(1, {
         fulfilled_quantity: 0,
-      })
-    })
-  })
+      });
+    });
+  });
 
   describe("createShipment", () => {
-    const trackingLinkRepository = MockRepository({ create: c => c })
+    const trackingLinkRepository = MockRepository({ create: (c) => c });
     const fulfillmentRepository = MockRepository({
-      findOne: q => {
+      findOne: (q) => {
         switch (q.where.id) {
           case IdMap.getId("canceled"):
-            return Promise.resolve({ canceled_at: new Date() })
+            return Promise.resolve({ canceled_at: new Date() });
           default:
-            return Promise.resolve({ id: IdMap.getId("fulfillment") })
+            return Promise.resolve({ id: IdMap.getId("fulfillment") });
         }
       },
-    })
+    });
 
     const fulfillmentService = new FulfillmentService({
       manager: MockManager,
       fulfillmentRepository,
       trackingLinkRepository,
-    })
+    });
 
-    const now = new Date()
+    const now = new Date();
     beforeEach(async () => {
-      jest.clearAllMocks()
-      jest.spyOn(global, "Date").mockImplementationOnce(() => now)
-    })
+      jest.clearAllMocks();
+      jest.spyOn(global, "Date").mockImplementationOnce(() => now);
+    });
 
     it("calls order model functions", async () => {
       await fulfillmentService.createShipment(
         IdMap.getId("fulfillment"),
         [{ tracking_number: "1234" }, { tracking_number: "2345" }],
         {}
-      )
+      );
 
-      expect(fulfillmentRepository.save).toHaveBeenCalledTimes(1)
+      expect(fulfillmentRepository.save).toHaveBeenCalledTimes(1);
       expect(fulfillmentRepository.save).toHaveBeenCalledWith({
         id: IdMap.getId("fulfillment"),
         tracking_links: [
@@ -190,8 +190,8 @@ describe("FulfillmentService", () => {
         ],
         metadata: {},
         shipped_at: now,
-      })
-    })
+      });
+    });
 
     it("fails when status is canceled", async () => {
       await expect(
@@ -200,7 +200,7 @@ describe("FulfillmentService", () => {
           [({ tracking_number: "1234" }, { tracking_number: "2345" })],
           {}
         )
-      ).rejects.toThrow("Fulfillment has been canceled")
-    })
-  })
-})
+      ).rejects.toThrow("Fulfillment has been canceled");
+    });
+  });
+});

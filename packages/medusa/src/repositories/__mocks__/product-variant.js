@@ -1,32 +1,32 @@
-import { IdMap } from "medusa-test-utils"
+import { IdMap } from "medusa-test-utils";
 
 export const ProductVariantModelMock = {
   create: jest.fn().mockReturnValue(Promise.resolve()),
   updateOne: jest.fn().mockImplementation((query, update) => {
-    return Promise.resolve()
+    return Promise.resolve();
   }),
   deleteOne: jest.fn().mockReturnValue(Promise.resolve()),
-  findOne: jest.fn().mockImplementation(query => {
+  findOne: jest.fn().mockImplementation((query) => {
     if (query._id === IdMap.getId("validId")) {
       return Promise.resolve({
         _id: IdMap.getId("validId"),
         title: "test",
-      })
+      });
     }
     if (query._id === IdMap.getId("testVariant")) {
       return Promise.resolve({
         _id: IdMap.getId("testVariant"),
         title: "test",
-      })
+      });
     }
     if (query._id === IdMap.getId("deleteId")) {
       return Promise.resolve({
         _id: IdMap.getId("deleteId"),
         title: "test",
-      })
+      });
     }
     if (query._id === IdMap.getId("failId")) {
-      return Promise.reject(new Error("test error"))
+      return Promise.reject(new Error("test error"));
     }
     if (query._id === IdMap.getId("inventory-test")) {
       return Promise.resolve({
@@ -35,7 +35,7 @@ export const ProductVariantModelMock = {
         inventory_quantity: 10,
         allow_backorder: false,
         manage_inventory: true,
-      })
+      });
     }
     if (query._id === IdMap.getId("no-inventory-test")) {
       return Promise.resolve({
@@ -44,7 +44,7 @@ export const ProductVariantModelMock = {
         inventory_quantity: 0,
         allow_backorder: false,
         manage_inventory: false,
-      })
+      });
     }
     if (query._id === IdMap.getId("backorder-test")) {
       return Promise.resolve({
@@ -53,7 +53,7 @@ export const ProductVariantModelMock = {
         inventory_quantity: 5,
         allow_backorder: true,
         manage_inventory: true,
-      })
+      });
     }
 
     if (query._id === IdMap.getId("no-prices")) {
@@ -61,7 +61,7 @@ export const ProductVariantModelMock = {
         _id: IdMap.getId("no-prices"),
         title: "No Prices",
         prices: [],
-      })
+      });
     }
 
     if (query._id === IdMap.getId("eur-prices")) {
@@ -79,7 +79,7 @@ export const ProductVariantModelMock = {
             amount: 950,
           },
         ],
-      })
+      });
     }
 
     if (query._id === IdMap.getId("france-prices")) {
@@ -102,9 +102,9 @@ export const ProductVariantModelMock = {
             amount: 1200,
           },
         ],
-      })
+      });
     }
 
-    return Promise.resolve(undefined)
+    return Promise.resolve(undefined);
   }),
-}
+};

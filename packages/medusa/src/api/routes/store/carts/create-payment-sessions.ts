@@ -1,5 +1,5 @@
-import { defaultStoreCartFields, defaultStoreCartRelations } from "."
-import { CartService } from "../../../../services"
+import { defaultStoreCartFields, defaultStoreCartRelations } from ".";
+import { CartService } from "../../../../services";
 
 /**
  * @oas [post] /carts/{id}/payment-sessions
@@ -21,16 +21,16 @@ import { CartService } from "../../../../services"
  *               $ref: "#/components/schemas/cart"
  */
 export default async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params;
 
-  const cartService: CartService = req.scope.resolve("cartService")
+  const cartService: CartService = req.scope.resolve("cartService");
 
-  await cartService.setPaymentSessions(id)
+  await cartService.setPaymentSessions(id);
 
   const cart = await cartService.retrieve(id, {
     select: defaultStoreCartFields,
     relations: defaultStoreCartRelations,
-  })
+  });
 
-  res.status(200).json({ cart })
-}
+  res.status(200).json({ cart });
+};

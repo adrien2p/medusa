@@ -5,12 +5,12 @@
 export default {
   postAuthentication: () => {
     return (err, req, res, next) => {
-      const permissionService = req.scope.resolve("permissionService")
+      const permissionService = req.scope.resolve("permissionService");
       if (permissionService.hasPermission(req.user, req.method, req.path)) {
-        next()
+        next();
       } else {
-        res.status(422)
+        res.status(422);
       }
-    }
-  }
-}
+    };
+  },
+};

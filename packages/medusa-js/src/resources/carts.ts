@@ -5,13 +5,13 @@ import {
   StorePostCartsCartPaymentSessionUpdateReq,
   StorePostCartsCartReq,
   StorePostCartsCartShippingMethodReq,
-} from "@medusajs/medusa"
-import { AxiosPromise } from "axios"
-import BaseResource from "./base"
-import LineItemsResource from "./line-items"
+} from "@medusajs/medusa";
+import { AxiosPromise } from "axios";
+import BaseResource from "./base";
+import LineItemsResource from "./line-items";
 
 class CartsResource extends BaseResource {
-  public lineItems = new LineItemsResource(this.client)
+  public lineItems = new LineItemsResource(this.client);
 
   /**
    * Adds a shipping method to cart
@@ -23,8 +23,8 @@ class CartsResource extends BaseResource {
     cart_id: string,
     payload: StorePostCartsCartShippingMethodReq
   ): AxiosPromise<StoreCartsRes> {
-    const path = `/store/carts/${cart_id}/shipping-methods`
-    return this.client.request("POST", path, payload)
+    const path = `/store/carts/${cart_id}/shipping-methods`;
+    return this.client.request("POST", path, payload);
   }
 
   /**
@@ -37,8 +37,8 @@ class CartsResource extends BaseResource {
    * @return {AxiosPromise<StoreCartsRes>}
    */
   complete(cart_id: string): AxiosPromise<StoreCartsRes> {
-    const path = `/store/carts/${cart_id}/complete`
-    return this.client.request("POST", path)
+    const path = `/store/carts/${cart_id}/complete`;
+    return this.client.request("POST", path);
   }
 
   /**
@@ -48,8 +48,8 @@ class CartsResource extends BaseResource {
    * @return {AxiosPromise<StoreCartsRes>}
    */
   create(payload?: StorePostCartReq): AxiosPromise<StoreCartsRes> {
-    const path = `/store/carts`
-    return this.client.request("POST", path, payload)
+    const path = `/store/carts`;
+    return this.client.request("POST", path, payload);
   }
 
   /**
@@ -60,8 +60,8 @@ class CartsResource extends BaseResource {
    * @return {AxiosPromise<StoreCartsRes>}
    */
   createPaymentSessions(cart_id: string): AxiosPromise<StoreCartsRes> {
-    const path = `/store/carts/${cart_id}/payment-sessions`
-    return this.client.request("POST", path)
+    const path = `/store/carts/${cart_id}/payment-sessions`;
+    return this.client.request("POST", path);
   }
 
   /**
@@ -71,8 +71,8 @@ class CartsResource extends BaseResource {
    * @return {AxiosPromise<StoreCartsRes>}
    */
   deleteDiscount(cart_id: string, code: string): AxiosPromise<StoreCartsRes> {
-    const path = `/store/carts/${cart_id}/discounts/${code}`
-    return this.client.request("DELETE", path)
+    const path = `/store/carts/${cart_id}/discounts/${code}`;
+    return this.client.request("DELETE", path);
   }
 
   /**
@@ -86,8 +86,8 @@ class CartsResource extends BaseResource {
     cart_id: string,
     provider_id: string
   ): AxiosPromise<StoreCartsRes> {
-    const path = `/store/carts/${cart_id}/payment-sessions/${provider_id}`
-    return this.client.request("DELETE", path)
+    const path = `/store/carts/${cart_id}/payment-sessions/${provider_id}`;
+    return this.client.request("DELETE", path);
   }
 
   /**
@@ -100,8 +100,8 @@ class CartsResource extends BaseResource {
     cart_id: string,
     provider_id: string
   ): AxiosPromise<StoreCartsRes> {
-    const path = `/store/carts/${cart_id}/payment-sessions/${provider_id}/refresh`
-    return this.client.request("POST", path)
+    const path = `/store/carts/${cart_id}/payment-sessions/${provider_id}/refresh`;
+    return this.client.request("POST", path);
   }
 
   /**
@@ -110,8 +110,8 @@ class CartsResource extends BaseResource {
    * @return {AxiosPromise<StoreCartsRes>}
    */
   retrieve(cart_id: string): AxiosPromise<StoreCartsRes> {
-    const path = `/store/carts/${cart_id}`
-    return this.client.request("GET", path)
+    const path = `/store/carts/${cart_id}`;
+    return this.client.request("GET", path);
   }
 
   /**
@@ -124,8 +124,8 @@ class CartsResource extends BaseResource {
     cart_id: string,
     payload: StorePostCartsCartPaymentSessionReq
   ): AxiosPromise<StoreCartsRes> {
-    const path = `/store/carts/${cart_id}/payment-session`
-    return this.client.request("POST", path, payload)
+    const path = `/store/carts/${cart_id}/payment-session`;
+    return this.client.request("POST", path, payload);
   }
 
   /**
@@ -138,8 +138,8 @@ class CartsResource extends BaseResource {
     cart_id: string,
     payload: StorePostCartsCartReq
   ): AxiosPromise<StoreCartsRes> {
-    const path = `/store/carts/${cart_id}`
-    return this.client.request("POST", path, payload)
+    const path = `/store/carts/${cart_id}`;
+    return this.client.request("POST", path, payload);
   }
 
   /**
@@ -152,9 +152,9 @@ class CartsResource extends BaseResource {
     cart_id: string,
     payload: StorePostCartsCartPaymentSessionUpdateReq
   ): AxiosPromise<StoreCartsRes> {
-    const path = `/store/carts/${cart_id}/payment-session/update`
-    return this.client.request("POST", path, payload)
+    const path = `/store/carts/${cart_id}/payment-session/update`;
+    return this.client.request("POST", path, payload);
   }
 }
 
-export default CartsResource
+export default CartsResource;

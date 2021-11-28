@@ -1,9 +1,9 @@
-import { IsEmail, IsObject, IsOptional, IsString } from "class-validator"
-import { defaultStoreCustomersFields, defaultStoreCustomersRelations } from "."
-import CustomerService from "../../../../services/customer"
-import { AddressPayload } from "../../../../types/common"
-import { IsType } from "../../../../utils/validators/is-type"
-import { validator } from "../../../../utils/validator"
+import { IsEmail, IsObject, IsOptional, IsString } from "class-validator";
+import { defaultStoreCustomersFields, defaultStoreCustomersRelations } from ".";
+import CustomerService from "../../../../services/customer";
+import { AddressPayload } from "../../../../types/common";
+import { IsType } from "../../../../utils/validators/is-type";
+import { validator } from "../../../../utils/validator";
 
 /**
  * @oas [post] /customers/me
@@ -51,47 +51,47 @@ import { validator } from "../../../../utils/validator"
  *               $ref: "#/components/schemas/customer"
  */
 export default async (req, res) => {
-  const id = req.user.customer_id
+  const id = req.user.customer_id;
 
-  const validated = await validator(StorePostCustomersCustomerReq, req.body)
+  const validated = await validator(StorePostCustomersCustomerReq, req.body);
 
-  const customerService: CustomerService = req.scope.resolve("customerService")
-  await customerService.update(id, validated)
+  const customerService: CustomerService = req.scope.resolve("customerService");
+  await customerService.update(id, validated);
 
   const customer = await customerService.retrieve(id, {
     relations: defaultStoreCustomersRelations,
     select: defaultStoreCustomersFields,
-  })
+  });
 
-  res.status(200).json({ customer })
-}
+  res.status(200).json({ customer });
+};
 
 export class StorePostCustomersCustomerReq {
   @IsOptional()
   @IsType([AddressPayload, String])
-  billing_address?: AddressPayload | string
+  billing_address?: AddressPayload | string = {} as AddressPayload;
 
   @IsOptional()
   @IsString()
-  first_name?: string
+  first_name?: string;
 
   @IsOptional()
   @IsString()
-  last_name?: string
+  last_name?: string;
 
   @IsOptional()
   @IsString()
-  password?: string
+  password?: string;
 
   @IsOptional()
   @IsString()
-  phone?: string
+  phone?: string;
 
   @IsOptional()
   @IsEmail()
-  email?: string
+  email?: string;
 
   @IsOptional()
   @IsObject()
-  metadata?: object
+  metadata?: object = {};
 }

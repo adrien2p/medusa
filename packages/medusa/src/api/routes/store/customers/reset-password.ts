@@ -1,7 +1,7 @@
-import { IsEmail, IsString } from "class-validator"
-import jwt, { JwtPayload } from "jsonwebtoken"
-import CustomerService from "../../../../services/customer"
-import { validator } from "../../../../utils/validator"
+import { IsEmail, IsString } from "class-validator";
+import jwt, { JwtPayload } from "jsonwebtoken";
+import CustomerService from "../../../../services/customer";
+import { validator } from "../../../../utils/validator";
 
 /**
  * @oas [post] /customers/reset-password
@@ -28,37 +28,37 @@ export default async (req, res) => {
   const validated = await validator(
     StorePostCustomersResetPasswordReq,
     req.body
-  )
+  );
 
-  const customerService: CustomerService = req.scope.resolve("customerService")
+  const customerService: CustomerService = req.scope.resolve("customerService");
   let customer = await customerService.retrieveByEmail(validated.email, {
     select: ["id", "password_hash"],
-  })
+  });
 
   const decodedToken = jwt.verify(
     validated.token,
     customer.password_hash
-  ) as JwtPayload
+  ) as JwtPayload;
   if (!decodedToken || customer.id !== decodedToken.customer_id) {
-    res.status(401).send("Invalid or expired password reset token")
-    return
+    res.status(401).send("Invalid or expired password reset token");
+    return;
   }
 
   await customerService.update(customer.id, {
     password: validated.password,
-  })
+  });
 
-  customer = await customerService.retrieve(customer.id)
-  res.status(200).json({ customer })
-}
+  customer = await customerService.retrieve(customer.id);
+  res.status(200).json({ customer });
+};
 
 export class StorePostCustomersResetPasswordReq {
   @IsEmail()
-  email: string
+  email: string;
 
   @IsString()
-  token: string
+  token: string;
 
   @IsString()
-  password: string
+  password: string;
 }

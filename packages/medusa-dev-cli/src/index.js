@@ -39,8 +39,10 @@ You typically only need to configure this once.`
   .alias(`h`, `help`)
   .nargs(`v`, 0)
   .alias(`v`, `version`)
-  .describe(`v`, `Print the currently installed version of Medusa Dev CLI`)
-  .argv;
+  .describe(
+    `v`,
+    `Print the currently installed version of Medusa Dev CLI`
+  ).argv;
 
 if (argv.version) {
   console.log(getVersionInfo());

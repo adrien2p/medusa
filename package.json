@@ -49,7 +49,7 @@
     "lint": "eslint --ext .js,.jsx,.ts,.tsx .",
     "jest": "jest",
     "test": "jest",
-    "prettier": "prettier",
+    "prettier": "prettier -w 'packages/**/src/**/*.{js,ts,jsx,tsx}'",
     "test:integration": "jest --config=integration-tests/jest.config.js --runInBand",
     "test:fixtures": "jest --config=docs-util/jest.config.js --runInBand"
   },

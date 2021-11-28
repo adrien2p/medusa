@@ -1,4 +1,4 @@
-import BaseService from "./base-service"
+import BaseService from "./base-service";
 
 /**
  * Interface for file connectors
@@ -6,20 +6,20 @@ import BaseService from "./base-service"
  */
 class BaseOauthService extends BaseService {
   constructor() {
-    super()
+    super();
   }
 
   generateToken() {
-    throw Error("generateToken must be overridden by the child class")
+    throw Error("generateToken must be overridden by the child class");
   }
 
   refreshToken() {
-    throw Error("refreshToken must be overridden by the child class")
+    throw Error("refreshToken must be overridden by the child class");
   }
 
   destroyToken() {
-    throw Error("destroyToken must be overridden by the child class")
+    throw Error("destroyToken must be overridden by the child class");
   }
 }
 
-export default BaseOauthService
+export default BaseOauthService;

@@ -1,14 +1,14 @@
-import paymentService from "medusa-interfaces/dist/payment-service"
-import { IdMap, MockRepository, MockManager } from "medusa-test-utils"
-import SwapService from "../swap"
-import { InventoryServiceMock } from "../__mocks__/inventory"
+import paymentService from "medusa-interfaces/dist/payment-service";
+import { IdMap, MockRepository, MockManager } from "medusa-test-utils";
+import SwapService from "../swap";
+import { InventoryServiceMock } from "../__mocks__/inventory";
 
 const eventBusService = {
   emit: jest.fn(),
   withTransaction: function () {
-    return this
+    return this;
   },
-}
+};
 
 const generateOrder = (orderId, items, additional = {}) => {
   return {
@@ -38,8 +38,8 @@ const generateOrder = (orderId, items, additional = {}) => {
       })
     ),
     ...additional,
-  }
-}
+  };
+};
 
 const testOrder = generateOrder(
   "test",
@@ -71,18 +71,18 @@ const testOrder = generateOrder(
       phone: "+18001231234",
     },
   }
-)
+);
 
 describe("SwapService", () => {
   describe("validateReturnItems_", () => {
     beforeEach(() => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     it("fails if item is returned", async () => {
       const swapService = new SwapService({
         eventBusService,
-      })
+      });
       const res = () =>
         swapService.validateReturnItems_(
           {
@@ -95,13 +95,13 @@ describe("SwapService", () => {
             ],
           },
           [{ item_id: IdMap.getId("line1"), quantity: 1 }]
-        )
+        );
 
-      expect(res).toThrow("Cannot return more items than have been ordered")
-    })
+      expect(res).toThrow("Cannot return more items than have been ordered");
+    });
 
     it("fails if item is returned", async () => {
-      const swapService = new SwapService({})
+      const swapService = new SwapService({});
       const res = () =>
         swapService.validateReturnItems_(
           {
@@ -114,13 +114,13 @@ describe("SwapService", () => {
             ],
           },
           [{ item_id: IdMap.getId("line2"), quantity: 1 }]
-        )
+        );
 
-      expect(res).toThrow("Item does not exist on order")
-    })
+      expect(res).toThrow("Item does not exist on order");
+    });
 
     it("successfully resolves", async () => {
-      const swapService = new SwapService({})
+      const swapService = new SwapService({});
       const res = swapService.validateReturnItems_(
         {
           items: [
@@ -132,16 +132,16 @@ describe("SwapService", () => {
           ],
         },
         [{ item_id: IdMap.getId("line1"), quantity: 1 }]
-      )
+      );
 
-      expect(res).toEqual([{ item_id: IdMap.getId("line1"), quantity: 1 }])
-    })
-  })
+      expect(res).toEqual([{ item_id: IdMap.getId("line1"), quantity: 1 }]);
+    });
+  });
 
   describe("createCart", () => {
     beforeEach(() => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     describe("success", () => {
       const existing = {
@@ -156,36 +156,36 @@ describe("SwapService", () => {
         },
         additional_items: [{ data: "lines", id: "test" }],
         other: "data",
-      }
+      };
 
       const cartService = {
         create: jest.fn().mockReturnValue(Promise.resolve({ id: "cart" })),
         update: jest.fn().mockReturnValue(Promise.resolve()),
         withTransaction: function () {
-          return this
+          return this;
         },
-      }
+      };
 
       const swapRepo = MockRepository({
         findOneWithRelations: () => Promise.resolve(existing),
-      })
+      });
 
       const customShippingOptionService = {
         create: jest.fn().mockReturnValue(Promise.resolve({ id: "cso-test" })),
         update: jest.fn().mockReturnValue(Promise.resolve()),
-        withTransaction: function() {
-          return this
+        withTransaction: function () {
+          return this;
         },
-      }
+      };
 
       const lineItemService = {
         create: jest.fn().mockImplementation((d) => Promise.resolve(d)),
         update: jest.fn().mockImplementation((d) => Promise.resolve(d)),
         retrieve: () => Promise.resolve({}),
         withTransaction: function () {
-          return this
+          return this;
         },
-      }
+      };
 
       const swapService = new SwapService({
         manager: MockManager,
@@ -194,14 +194,14 @@ describe("SwapService", () => {
         cartService,
         lineItemService,
         customShippingOptionService,
-      })
+      });
 
       it("finds swap and calls return create cart", async () => {
         await swapService.createCart(IdMap.getId("swap-1"), [
           { option_id: "test-option", price: 10 },
-        ])
+        ]);
 
-        expect(swapRepo.findOneWithRelations).toHaveBeenCalledTimes(1)
+        expect(swapRepo.findOneWithRelations).toHaveBeenCalledTimes(1);
         expect(swapRepo.findOneWithRelations).toHaveBeenCalledWith(
           [
             "order",
@@ -220,9 +220,9 @@ describe("SwapService", () => {
           {
             where: { id: IdMap.getId("swap-1") },
           }
-        )
+        );
 
-        expect(cartService.create).toHaveBeenCalledTimes(1)
+        expect(cartService.create).toHaveBeenCalledTimes(1);
         expect(cartService.create).toHaveBeenCalledWith({
           email: testOrder.email,
           discounts: testOrder.discounts,
@@ -233,18 +233,18 @@ describe("SwapService", () => {
             swap_id: IdMap.getId("test-swap"),
             parent_order_id: IdMap.getId("test"),
           },
-        })
+        });
 
-        expect(cartService.create).toHaveBeenCalledTimes(1)
+        expect(cartService.create).toHaveBeenCalledTimes(1);
         // expect(cartService.update).toHaveBeenCalledTimes(1)
 
-        expect(swapRepo.save).toHaveBeenCalledTimes(1)
+        expect(swapRepo.save).toHaveBeenCalledTimes(1);
         expect(swapRepo.save).toHaveBeenCalledWith({
           ...existing,
           cart_id: "cart",
-        })
-      })
-    })
+        });
+      });
+    });
 
     describe("failure", () => {
       const existing = {
@@ -255,7 +255,7 @@ describe("SwapService", () => {
         },
         additional_items: [{ data: "lines" }],
         other: "data",
-      }
+      };
 
       const swapRepo = MockRepository({
         findOneWithRelations: (_, query) => {
@@ -263,43 +263,43 @@ describe("SwapService", () => {
             case IdMap.getId("canceled"):
               return Promise.resolve({
                 canceled_at: new Date(),
-              })
+              });
             default:
               return Promise.resolve({
                 ...existing,
                 order_id: IdMap.getId("test"),
                 cart_id: IdMap.getId("swap-cart"),
-              })
+              });
           }
         },
-      })
+      });
 
       const swapService = new SwapService({
         manager: MockManager,
         eventBusService,
         swapRepository: swapRepo,
-      })
+      });
 
       it("fails if cart already created", async () => {
-        const res = swapService.createCart(IdMap.getId("swap-1"))
+        const res = swapService.createCart(IdMap.getId("swap-1"));
 
         await expect(res).rejects.toThrow(
           "A cart has already been created for the swap"
-        )
-      })
+        );
+      });
 
       it("fails if swap is canceled", async () => {
         await expect(
           swapService.createCart(IdMap.getId("canceled"))
-        ).rejects.toThrow("Canceled swap cannot be used to create a cart")
-      })
-    })
-  })
+        ).rejects.toThrow("Canceled swap cannot be used to create a cart");
+      });
+    });
+  });
 
   describe("create", () => {
     beforeEach(() => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     describe("success", () => {
       const lineItemService = {
@@ -310,17 +310,17 @@ describe("SwapService", () => {
               unit_price: 100,
               variant_id: variantId,
               quantity,
-            }
+            };
           }),
         retrieve: () => Promise.resolve({}),
-      }
-      const swapRepo = MockRepository()
+      };
+      const swapRepo = MockRepository();
       const returnService = {
         create: jest.fn().mockReturnValue(Promise.resolve({ id: "ret" })),
         withTransaction: function () {
-          return this
+          return this;
         },
-      }
+      };
 
       const swapService = new SwapService({
         manager: MockManager,
@@ -328,7 +328,7 @@ describe("SwapService", () => {
         swapRepository: swapRepo,
         returnService,
         lineItemService,
-      })
+      });
 
       it("generates lines items", async () => {
         await swapService.create(
@@ -339,15 +339,15 @@ describe("SwapService", () => {
             id: IdMap.getId("return-shipping"),
             price: 20,
           }
-        )
+        );
 
-        expect(lineItemService.generate).toHaveBeenCalledTimes(1)
+        expect(lineItemService.generate).toHaveBeenCalledTimes(1);
         expect(lineItemService.generate).toHaveBeenCalledWith(
           IdMap.getId("new-variant"),
           IdMap.getId("region"),
           1
-        )
-      })
+        );
+      });
 
       it("creates swap", async () => {
         await swapService.create(
@@ -358,7 +358,7 @@ describe("SwapService", () => {
             id: IdMap.getId("return-shipping"),
             price: 20,
           }
-        )
+        );
 
         expect(swapRepo.create).toHaveBeenCalledWith({
           order_id: IdMap.getId("test"),
@@ -372,10 +372,10 @@ describe("SwapService", () => {
               quantity: 1,
             },
           ],
-        })
+        });
 
-        expect(returnService.create).toHaveBeenCalledTimes(1)
-      })
+        expect(returnService.create).toHaveBeenCalledTimes(1);
+      });
 
       it.each([
         [true, true],
@@ -393,21 +393,21 @@ describe("SwapService", () => {
               price: 20,
             },
             { no_notification: input }
-          )
+          );
 
           expect(eventBusService.emit).toHaveBeenCalledWith(
             expect.any(String),
             { id: undefined, no_notification: expected }
-          )
+          );
         }
-      )
-    })
-  })
+      );
+    });
+  });
 
   describe("receiveReturn", () => {
     beforeEach(() => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     describe("success", () => {
       const returnService = {
@@ -415,9 +415,9 @@ describe("SwapService", () => {
           .fn()
           .mockReturnValue(Promise.resolve({ test: "received" })),
         withTransaction: function () {
-          return this
+          return this;
         },
-      }
+      };
 
       const existing = {
         order_id: IdMap.getId("test"),
@@ -428,32 +428,32 @@ describe("SwapService", () => {
           refund_amount: 11,
         },
         other: "data",
-      }
+      };
 
       const swapRepo = MockRepository({
         findOneWithRelations: () => Promise.resolve(existing),
-      })
+      });
       const swapService = new SwapService({
         manager: MockManager,
         eventBusService,
         swapRepository: swapRepo,
         returnService,
-      })
+      });
 
       it("calls register return and updates return value", async () => {
         await swapService.receiveReturn(IdMap.getId("swap"), [
           { item_id: IdMap.getId("1234"), quantity: 1 },
-        ])
+        ]);
 
-        expect(returnService.receiveReturn).toHaveBeenCalledTimes(1)
+        expect(returnService.receiveReturn).toHaveBeenCalledTimes(1);
         expect(returnService.receiveReturn).toHaveBeenCalledWith(
           IdMap.getId("return-swap"),
           [{ item_id: IdMap.getId("1234"), quantity: 1 }],
           undefined,
           false
-        )
-      })
-    })
+        );
+      });
+    });
 
     describe("failure", () => {
       const returnService = {
@@ -461,9 +461,9 @@ describe("SwapService", () => {
           .fn()
           .mockReturnValue(Promise.resolve({ status: "requires_action" })),
         withTransaction: function () {
-          return this
+          return this;
         },
-      }
+      };
 
       const existing = {
         order_id: IdMap.getId("test"),
@@ -471,63 +471,63 @@ describe("SwapService", () => {
         return_order_id: IdMap.getId("return-swap"),
         return_order: { id: IdMap.getId("return-swap") },
         other: "data",
-      }
+      };
 
       const swapRepo = MockRepository({
         findOneWithRelations: (rels, q) => {
           switch (q.where.id) {
             case IdMap.getId("canceled"):
-              return Promise.resolve({ canceled_at: new Date() })
+              return Promise.resolve({ canceled_at: new Date() });
             case IdMap.getId("empty"):
-              return Promise.resolve({})
+              return Promise.resolve({});
             default:
-              return Promise.resolve(existing)
+              return Promise.resolve(existing);
           }
         },
-      })
+      });
       const swapService = new SwapService({
         manager: MockManager,
         eventBusService,
         swapRepository: swapRepo,
         returnService,
-      })
+      });
 
       it("fails if swap has no return request", async () => {
-        const res = swapService.receiveReturn(IdMap.getId("empty"), [])
-        await expect(res).rejects.toThrow("Swap has no return request")
-      })
+        const res = swapService.receiveReturn(IdMap.getId("empty"), []);
+        await expect(res).rejects.toThrow("Swap has no return request");
+      });
 
       it("sets requires action if return fails", async () => {
         await swapService.receiveReturn(IdMap.getId("swap"), [
           { variant_id: IdMap.getId("1234"), quantity: 1 },
-        ])
+        ]);
 
         expect(swapRepo.save).toHaveBeenCalledWith({
           ...existing,
           fulfillment_status: "requires_action",
-        })
+        });
 
-        expect(returnService.receiveReturn).toHaveBeenCalledTimes(1)
+        expect(returnService.receiveReturn).toHaveBeenCalledTimes(1);
         expect(returnService.receiveReturn).toHaveBeenCalledWith(
           IdMap.getId("return-swap"),
           [{ variant_id: IdMap.getId("1234"), quantity: 1 }],
           undefined,
           false
-        )
-      })
+        );
+      });
 
       it("fails to receive return when swap is canceled", async () => {
         await expect(
           swapService.receiveReturn(IdMap.getId("canceled"))
-        ).rejects.toThrow("Canceled swap cannot be registered as received")
-      })
-    })
-  })
+        ).rejects.toThrow("Canceled swap cannot be registered as received");
+      });
+    });
+  });
 
   describe("createFulfillment", () => {
     beforeEach(() => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     describe("success", () => {
       const fulfillmentService = {
@@ -539,9 +539,9 @@ describe("SwapService", () => {
             ])
           ),
         withTransaction: function () {
-          return this
+          return this;
         },
-      }
+      };
 
       const existing = {
         fulfillment_status: "not_fulfilled",
@@ -554,34 +554,34 @@ describe("SwapService", () => {
         ],
         shipping_methods: [{ method: "1" }],
         other: "data",
-      }
+      };
 
       const lineItemService = {
         update: jest.fn(),
         retrieve: () => Promise.resolve({}),
         withTransaction: function () {
-          return this
+          return this;
         },
-      }
+      };
 
       const swapRepo = MockRepository({
         findOneWithRelations: () => Promise.resolve({ ...existing }),
-      })
+      });
       const swapService = new SwapService({
         manager: MockManager,
         eventBusService,
         swapRepository: swapRepo,
         fulfillmentService,
         lineItemService,
-      })
+      });
 
       it("creates a fulfillment", async () => {
-        await swapService.createFulfillment(IdMap.getId("swap"))
+        await swapService.createFulfillment(IdMap.getId("swap"));
 
-        expect(lineItemService.update).toHaveBeenCalledTimes(1)
+        expect(lineItemService.update).toHaveBeenCalledTimes(1);
         expect(lineItemService.update).toHaveBeenCalledWith("1234", {
           fulfilled_quantity: 2,
-        })
+        });
 
         expect(swapRepo.save).toHaveBeenCalledWith({
           ...existing,
@@ -589,7 +589,7 @@ describe("SwapService", () => {
           fulfillments: [
             { items: [{ item_id: "1234", quantity: 2 }], data: "new" },
           ],
-        })
+        });
 
         expect(fulfillmentService.createFulfillment).toHaveBeenCalledWith(
           {
@@ -607,9 +607,9 @@ describe("SwapService", () => {
           },
           [{ item_id: "1234", quantity: 2 }],
           { swap_id: IdMap.getId("swap"), metadata: {} }
-        )
-      })
-    })
+        );
+      });
+    });
 
     describe("failure", () => {
       const swapRepo = MockRepository({
@@ -617,77 +617,77 @@ describe("SwapService", () => {
           Promise.resolve({
             canceled_at: new Date(),
           }),
-      })
+      });
       const swapService = new SwapService({
         manager: MockManager,
         swapRepository: swapRepo,
-      })
+      });
 
       it("fails when swap has been canceled", async () => {
         await expect(
           swapService.createFulfillment(IdMap.getId("swap"), {})
-        ).rejects.toThrow("Canceled swap cannot be fulfilled")
-      })
-    })
-  })
+        ).rejects.toThrow("Canceled swap cannot be fulfilled");
+      });
+    });
+  });
 
   describe("cancelFulfillment", () => {
     const swapRepo = MockRepository({
       findOneWithRelations: () => Promise.resolve({}),
       save: (f) => Promise.resolve(f),
-    })
+    });
 
     const fulfillmentService = {
       cancelFulfillment: jest.fn().mockImplementation((f) => {
         switch (f) {
           case IdMap.getId("no-swap"):
-            return Promise.resolve({})
+            return Promise.resolve({});
           default:
             return Promise.resolve({
               swap_id: IdMap.getId("swap-id"),
-            })
+            });
         }
       }),
       withTransaction: function () {
-        return this
+        return this;
       },
-    }
+    };
 
     const swapService = new SwapService({
       manager: MockManager,
       swapRepository: swapRepo,
       fulfillmentService,
-    })
+    });
 
     beforeEach(async () => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     it("successfully cancels fulfillment and corrects swap status", async () => {
-      await swapService.cancelFulfillment(IdMap.getId("swap"))
+      await swapService.cancelFulfillment(IdMap.getId("swap"));
 
-      expect(fulfillmentService.cancelFulfillment).toHaveBeenCalledTimes(1)
+      expect(fulfillmentService.cancelFulfillment).toHaveBeenCalledTimes(1);
       expect(fulfillmentService.cancelFulfillment).toHaveBeenCalledWith(
         IdMap.getId("swap")
-      )
+      );
 
-      expect(swapRepo.save).toHaveBeenCalledTimes(1)
+      expect(swapRepo.save).toHaveBeenCalledTimes(1);
       expect(swapRepo.save).toHaveBeenCalledWith({
         fulfillment_status: "canceled",
-      })
-    })
+      });
+    });
 
     it("fails to cancel fulfillment when not related to a swap", async () => {
       await expect(
         swapService.cancelFulfillment(IdMap.getId("no-swap"))
-      ).rejects.toThrow(`Fufillment not related to a swap`)
-    })
-  })
+      ).rejects.toThrow(`Fufillment not related to a swap`);
+    });
+  });
 
   describe("createShipment", () => {
     beforeEach(() => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     describe("success", () => {
       const fulfillmentService = {
@@ -700,19 +700,19 @@ describe("SwapService", () => {
               },
             ],
             data: "new",
-          })
+          });
         }),
         withTransaction: function () {
-          return this
+          return this;
         },
-      }
+      };
 
       const eventBusService = {
         emit: jest.fn().mockReturnValue(Promise.resolve()),
         withTransaction: function () {
-          return this
+          return this;
         },
-      }
+      };
 
       const existing = {
         fulfillment_status: "not_fulfilled",
@@ -745,26 +745,26 @@ describe("SwapService", () => {
         ],
         shipping_methods: [{ method: "1" }],
         other: "data",
-      }
+      };
 
       const lineItemService = {
         update: jest.fn(),
         retrieve: () => Promise.resolve({}),
         withTransaction: function () {
-          return this
+          return this;
         },
-      }
+      };
 
       const cartService = {
         update: jest.fn(),
         withTransaction: function () {
-          return this
+          return this;
         },
-      }
+      };
 
       const swapRepo = MockRepository({
         findOneWithRelations: () => Promise.resolve(existing),
-      })
+      });
 
       const swapService = new SwapService({
         manager: MockManager,
@@ -774,7 +774,7 @@ describe("SwapService", () => {
         eventBusService,
         fulfillmentService,
         cartService,
-      })
+      });
 
       it("creates a shipment", async () => {
         await swapService.createShipment(
@@ -782,107 +782,107 @@ describe("SwapService", () => {
           IdMap.getId("f1"),
           ["1234"],
           {}
-        )
+        );
 
         expect(lineItemService.update).toHaveBeenCalledWith(
           IdMap.getId("1234-1"),
           {
             shipped_quantity: 2,
           }
-        )
+        );
 
         expect(swapRepo.save).toHaveBeenCalledWith({
           ...existing,
           fulfillment_status: "shipped",
-        })
+        });
 
         expect(fulfillmentService.createShipment).toHaveBeenCalledWith(
           IdMap.getId("f1"),
           ["1234"],
           {}
-        )
-      })
-    })
+        );
+      });
+    });
 
     describe("failure", () => {
       const swapRepo = MockRepository({
         findOneWithRelations: () =>
           Promise.resolve({ canceled_at: new Date() }),
-      })
+      });
 
       const swapService = new SwapService({
         manager: MockManager,
         swapRepository: swapRepo,
-      })
+      });
 
       it("fails when swap is canceled", async () => {
         await expect(
           swapService.createShipment(
             IdMap.getId("swap", IdMap.getId("fulfillment"), [], {})
           )
-        ).rejects.toThrow("Canceled swap cannot be fulfilled as shipped")
-      })
-    })
-  })
+        ).rejects.toThrow("Canceled swap cannot be fulfilled as shipped");
+      });
+    });
+  });
 
   describe("registerCartCompletion", () => {
     beforeEach(() => {
-      jest.clearAllMocks()
-      Date.now = jest.fn(() => 1572393600000)
-    })
+      jest.clearAllMocks();
+      Date.now = jest.fn(() => 1572393600000);
+    });
 
     const eventBusService = {
       emit: jest.fn().mockReturnValue(Promise.resolve()),
       withTransaction: function () {
-        return this
+        return this;
       },
-    }
+    };
 
     const totalsService = {
       getTotal: () => {
-        return Promise.resolve(100)
+        return Promise.resolve(100);
       },
-    }
+    };
 
     const shippingOptionService = {
       updateShippingMethod: () => {
-        return Promise.resolve()
+        return Promise.resolve();
       },
       withTransaction: function () {
-        return this
+        return this;
       },
-    }
+    };
 
     const cartService = {
       update: () => {
-        return Promise.resolve()
+        return Promise.resolve();
       },
       withTransaction: function () {
-        return this
+        return this;
       },
-    }
+    };
 
     const paymentProviderService = {
       getStatus: jest.fn(() => {
-        return Promise.resolve("authorized")
+        return Promise.resolve("authorized");
       }),
       updatePayment: jest.fn(() => {
-        return Promise.resolve()
+        return Promise.resolve();
       }),
       cancelPayment: jest.fn(() => {
-        return Promise.resolve()
+        return Promise.resolve();
       }),
       withTransaction: function () {
-        return this
+        return this;
       },
-    }
+    };
 
     const inventoryService = {
       ...InventoryServiceMock,
       withTransaction: function () {
-        return this
+        return this;
       },
-    }
+    };
 
     describe("success", () => {
       const existing = {
@@ -895,11 +895,11 @@ describe("SwapService", () => {
           shipping_address_id: 1234,
         },
         other: "data",
-      }
+      };
 
       const swapRepo = MockRepository({
         findOneWithRelations: () => Promise.resolve(existing),
-      })
+      });
 
       const swapService = new SwapService({
         manager: MockManager,
@@ -911,32 +911,32 @@ describe("SwapService", () => {
         eventBusService,
         shippingOptionService,
         inventoryService,
-      })
+      });
 
       it("creates a shipment", async () => {
-        await swapService.registerCartCompletion(IdMap.getId("swap"))
+        await swapService.registerCartCompletion(IdMap.getId("swap"));
 
         expect(paymentProviderService.getStatus).toHaveBeenCalledWith({
           good: "yes",
-        })
+        });
 
         expect(inventoryService.confirmInventory).toHaveBeenCalledWith(
           "variant",
           2
-        )
+        );
         expect(inventoryService.adjustInventory).toHaveBeenCalledWith(
           "variant",
           -2
-        )
+        );
 
         expect(swapRepo.save).toHaveBeenCalledWith({
           ...existing,
           difference_due: 100,
           shipping_address_id: 1234,
           confirmed_at: expect.anything(),
-        })
-      })
-    })
+        });
+      });
+    });
 
     describe("failure", () => {
       const existing = {
@@ -949,18 +949,18 @@ describe("SwapService", () => {
           shipping_address_id: 1234,
         },
         other: "data",
-      }
+      };
 
       const swapRepo = MockRepository({
         findOneWithRelations: (rels, q) => {
           switch (q.where.id) {
             case IdMap.getId("canceled"):
-              return Promise.resolve({ canceled_at: new Date() })
+              return Promise.resolve({ canceled_at: new Date() });
             default:
-              return Promise.resolve(existing)
+              return Promise.resolve(existing);
           }
         },
-      })
+      });
 
       const swapService = new SwapService({
         manager: MockManager,
@@ -973,37 +973,37 @@ describe("SwapService", () => {
         eventBusService,
         shippingOptionService,
         inventoryService,
-      })
+      });
 
       it("fails to register cart completion when swap is canceled", async () => {
         await expect(
           swapService.registerCartCompletion(IdMap.getId("canceled"))
-        ).rejects.toThrow("Cart related to canceled swap cannot be completed")
-      })
+        ).rejects.toThrow("Cart related to canceled swap cannot be completed");
+      });
       it("throws an error because inventory is to low", async () => {
         try {
-          await swapService.registerCartCompletion(IdMap.getId("swap"))
+          await swapService.registerCartCompletion(IdMap.getId("swap"));
         } catch (e) {
           expect(e.message).toEqual(
             `Variant with id: variant does not have the required inventory`
-          )
+          );
         }
-      })
-    })
-  })
+      });
+    });
+  });
 
   describe("processDifference", () => {
     beforeEach(() => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     describe("success", () => {
       const eventBusService = {
         emit: jest.fn().mockReturnValue(Promise.resolve()),
         withTransaction: function () {
-          return this
+          return this;
         },
-      }
+      };
 
       const paymentProviderService = {
         capturePayment: jest.fn((g) =>
@@ -1013,9 +1013,9 @@ describe("SwapService", () => {
           g[0].id === "good" ? Promise.resolve() : Promise.reject()
         ),
         withTransaction: function () {
-          return this
+          return this;
         },
-      }
+      };
 
       const existing = (dif, fail, conf = true) => ({
         confirmed_at: conf ? "1234" : null,
@@ -1024,28 +1024,28 @@ describe("SwapService", () => {
         order: {
           payments: [{ id: fail ? "f" : "good" }],
         },
-      })
+      });
 
       const swapRepo = MockRepository({
         findOneWithRelations: (rels, q) => {
           switch (q.where.id) {
             case "refund":
-              return Promise.resolve(existing(-1, false))
+              return Promise.resolve(existing(-1, false));
             case "refund_fail":
-              return Promise.resolve(existing(-1, true))
+              return Promise.resolve(existing(-1, true));
             case "capture_fail":
-              return Promise.resolve(existing(1, true))
+              return Promise.resolve(existing(1, true));
             case "0":
-              return Promise.resolve(existing(0, false))
+              return Promise.resolve(existing(0, false));
             case "not_conf":
-              return Promise.resolve(existing(1, false, false))
+              return Promise.resolve(existing(1, false, false));
             case "canceled":
-              return Promise.resolve({ canceled_at: new Date() })
+              return Promise.resolve({ canceled_at: new Date() });
             default:
-              return Promise.resolve(existing(1, false))
+              return Promise.resolve(existing(1, false));
           }
         },
-      })
+      });
 
       const swapService = new SwapService({
         manager: MockManager,
@@ -1053,32 +1053,32 @@ describe("SwapService", () => {
         swapRepository: swapRepo,
         paymentProviderService,
         eventBusService,
-      })
+      });
 
       it("capture success", async () => {
-        await swapService.processDifference(IdMap.getId("swap"))
+        await swapService.processDifference(IdMap.getId("swap"));
         expect(paymentProviderService.capturePayment).toHaveBeenCalledWith({
           id: "good",
-        })
+        });
         expect(swapRepo.save).toHaveBeenCalledWith({
           ...existing(1, false),
           payment_status: "captured",
-        })
-      })
+        });
+      });
 
       it("capture fail", async () => {
-        await swapService.processDifference("capture_fail")
+        await swapService.processDifference("capture_fail");
         expect(paymentProviderService.capturePayment).toHaveBeenCalledWith({
           id: "f",
-        })
+        });
         expect(swapRepo.save).toHaveBeenCalledWith({
           ...existing(1, true),
           payment_status: "requires_action",
-        })
-      })
+        });
+      });
 
       it("refund success", async () => {
-        await swapService.processDifference("refund")
+        await swapService.processDifference("refund");
         expect(paymentProviderService.refundPayment).toHaveBeenCalledWith(
           [
             {
@@ -1087,15 +1087,15 @@ describe("SwapService", () => {
           ],
           1,
           "swap"
-        )
+        );
         expect(swapRepo.save).toHaveBeenCalledWith({
           ...existing(-1, false),
           payment_status: "difference_refunded",
-        })
-      })
+        });
+      });
 
       it("refund fail", async () => {
-        await swapService.processDifference("refund_fail")
+        await swapService.processDifference("refund_fail");
 
         expect(paymentProviderService.refundPayment).toHaveBeenCalledWith(
           [
@@ -1105,45 +1105,45 @@ describe("SwapService", () => {
           ],
           1,
           "swap"
-        )
+        );
         expect(swapRepo.save).toHaveBeenCalledWith({
           ...existing(-1, true),
           payment_status: "requires_action",
-        })
-      })
+        });
+      });
 
       it("fails as swap is canceled", async () => {
         await expect(swapService.processDifference("canceled")).rejects.toThrow(
           "Canceled swap cannot be processed"
-        )
-      })
+        );
+      });
 
       it("zero", async () => {
-        await swapService.processDifference("0")
+        await swapService.processDifference("0");
         expect(swapRepo.save).toHaveBeenCalledWith({
           ...existing(0, false),
           payment_status: "difference_refunded",
-        })
-      })
+        });
+      });
 
       it("not confirmed", async () => {
         await expect(swapService.processDifference("not_conf")).rejects.toThrow(
           "Cannot process a swap that hasn't been confirmed by the customer"
-        )
-      })
-    })
+        );
+      });
+    });
 
     describe("registerReceived", () => {
       beforeEach(async () => {
-        jest.clearAllMocks()
-      })
+        jest.clearAllMocks();
+      });
 
       const eventBusService = {
         emit: jest.fn().mockReturnValue(Promise.resolve()),
         withTransaction: function () {
-          return this
+          return this;
         },
-      }
+      };
 
       const swapRepo = MockRepository({
         findOneWithRelations: (rels, q) => {
@@ -1153,60 +1153,60 @@ describe("SwapService", () => {
                 id: "requested",
                 order_id: IdMap.getId("order"),
                 return_order: { status: "requested" },
-              })
+              });
             case "received":
               return Promise.resolve({
                 id: "received",
                 order_id: IdMap.getId("order"),
                 return_order: { status: "received" },
-              })
+              });
             case "canceled":
               return Promise.resolve({
                 canceled_at: new Date(),
-              })
+              });
             default:
-              return Promise.resolve()
+              return Promise.resolve();
           }
         },
-      })
+      });
 
       const swapService = new SwapService({
         manager: MockManager,
         swapRepository: swapRepo,
         eventBusService,
-      })
+      });
 
       it("fails if swap doesn't have status received", async () => {
-        const res = swapService.registerReceived("requested")
-        await expect(res).rejects.toThrow("Swap is not received")
-      })
+        const res = swapService.registerReceived("requested");
+        await expect(res).rejects.toThrow("Swap is not received");
+      });
 
       it("registers a swap as received", async () => {
-        await swapService.registerReceived("received")
+        await swapService.registerReceived("received");
 
-        expect(eventBusService.emit).toHaveBeenCalledTimes(1)
-      })
+        expect(eventBusService.emit).toHaveBeenCalledTimes(1);
+      });
 
       it("fails to register as received when swap is canceled", async () => {
         await expect(swapService.registerReceived("canceled")).rejects.toThrow(
           "Canceled swap cannot be registered as received"
-        )
-      })
-    })
-  })
+        );
+      });
+    });
+  });
 
   describe("cancel", () => {
-    const now = new Date()
-    const payment = { id: IdMap.getId("payment") }
-    const return_order = { status: "canceled" }
-    const fulfillment = { canceled_at: now }
+    const now = new Date();
+    const payment = { id: IdMap.getId("payment") };
+    const return_order = { status: "canceled" };
+    const fulfillment = { canceled_at: now };
 
     const paymentProviderService = {
       cancelPayment: jest.fn(() => Promise.resolve({})),
       withTransaction: function () {
-        return this
+        return this;
       },
-    }
+    };
 
     const swapRepo = MockRepository({
       findOneWithRelations: (_, q) => {
@@ -1214,44 +1214,44 @@ describe("SwapService", () => {
           payment: { ...payment },
           return_order: { ...return_order },
           fulfillments: [{ ...fulfillment }, { ...fulfillment }],
-        }
+        };
         switch (q.where.id) {
           case IdMap.getId("fail-fulfillment"):
-            swap.fulfillments[1].canceled_at = undefined
-            return Promise.resolve(swap)
+            swap.fulfillments[1].canceled_at = undefined;
+            return Promise.resolve(swap);
           case IdMap.getId("fail-return"):
-            swap.return_order.status = "received"
-            return Promise.resolve(swap)
+            swap.return_order.status = "received";
+            return Promise.resolve(swap);
           case IdMap.getId("fail-refund-1"):
-            swap.payment_status = "difference_refunded"
-            return Promise.resolve(swap)
+            swap.payment_status = "difference_refunded";
+            return Promise.resolve(swap);
           case IdMap.getId("fail-refund-2"):
-            swap.payment_status = "partially_refunded"
-            return Promise.resolve(swap)
+            swap.payment_status = "partially_refunded";
+            return Promise.resolve(swap);
           case IdMap.getId("fail-refund-3"):
-            swap.payment_status = "refunded"
-            return Promise.resolve(swap)
+            swap.payment_status = "refunded";
+            return Promise.resolve(swap);
           default:
-            return Promise.resolve(swap)
+            return Promise.resolve(swap);
         }
       },
       save: (f) => f,
-    })
+    });
 
     const swapService = new SwapService({
       manager: MockManager,
       swapRepository: swapRepo,
       paymentProviderService,
-    })
+    });
 
     beforeEach(async () => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     it("successfully cancels valid swap", async () => {
-      await swapService.cancel(IdMap.getId("complete"))
+      await swapService.cancel(IdMap.getId("complete"));
 
-      expect(swapRepo.save).toHaveBeenCalledTimes(1)
+      expect(swapRepo.save).toHaveBeenCalledTimes(1);
       expect(swapRepo.save).toHaveBeenCalledWith({
         payment_status: "canceled",
         fulfillment_status: "canceled",
@@ -1259,36 +1259,36 @@ describe("SwapService", () => {
         fulfillments: expect.anything(),
         payment: expect.anything(),
         return_order: expect.anything(),
-      })
-      expect(paymentProviderService.cancelPayment).toHaveBeenCalledTimes(1)
+      });
+      expect(paymentProviderService.cancelPayment).toHaveBeenCalledTimes(1);
       expect(paymentProviderService.cancelPayment).toHaveBeenCalledWith({
         id: IdMap.getId("payment"),
-      })
-    })
+      });
+    });
 
     it("fails to cancel swap when fulfillment not canceled", async () => {
       await expect(
         swapService.cancel(IdMap.getId("fail-fulfillment"))
       ).rejects.toThrow(
         "All fulfillments must be canceled before the swap can be canceled"
-      )
-    })
+      );
+    });
 
     it("fails to cancel swap when return not canceled", async () => {
       await expect(
         swapService.cancel(IdMap.getId("fail-return"))
       ).rejects.toThrow(
         "Return must be canceled before the swap can be cancele"
-      )
-    })
+      );
+    });
 
     it.each([["fail-refund-1"], ["fail-refund-2"], ["fail-refund-3"]])(
       "fails to cancel swap when contains refund",
       async (input) => {
         await expect(swapService.cancel(IdMap.getId(input))).rejects.toThrow(
           "Swap with a refund cannot be canceled"
-        )
+        );
       }
-    )
-  })
-})
+    );
+  });
+});

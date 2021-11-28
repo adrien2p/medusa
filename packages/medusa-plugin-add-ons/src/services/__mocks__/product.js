@@ -1,4 +1,4 @@
-import { IdMap } from "medusa-test-utils"
+import { IdMap } from "medusa-test-utils";
 
 export const products = {
   product1: {
@@ -15,25 +15,25 @@ export const products = {
     title: "Product 2",
     metadata: {},
   },
-}
+};
 
 export const ProductServiceMock = {
   retrieve: jest.fn().mockImplementation((productId) => {
     if (productId === IdMap.getId("test-product")) {
-      return Promise.resolve(products.product1)
+      return Promise.resolve(products.product1);
     }
     if (productId === IdMap.getId("test-product-2")) {
-      return Promise.resolve(products.product2)
+      return Promise.resolve(products.product2);
     }
-    return Promise.resolve(undefined)
+    return Promise.resolve(undefined);
   }),
   list: jest.fn().mockImplementation((query) => {
-    return Promise.resolve([products.product1])
+    return Promise.resolve([products.product1]);
   }),
-}
+};
 
 const mock = jest.fn().mockImplementation(() => {
-  return ProductServiceMock
-})
+  return ProductServiceMock;
+});
 
-export default mock
+export default mock;

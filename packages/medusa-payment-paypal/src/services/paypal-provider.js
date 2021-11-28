@@ -1,20 +1,20 @@
-import _ from "lodash"
-import { humanizeAmount, zeroDecimalCurrencies } from "medusa-core-utils"
-import PayPal from "@paypal/checkout-server-sdk"
-import { PaymentService } from "medusa-interfaces"
+import _ from "lodash";
+import { humanizeAmount, zeroDecimalCurrencies } from "medusa-core-utils";
+import PayPal from "@paypal/checkout-server-sdk";
+import { PaymentService } from "medusa-interfaces";
 
 function roundToTwo(num, currency) {
   if (zeroDecimalCurrencies.includes(currency.toLowerCase())) {
-    return `${num}`
+    return `${num}`;
   }
-  return num.toFixed(2)
+  return num.toFixed(2);
 }
 
 class PayPalProviderService extends PaymentService {
-  static identifier = "paypal"
+  static identifier = "paypal";
 
   constructor({ totalsService, regionService }, options) {
-    super()
+    super();
 
     /**
      * Required PayPal options:
@@ -25,29 +25,29 @@ class PayPalProviderService extends PaymentService {
      *    auth_webhook_id: REQUIRED for webhook to work
      *  }
      */
-    this.options_ = options
+    this.options_ = options;
 
-    let environment
+    let environment;
     if (this.options_.sandbox) {
       environment = new PayPal.core.SandboxEnvironment(
         options.client_id,
         options.client_secret
-      )
+      );
     } else {
       environment = new PayPal.core.LiveEnvironment(
         options.client_id,
         options.client_secret
-      )
+      );
     }
 
     /** @private @const {PayPalHttpClient} */
-    this.paypal_ = new PayPal.core.PayPalHttpClient(environment)
+    this.paypal_ = new PayPal.core.PayPalHttpClient(environment);
 
     /** @private @const {RegionService} */
-    this.regionService_ = regionService
+    this.regionService_ = regionService;
 
     /** @private @const {TotalsService} */
-    this.totalsService_ = totalsService
+    this.totalsService_ = totalsService;
   }
 
   /**
@@ -57,24 +57,24 @@ class PayPalProviderService extends PaymentService {
    * @returns {Promise<string>} the status of the order
    */
   async getStatus(paymentData) {
-    const order = await this.retrievePayment(paymentData)
+    const order = await this.retrievePayment(paymentData);
 
-    let status = "pending"
+    let status = "pending";
 
     switch (order.status) {
       case "CREATED":
-        return "pending"
+        return "pending";
       case "COMPLETED":
-        return "authorized"
+        return "authorized";
       case "SAVED":
       case "APPROVED":
       case "PAYER_ACTION_REQUIRED":
-        return "requires_more"
+        return "requires_more";
       case "VOIDED":
-        return "canceled"
+        return "canceled";
       // return "captured"
       default:
-        return status
+        return status;
     }
   }
 
@@ -82,7 +82,7 @@ class PayPalProviderService extends PaymentService {
    * Not supported
    */
   async retrieveSavedMethods(customer) {
-    return Promise.resolve([])
+    return Promise.resolve([]);
   }
 
   /**
@@ -93,12 +93,12 @@ class PayPalProviderService extends PaymentService {
    * @returns {object} the data to be stored with the payment session.
    */
   async createPayment(cart) {
-    const { region_id } = cart
-    const { currency_code } = await this.regionService_.retrieve(region_id)
+    const { region_id } = cart;
+    const { currency_code } = await this.regionService_.retrieve(region_id);
 
-    const amount = await this.totalsService_.getTotal(cart)
+    const amount = await this.totalsService_.getTotal(cart);
 
-    const request = new PayPal.orders.OrdersCreateRequest()
+    const request = new PayPal.orders.OrdersCreateRequest();
     request.requestBody({
       intent: "AUTHORIZE",
       application_context: {
@@ -116,11 +116,11 @@ class PayPalProviderService extends PaymentService {
           },
         },
       ],
-    })
+    });
 
-    const res = await this.paypal_.execute(request)
+    const res = await this.paypal_.execute(request);
 
-    return { id: res.result.id }
+    return { id: res.result.id };
   }
 
   /**
@@ -130,11 +130,11 @@ class PayPalProviderService extends PaymentService {
    */
   async retrievePayment(data) {
     try {
-      const request = new PayPal.orders.OrdersGetRequest(data.id)
-      const res = await this.paypal_.execute(request)
-      return res.result
+      const request = new PayPal.orders.OrdersGetRequest(data.id);
+      const res = await this.paypal_.execute(request);
+      return res.result;
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
@@ -145,9 +145,9 @@ class PayPalProviderService extends PaymentService {
    */
   async getPaymentData(session) {
     try {
-      return this.retrievePayment(session.data)
+      return this.retrievePayment(session.data);
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
@@ -159,12 +159,12 @@ class PayPalProviderService extends PaymentService {
    * @returns {Promise<{ status: string, data: object }>} result with data and status
    */
   async authorizePayment(session, context = {}) {
-    const stat = await this.getStatus(session.data)
+    const stat = await this.getStatus(session.data);
 
     try {
-      return { data: session.data, status: stat }
+      return { data: session.data, status: stat };
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
@@ -179,9 +179,9 @@ class PayPalProviderService extends PaymentService {
       return {
         ...data,
         ...update.data,
-      }
+      };
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
@@ -193,10 +193,10 @@ class PayPalProviderService extends PaymentService {
    */
   async updatePayment(sessionData, cart) {
     try {
-      const { region_id } = cart
-      const { currency_code } = await this.regionService_.retrieve(region_id)
+      const { region_id } = cart;
+      const { currency_code } = await this.regionService_.retrieve(region_id);
 
-      const request = new PayPal.orders.OrdersPatchRequest(sessionData.id)
+      const request = new PayPal.orders.OrdersPatchRequest(sessionData.id);
       request.requestBody([
         {
           op: "replace",
@@ -211,13 +211,13 @@ class PayPalProviderService extends PaymentService {
             },
           },
         },
-      ])
+      ]);
 
-      await this.paypal_.execute(request)
+      await this.paypal_.execute(request);
 
-      return sessionData
+      return sessionData;
     } catch (error) {
-      return this.createPayment(cart)
+      return this.createPayment(cart);
     }
   }
 
@@ -225,7 +225,7 @@ class PayPalProviderService extends PaymentService {
    * Not suported
    */
   async deletePayment(payment) {
-    return
+    return;
   }
 
   /**
@@ -234,16 +234,16 @@ class PayPalProviderService extends PaymentService {
    * @returns {object} the PayPal order
    */
   async capturePayment(payment) {
-    const { purchase_units } = payment.data
+    const { purchase_units } = payment.data;
 
-    const id = purchase_units[0].payments.authorizations[0].id
+    const id = purchase_units[0].payments.authorizations[0].id;
 
     try {
-      const request = new PayPal.payments.AuthorizationsCaptureRequest(id)
-      await this.paypal_.execute(request)
-      return this.retrievePayment(payment.data)
+      const request = new PayPal.payments.AuthorizationsCaptureRequest(id);
+      await this.paypal_.execute(request);
+      return this.retrievePayment(payment.data);
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
@@ -254,16 +254,16 @@ class PayPalProviderService extends PaymentService {
    * @returns {Promise<Object>} the resulting PayPal order
    */
   async refundPayment(payment, amountToRefund) {
-    const { purchase_units } = payment.data
+    const { purchase_units } = payment.data;
 
     try {
-      const payments = purchase_units[0].payments
+      const payments = purchase_units[0].payments;
       if (!(payments && payments.captures.length)) {
-        throw new Error("Order not yet captured")
+        throw new Error("Order not yet captured");
       }
 
-      const payId = payments.captures[0].id
-      const request = new PayPal.payments.CapturesRefundRequest(payId)
+      const payId = payments.captures[0].id;
+      const request = new PayPal.payments.CapturesRefundRequest(payId);
 
       request.requestBody({
         amount: {
@@ -273,13 +273,13 @@ class PayPalProviderService extends PaymentService {
             payment.currency_code
           ),
         },
-      })
+      });
 
-      await this.paypal_.execute(request)
+      await this.paypal_.execute(request);
 
-      return this.retrievePayment(payment.data)
+      return this.retrievePayment(payment.data);
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
@@ -290,22 +290,22 @@ class PayPalProviderService extends PaymentService {
    */
   async cancelPayment(payment) {
     try {
-      const { purchase_units } = payment.data
+      const { purchase_units } = payment.data;
       if (payment.captured_at) {
-        const payments = purchase_units[0].payments
+        const payments = purchase_units[0].payments;
 
-        const payId = payments.captures[0].id
-        const request = new PayPal.payments.CapturesRefundRequest(payId)
-        await this.paypal_.execute(request)
+        const payId = payments.captures[0].id;
+        const request = new PayPal.payments.CapturesRefundRequest(payId);
+        await this.paypal_.execute(request);
       } else {
-        const id = purchase_units[0].payments.authorizations[0].id
-        const request = new PayPal.payments.AuthorizationsVoidRequest(id)
-        await this.paypal_.execute(request)
+        const id = purchase_units[0].payments.authorizations[0].id;
+        const request = new PayPal.payments.AuthorizationsVoidRequest(id);
+        await this.paypal_.execute(request);
       }
 
-      return this.retrievePayment(payment.data)
+      return this.retrievePayment(payment.data);
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
@@ -316,15 +316,15 @@ class PayPalProviderService extends PaymentService {
    * @returns {Promise<object>} the PayPal order object
    */
   async retrieveOrderFromAuth(auth) {
-    const link = auth.links.find((l) => l.rel === "up")
-    const parts = link.href.split("/")
-    const orderId = parts[parts.length - 1]
-    const orderReq = new PayPal.orders.OrdersGetRequest(orderId)
-    const res = await this.paypal_.execute(orderReq)
+    const link = auth.links.find((l) => l.rel === "up");
+    const parts = link.href.split("/");
+    const orderId = parts[parts.length - 1];
+    const orderReq = new PayPal.orders.OrdersGetRequest(orderId);
+    const res = await this.paypal_.execute(orderReq);
     if (res.result) {
-      return res.result
+      return res.result;
     }
-    return null
+    return null;
   }
 
   /**
@@ -333,12 +333,12 @@ class PayPalProviderService extends PaymentService {
    * @returns {Promise<object>} the authorization.
    */
   async retrieveAuthorization(id) {
-    const authReq = new PayPal.payments.AuthorizationsGetRequest(id)
-    const res = await this.paypal_.execute(authReq)
+    const authReq = new PayPal.payments.AuthorizationsGetRequest(id);
+    const res = await this.paypal_.execute(authReq);
     if (res.result) {
-      return res.result
+      return res.result;
     }
-    return null
+    return null;
   }
 
   /**
@@ -357,9 +357,9 @@ class PayPalProviderService extends PaymentService {
         webhook_id: this.options_.auth_webhook_id,
         ...data,
       },
-    }
+    };
 
-    return this.paypal_.execute(verifyReq)
+    return this.paypal_.execute(verifyReq);
   }
 
   /**
@@ -367,27 +367,27 @@ class PayPalProviderService extends PaymentService {
    */
   async ensureWebhooks() {
     if (!this.options_.backend_url) {
-      return
+      return;
     }
 
     const webhookReq = {
       verb: "GET",
       path: "/v1/notifications/webhooks",
-    }
-    const webhookRes = await this.paypal_.execute(webhookReq)
+    };
+    const webhookRes = await this.paypal_.execute(webhookReq);
 
-    console.log(webhookRes.result.webhooks)
-    let found
+    console.log(webhookRes.result.webhooks);
+    let found;
     if (webhookRes.result && webhookRes.result.webhooks) {
       found = webhookRes.result.webhooks.find((w) => {
         const notificationType = w.event_types.find(
           (e) => e.name === "PAYMENT.AUTHORIZATION.CREATED"
-        )
+        );
         return (
           !!notificationType &&
           w.url === `${this.options_.backend_url}/paypal/hooks`
-        )
-      })
+        );
+      });
     }
 
     if (!found) {
@@ -406,11 +406,11 @@ class PayPalProviderService extends PaymentService {
             },
           ],
         },
-      }
+      };
 
-      await this.paypal_.execute(whCreateReq)
+      await this.paypal_.execute(whCreateReq);
     }
   }
 }
 
-export default PayPalProviderService
+export default PayPalProviderService;

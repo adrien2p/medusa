@@ -1,10 +1,10 @@
-import axios from "axios"
-import rateLimit from "axios-rate-limit"
-import qs from "querystring"
+import axios from "axios";
+import rateLimit from "axios-rate-limit";
+import qs from "querystring";
 
 // Brightpearl allows 200 requests per minute
-const RATE_LIMIT_REQUESTS = 200
-const RATE_LIMIT_INTERVAL = 60 * 1000
+const RATE_LIMIT_REQUESTS = 200;
+const RATE_LIMIT_INTERVAL = 60 * 1000;
 
 class BrightpearlClient {
   static createToken(account, data) {
@@ -14,7 +14,7 @@ class BrightpearlClient {
       client_id: data.client_id,
       client_secret: data.client_secret,
       redirect_uri: data.redirect,
-    }
+    };
 
     return axios({
       url: `https://ws-eu1.brightpearl.com/${account}/oauth/token`,
@@ -23,7 +23,7 @@ class BrightpearlClient {
         "content-type": "application/x-www-form-urlencoded",
       },
       data: qs.stringify(params),
-    }).then(({ data }) => data)
+    }).then(({ data }) => data);
   }
 
   static refreshToken(account, data) {
@@ -32,7 +32,7 @@ class BrightpearlClient {
       refresh_token: data.refresh_token,
       client_id: data.client_id,
       client_secret: data.client_secret,
-    }
+    };
 
     return axios({
       url: `https://ws-eu1.brightpearl.com/${account}/oauth/token`,
@@ -44,8 +44,8 @@ class BrightpearlClient {
     })
       .then(({ data }) => data)
       .catch((err) => {
-        throw err
-      })
+        throw err;
+      });
   }
 
   constructor(options) {
@@ -57,35 +57,38 @@ class BrightpearlClient {
           "brightpearl-dev-ref": "sebrindom",
         },
       }),
-      { maxRequests: RATE_LIMIT_REQUESTS, perMilliseconds: RATE_LIMIT_INTERVAL }
-    )
+      {
+        maxRequests: RATE_LIMIT_REQUESTS,
+        perMilliseconds: RATE_LIMIT_INTERVAL,
+      }
+    );
 
-    this.tokenStore_ = options.token_store
-    this.authType_ = options.auth_type
-    this.webhooks = this.buildWebhookEndpoints()
-    this.payments = this.buildPaymentEndpoints()
-    this.warehouses = this.buildWarehouseEndpoints()
-    this.orders = this.buildOrderEndpoints()
-    this.addresses = this.buildAddressEndpoints()
-    this.customers = this.buildCustomerEndpoints()
-    this.products = this.buildProductEndpoints()
+    this.tokenStore_ = options.token_store;
+    this.authType_ = options.auth_type;
+    this.webhooks = this.buildWebhookEndpoints();
+    this.payments = this.buildPaymentEndpoints();
+    this.warehouses = this.buildWarehouseEndpoints();
+    this.orders = this.buildOrderEndpoints();
+    this.addresses = this.buildAddressEndpoints();
+    this.customers = this.buildCustomerEndpoints();
+    this.products = this.buildProductEndpoints();
 
-    this.buildRefreshTokenInterceptor_()
+    this.buildRefreshTokenInterceptor_();
   }
 
   buildRefreshTokenInterceptor_() {
     this.client_.interceptors.request.use(async (request) => {
-      const token = await this.tokenStore_.getToken()
+      const token = await this.tokenStore_.getToken();
 
       if (token) {
-        request.headers["Authorization"] = `Bearer ${token}`
+        request.headers["Authorization"] = `Bearer ${token}`;
       }
 
-      return request
-    })
+      return request;
+    });
 
     this.client_.interceptors.response.use(undefined, async (error) => {
-      const response = error.response
+      const response = error.response;
 
       if (response) {
         if (
@@ -94,33 +97,33 @@ class BrightpearlClient {
           !error.config.__isRetryRequest
         ) {
           try {
-            await this.tokenStore_.refreshToken()
+            await this.tokenStore_.refreshToken();
           } catch (authError) {
             // refreshing has failed, but report the original error, i.e. 401
-            return Promise.reject(error)
+            return Promise.reject(error);
           }
 
           // retry the original request
-          error.config.__isRetryRequest = true
-          return this.client_(error.config)
+          error.config.__isRetryRequest = true;
+          return this.client_(error.config);
         }
       }
 
-      return Promise.reject(error)
-    })
+      return Promise.reject(error);
+    });
   }
 
   buildSearchResults_(response) {
-    const { results, metaData } = response
+    const { results, metaData } = response;
     // Map the column names to the columns
     return results.map((resColumns) => {
-      const object = {}
+      const object = {};
       for (let i = 0; i < resColumns.length; i++) {
-        const fieldName = metaData.columns[i].name
-        object[fieldName] = resColumns[i]
+        const fieldName = metaData.columns[i].name;
+        object[fieldName] = resColumns[i];
       }
-      return object
-    })
+      return object;
+    });
   }
 
   buildWebhookEndpoints = () => {
@@ -131,17 +134,17 @@ class BrightpearlClient {
             url: `/integration-service/webhook`,
             method: "GET",
           })
-          .then(({ data }) => data.response)
+          .then(({ data }) => data.response);
       },
       create: (data) => {
         return this.client_.request({
           url: `/integration-service/webhook`,
           method: "POST",
           data,
-        })
+        });
       },
-    }
-  }
+    };
+  };
 
   buildPaymentEndpoints = () => {
     return {
@@ -152,10 +155,10 @@ class BrightpearlClient {
             method: "POST",
             data: payment,
           })
-          .then(({ data }) => data.response)
+          .then(({ data }) => data.response);
       },
-    }
-  }
+    };
+  };
 
   buildWarehouseEndpoints = () => {
     return {
@@ -165,7 +168,7 @@ class BrightpearlClient {
             url: `/warehouse-service/order/${orderId}/reservation`,
             method: "GET",
           })
-          .then(({ data }) => data.response)
+          .then(({ data }) => data.response);
       },
       retrieveGoodsOutNote: (id) => {
         return this.client_
@@ -173,7 +176,7 @@ class BrightpearlClient {
             url: `/warehouse-service/order/*/goods-note/goods-out/${id}`,
             method: "GET",
           })
-          .then(({ data }) => data.response && data.response[id])
+          .then(({ data }) => data.response && data.response[id]);
       },
       createGoodsOutNote: (orderId, data) => {
         return this.client_
@@ -182,29 +185,29 @@ class BrightpearlClient {
             method: "POST",
             data,
           })
-          .then(({ data }) => data.response)
+          .then(({ data }) => data.response);
       },
       updateGoodsOutNote: (noteId, update) => {
         return this.client_.request({
           url: `/warehouse-service/goods-note/goods-out/${noteId}`,
           method: "PUT",
           data: update,
-        })
+        });
       },
       registerGoodsOutEvent: (noteId, data) => {
         return this.client_.request({
           url: `/warehouse-service/goods-note/goods-out/${noteId}/event`,
           method: "POST",
           data,
-        })
+        });
       },
       createReservation: (order, warehouse) => {
-        const id = order.id
+        const id = order.id;
         const data = order.rows.map((r) => ({
           productId: r.productId,
           salesOrderRowId: r.id,
           quantity: r.quantity,
-        }))
+        }));
         return this.client_
           .request({
             url: `/warehouse-service/order/${id}/reservation/warehouse/${warehouse}`,
@@ -213,10 +216,10 @@ class BrightpearlClient {
               products: data,
             },
           })
-          .then(({ data }) => data.response)
+          .then(({ data }) => data.response);
       },
-    }
-  }
+    };
+  };
 
   buildOrderEndpoints = () => {
     return {
@@ -227,7 +230,7 @@ class BrightpearlClient {
             method: "GET",
           })
           .then(({ data }) => data.response.length && data.response[0])
-          .catch((err) => console.log(err))
+          .catch((err) => console.log(err));
       },
       create: (order) => {
         return this.client_
@@ -236,7 +239,7 @@ class BrightpearlClient {
             method: "POST",
             data: order,
           })
-          .then(({ data }) => data.response)
+          .then(({ data }) => data.response);
       },
       createCredit: (salesCredit) => {
         return this.client_
@@ -245,10 +248,10 @@ class BrightpearlClient {
             method: "POST",
             data: salesCredit,
           })
-          .then(({ data }) => data.response)
+          .then(({ data }) => data.response);
       },
-    }
-  }
+    };
+  };
 
   buildAddressEndpoints = () => {
     return {
@@ -259,10 +262,10 @@ class BrightpearlClient {
             method: "POST",
             data: address,
           })
-          .then(({ data }) => data.response)
+          .then(({ data }) => data.response);
       },
-    }
-  }
+    };
+  };
 
   buildProductEndpoints = () => {
     return {
@@ -271,14 +274,14 @@ class BrightpearlClient {
           .request({
             url: `/warehouse-service/product-availability/${productId}`,
           })
-          .then(({ data }) => data.response && data.response)
+          .then(({ data }) => data.response && data.response);
       },
       retrieve: (productId) => {
         return this.client_
           .request({
             url: `/product-service/product/${productId}`,
           })
-          .then(({ data }) => data.response && data.response[0])
+          .then(({ data }) => data.response && data.response[0]);
       },
       search: (search) => {
         return this.client_
@@ -289,8 +292,8 @@ class BrightpearlClient {
             return {
               products: this.buildSearchResults_(data.response),
               metadata: data.response.metaData,
-            }
-          })
+            };
+          });
       },
       retrieveBySKU: (sku) => {
         return this.client_
@@ -298,18 +301,18 @@ class BrightpearlClient {
             url: `/product-service/product-search?SKU=${sku}`,
           })
           .then(({ data }) => {
-            return this.buildSearchResults_(data.response)
-          })
+            return this.buildSearchResults_(data.response);
+          });
       },
       retrievePrice: (productId) => {
         return this.client_
           .request({
             url: `/product-service/product-price/${productId}`,
           })
-          .then(({ data }) => data.response.length && data.response[0])
+          .then(({ data }) => data.response.length && data.response[0]);
       },
-    }
-  }
+    };
+  };
 
   buildCustomerEndpoints = () => {
     return {
@@ -319,8 +322,8 @@ class BrightpearlClient {
             url: `/contact-service/contact-search?primaryEmail=${email}`,
           })
           .then(({ data }) => {
-            return this.buildSearchResults_(data.response)
-          })
+            return this.buildSearchResults_(data.response);
+          });
       },
 
       create: (customerData) => {
@@ -330,10 +333,10 @@ class BrightpearlClient {
             method: "POST",
             data: customerData,
           })
-          .then(({ data }) => data.response)
+          .then(({ data }) => data.response);
       },
-    }
-  }
+    };
+  };
 }
 
-export default BrightpearlClient
+export default BrightpearlClient;

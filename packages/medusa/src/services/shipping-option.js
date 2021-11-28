@@ -1,5 +1,5 @@
-import { MedusaError } from "medusa-core-utils"
-import { BaseService } from "medusa-interfaces"
+import { MedusaError } from "medusa-core-utils";
+import { BaseService } from "medusa-interfaces";
 
 /**
  * Provides layer to manipulate profiles.
@@ -15,33 +15,33 @@ class ShippingOptionService extends BaseService {
     regionService,
     totalsService,
   }) {
-    super()
+    super();
 
     /** @private @const {EntityManager} */
-    this.manager_ = manager
+    this.manager_ = manager;
 
     /** @private @const {ShippingOptionRepository} */
-    this.optionRepository_ = shippingOptionRepository
+    this.optionRepository_ = shippingOptionRepository;
 
     /** @private @const {ShippingMethodRepository} */
-    this.methodRepository_ = shippingMethodRepository
+    this.methodRepository_ = shippingMethodRepository;
 
     /** @private @const {ShippingOptionRequirementRepository} */
-    this.requirementRepository_ = shippingOptionRequirementRepository
+    this.requirementRepository_ = shippingOptionRequirementRepository;
 
     /** @private @const {ProductService} */
-    this.providerService_ = fulfillmentProviderService
+    this.providerService_ = fulfillmentProviderService;
 
     /** @private @const {RegionService} */
-    this.regionService_ = regionService
+    this.regionService_ = regionService;
 
     /** @private @const {TotalsService} */
-    this.totalsService_ = totalsService
+    this.totalsService_ = totalsService;
   }
 
   withTransaction(transactionManager) {
     if (!transactionManager) {
-      return this
+      return this;
     }
 
     const cloned = new ShippingOptionService({
@@ -52,11 +52,11 @@ class ShippingOptionService extends BaseService {
       fulfillmentProviderService: this.providerService_,
       regionService: this.regionService_,
       totalsService: this.totalsService_,
-    })
+    });
 
-    cloned.transactionManager_ = transactionManager
+    cloned.transactionManager_ = transactionManager;
 
-    return cloned
+    return cloned;
   }
 
   /**
@@ -70,7 +70,7 @@ class ShippingOptionService extends BaseService {
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
         "A Shipping Requirement must have a type field"
-      )
+      );
     }
 
     if (
@@ -80,44 +80,47 @@ class ShippingOptionService extends BaseService {
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
         "Requirement type must be one of min_subtotal, max_subtotal"
-      )
+      );
     }
 
     const reqRepo = this.manager_.getCustomRepository(
       this.requirementRepository_
-    )
+    );
 
     const existingReq = await reqRepo.findOne({
       where: { id: requirement.id },
-    })
+    });
 
     if (!existingReq && requirement.id) {
-      throw new MedusaError(MedusaError.Types.INVALID_DATA, "ID does not exist")
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        "ID does not exist"
+      );
     }
 
     // If no option id is provided, we are currently in the process of creating
     // a new shipping option. Therefore, simply return the requirement, such
     // that the cascading will take care of the creation of the requirement.
     if (!optionId) {
-      return requirement
+      return requirement;
     }
 
-    let req
+    let req;
     if (existingReq) {
       req = await reqRepo.save({
         ...existingReq,
         ...requirement,
-      })
+      });
     } else {
       const created = reqRepo.create({
         shipping_option_id: optionId,
         ...requirement,
-      })
+      });
 
-      req = await reqRepo.save(created)
+      req = await reqRepo.save(created);
     }
 
-    return req
+    return req;
   }
 
   /**
@@ -126,10 +129,10 @@ class ShippingOptionService extends BaseService {
    * @return {Promise} the result of the find operation
    */
   async list(selector, config = { skip: 0, take: 50 }) {
-    const optRepo = this.manager_.getCustomRepository(this.optionRepository_)
+    const optRepo = this.manager_.getCustomRepository(this.optionRepository_);
 
-    const query = this.buildQuery_(selector, config)
-    return optRepo.find(query)
+    const query = this.buildQuery_(selector, config);
+    return optRepo.find(query);
   }
 
   /**
@@ -140,31 +143,31 @@ class ShippingOptionService extends BaseService {
    * @return {Promise<Product>} the profile document.
    */
   async retrieve(optionId, options = {}) {
-    const soRepo = this.manager_.getCustomRepository(this.optionRepository_)
-    const validatedId = this.validateId_(optionId)
+    const soRepo = this.manager_.getCustomRepository(this.optionRepository_);
+    const validatedId = this.validateId_(optionId);
 
     const query = {
       where: { id: validatedId },
-    }
+    };
 
     if (options.select) {
-      query.select = options.select
+      query.select = options.select;
     }
 
     if (options.relations) {
-      query.relations = options.relations
+      query.relations = options.relations;
     }
 
-    const option = await soRepo.findOne(query)
+    const option = await soRepo.findOne(query);
 
     if (!option) {
       throw new MedusaError(
         MedusaError.Types.NOT_FOUND,
         `Shipping Option with ${optionId} was not found`
-      )
+      );
     }
 
-    return option
+    return option;
   }
 
   /**
@@ -176,27 +179,27 @@ class ShippingOptionService extends BaseService {
    */
   async updateShippingMethod(id, update) {
     return this.atomicPhase_(async (manager) => {
-      const methodRepo = manager.getCustomRepository(this.methodRepository_)
-      const method = await methodRepo.findOne({ where: { id } })
+      const methodRepo = manager.getCustomRepository(this.methodRepository_);
+      const method = await methodRepo.findOne({ where: { id } });
 
       if ("return_id" in update) {
-        method.return_id = update.return_id
+        method.return_id = update.return_id;
       }
 
       if ("swap_id" in update) {
-        method.swap_id = update.swap_id
+        method.swap_id = update.swap_id;
       }
 
       if ("order_id" in update) {
-        method.order_id = update.order_id
+        method.order_id = update.order_id;
       }
 
       if ("claim_order_id" in update) {
-        method.claim_order_id = update.claim_order_id
+        method.claim_order_id = update.claim_order_id;
       }
 
-      return methodRepo.save(method)
-    })
+      return methodRepo.save(method);
+    });
   }
 
   /**
@@ -205,9 +208,9 @@ class ShippingOptionService extends BaseService {
    */
   async deleteShippingMethod(sm) {
     return this.atomicPhase_(async (manager) => {
-      const methodRepo = manager.getCustomRepository(this.methodRepository_)
-      return methodRepo.remove(sm)
-    })
+      const methodRepo = manager.getCustomRepository(this.methodRepository_);
+      return methodRepo.remove(sm);
+    });
   }
 
   /**
@@ -221,70 +224,70 @@ class ShippingOptionService extends BaseService {
     return this.atomicPhase_(async (manager) => {
       const option = await this.retrieve(optionId, {
         relations: ["requirements"],
-      })
+      });
 
-      const methodRepo = manager.getCustomRepository(this.methodRepository_)
+      const methodRepo = manager.getCustomRepository(this.methodRepository_);
 
       if ("cart" in config) {
-        this.validateCartOption(option, config.cart || {})
+        this.validateCartOption(option, config.cart || {});
       }
 
       const validatedData = await this.providerService_.validateFulfillmentData(
         option,
         data,
         config.cart || {}
-      )
+      );
 
-      let methodPrice
+      let methodPrice;
       if ("price" in config) {
-        methodPrice = config.price
+        methodPrice = config.price;
       } else {
-        methodPrice = await this.getPrice_(option, validatedData, config.cart)
+        methodPrice = await this.getPrice_(option, validatedData, config.cart);
       }
 
       const toCreate = {
         shipping_option_id: option.id,
         data: validatedData,
         price: methodPrice,
-      }
+      };
 
       if (config.order) {
-        toCreate.order_id = config.order.id
+        toCreate.order_id = config.order.id;
       }
 
       if (config.cart) {
-        toCreate.cart_id = config.cart.id
+        toCreate.cart_id = config.cart.id;
       }
 
       if (config.cart_id) {
-        toCreate.cart_id = config.cart_id
+        toCreate.cart_id = config.cart_id;
       }
 
       if (config.return_id) {
-        toCreate.return_id = config.return_id
+        toCreate.return_id = config.return_id;
       }
 
       if (config.order_id) {
-        toCreate.order_id = config.order_id
+        toCreate.order_id = config.order_id;
       }
 
       if (config.claim_order_id) {
-        toCreate.claim_order_id = config.claim_order_id
+        toCreate.claim_order_id = config.claim_order_id;
       }
 
       if (config.draft_order_id) {
-        toCreate.draft_order_id = config.draft_order_id
+        toCreate.draft_order_id = config.draft_order_id;
       }
 
-      const method = await methodRepo.create(toCreate)
+      const method = await methodRepo.create(toCreate);
 
-      const created = await methodRepo.save(method)
+      const created = await methodRepo.save(method);
 
       return methodRepo.findOne({
         where: { id: created.id },
         relations: ["shipping_option"],
-      })
-    })
+      });
+    });
   }
 
   /**
@@ -297,36 +300,36 @@ class ShippingOptionService extends BaseService {
    */
   validateCartOption(option, cart) {
     if (option.is_return) {
-      return null
+      return null;
     }
 
     if (cart.region_id !== option.region_id) {
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
         "The shipping option is not available in the cart's region"
-      )
+      );
     }
 
-    const subtotal = cart.subtotal
+    const subtotal = cart.subtotal;
     const requirementResults = option.requirements.map((requirement) => {
       switch (requirement.type) {
         case "max_subtotal":
-          return requirement.amount > subtotal
+          return requirement.amount > subtotal;
         case "min_subtotal":
-          return requirement.amount <= subtotal
+          return requirement.amount <= subtotal;
         default:
-          return true
+          return true;
       }
-    })
+    });
 
     if (!requirementResults.every(Boolean)) {
       throw new MedusaError(
         MedusaError.Types.NOT_ALLOWED,
         "The Cart does not satisfy the shipping option's requirements"
-      )
+      );
     }
 
-    return option
+    return option;
   }
 
   /**
@@ -338,14 +341,14 @@ class ShippingOptionService extends BaseService {
    */
   async create(data) {
     return this.atomicPhase_(async (manager) => {
-      const optionRepo = manager.getCustomRepository(this.optionRepository_)
-      const option = await optionRepo.create(data)
+      const optionRepo = manager.getCustomRepository(this.optionRepository_);
+      const option = await optionRepo.create(data);
 
       const region = await this.regionService_
         .withTransaction(manager)
         .retrieve(option.region_id, {
           relations: ["fulfillment_providers"],
-        })
+        });
 
       if (
         !region.fulfillment_providers.find(
@@ -355,31 +358,34 @@ class ShippingOptionService extends BaseService {
         throw new MedusaError(
           MedusaError.Types.INVALID_DATA,
           "The fulfillment provider is not available in the provided region"
-        )
+        );
       }
 
-      option.price_type = await this.validatePriceType_(data.price_type, option)
-      option.amount = data.price_type === "calculated" ? null : data.amount
+      option.price_type = await this.validatePriceType_(
+        data.price_type,
+        option
+      );
+      option.amount = data.price_type === "calculated" ? null : data.amount;
 
-      const isValid = await this.providerService_.validateOption(option)
+      const isValid = await this.providerService_.validateOption(option);
 
       if (!isValid) {
         throw new MedusaError(
           MedusaError.Types.INVALID_DATA,
           "The fulfillment provider cannot validate the shipping option"
-        )
+        );
       }
 
       if ("requirements" in data) {
-        const acc = []
+        const acc = [];
         for (const r of data.requirements) {
-          const validated = await this.validateRequirement_(r)
+          const validated = await this.validateRequirement_(r);
 
           if (acc.find((raw) => raw.type === validated.type)) {
             throw new MedusaError(
               MedusaError.Types.INVALID_DATA,
               "Only one requirement of each type is allowed"
-            )
+            );
           }
 
           if (
@@ -393,16 +399,16 @@ class ShippingOptionService extends BaseService {
             throw new MedusaError(
               MedusaError.Types.INVALID_DATA,
               "Max. subtotal must be greater than Min. subtotal"
-            )
+            );
           }
 
-          acc.push(validated)
+          acc.push(validated);
         }
       }
 
-      const result = await optionRepo.save(option)
-      return result
-    })
+      const result = await optionRepo.save(option);
+      return result;
+    });
   }
 
   /**
@@ -425,23 +431,23 @@ class ShippingOptionService extends BaseService {
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
         "The price must be of type flat_rate or calculated"
-      )
+      );
     }
 
     if (priceType === "calculated") {
       const canCalculate = await this.providerService_.canCalculate(
         option.provider_id,
         option.data
-      )
+      );
       if (!canCalculate) {
         throw new MedusaError(
           MedusaError.Types.INVALID_DATA,
           "The fulfillment provider cannot calculate prices for this option"
-        )
+        );
       }
     }
 
-    return priceType
+    return priceType;
   }
 
   /**
@@ -457,36 +463,36 @@ class ShippingOptionService extends BaseService {
     return this.atomicPhase_(async (manager) => {
       const option = await this.retrieve(optionId, {
         relations: ["requirements"],
-      })
+      });
 
       if ("metadata" in update) {
-        option.metadata = await this.setMetadata_(option, update.metadata)
+        option.metadata = await this.setMetadata_(option, update.metadata);
       }
 
       if (update.region_id || update.provider_id || update.data) {
         throw new MedusaError(
           MedusaError.Types.NOT_ALLOWED,
           "Region and Provider cannot be updated after creation"
-        )
+        );
       }
 
       if ("is_return" in update) {
         throw new MedusaError(
           MedusaError.Types.NOT_ALLOWED,
           "is_return cannot be changed after creation"
-        )
+        );
       }
 
       if ("requirements" in update) {
-        const acc = []
+        const acc = [];
         for (const r of update.requirements) {
-          const validated = await this.validateRequirement_(r, optionId)
+          const validated = await this.validateRequirement_(r, optionId);
 
           if (acc.find((raw) => raw.type === validated.type)) {
             throw new MedusaError(
               MedusaError.Types.INVALID_DATA,
               "Only one requirement of each type is allowed"
-            )
+            );
           }
 
           if (
@@ -500,53 +506,53 @@ class ShippingOptionService extends BaseService {
             throw new MedusaError(
               MedusaError.Types.INVALID_DATA,
               "Max. subtotal must be greater than Min. subtotal"
-            )
+            );
           }
 
-          acc.push(validated)
+          acc.push(validated);
         }
 
         if (option.requirements) {
-          const accReqs = acc.map((a) => a.id)
+          const accReqs = acc.map((a) => a.id);
           const toRemove = option.requirements.filter(
             (r) => !accReqs.includes(r.id)
-          )
+          );
           await Promise.all(
             toRemove.map(async (req) => {
-              await this.removeRequirement(req.id)
+              await this.removeRequirement(req.id);
             })
-          )
+          );
         }
 
-        option.requirements = acc
+        option.requirements = acc;
       }
 
       if ("price_type" in update) {
         option.price_type = await this.validatePriceType_(
           update.price_type,
           option
-        )
+        );
         if (update.price_type === "calculated") {
-          option.amount = null
+          option.amount = null;
         }
       }
 
       if ("amount" in update && option.price_type !== "calculated") {
-        option.amount = update.amount
+        option.amount = update.amount;
       }
 
       if ("name" in update) {
-        option.name = update.name
+        option.name = update.name;
       }
 
       if ("admin_only" in update) {
-        option.admin_only = update.admin_only
+        option.admin_only = update.admin_only;
       }
 
-      const optionRepo = manager.getCustomRepository(this.optionRepository_)
-      const result = await optionRepo.save(option)
-      return result
-    })
+      const optionRepo = manager.getCustomRepository(this.optionRepository_);
+      const result = await optionRepo.save(option);
+      return result;
+    });
   }
 
   /**
@@ -557,16 +563,16 @@ class ShippingOptionService extends BaseService {
    */
   async delete(optionId) {
     try {
-      const option = await this.retrieve(optionId)
+      const option = await this.retrieve(optionId);
 
       const optionRepo = this.manager_.getCustomRepository(
         this.optionRepository_
-      )
+      );
 
-      return optionRepo.softRemove(option)
+      return optionRepo.softRemove(option);
     } catch (error) {
       // Delete is idempotent, but we return a promise to allow then-chaining
-      return Promise.resolve()
+      return Promise.resolve();
     }
   }
 
@@ -587,21 +593,21 @@ class ShippingOptionService extends BaseService {
     return this.atomicPhase_(async (manager) => {
       const option = await this.retrieve(optionId, {
         relations: ["requirements"],
-      })
-      const validatedReq = await this.validateRequirement_(requirement)
+      });
+      const validatedReq = await this.validateRequirement_(requirement);
 
       if (option.requirements.find((r) => r.type === validatedReq.type)) {
         throw new MedusaError(
           MedusaError.Types.DUPLICATE_ERROR,
           `A requirement with type: ${validatedReq.type} already exists`
-        )
+        );
       }
 
-      option.requirements.push(validatedReq)
+      option.requirements.push(validatedReq);
 
-      const optionRepo = manager.getCustomRepository(this.optionRepository_)
-      return optionRepo.save(option)
-    })
+      const optionRepo = manager.getCustomRepository(this.optionRepository_);
+      return optionRepo.save(option);
+    });
   }
 
   /**
@@ -612,19 +618,21 @@ class ShippingOptionService extends BaseService {
   async removeRequirement(requirementId) {
     return this.atomicPhase_(async (manager) => {
       try {
-        const reqRepo = manager.getCustomRepository(this.requirementRepository_)
+        const reqRepo = manager.getCustomRepository(
+          this.requirementRepository_
+        );
         const requirement = await reqRepo.findOne({
           where: { id: requirementId },
-        })
+        });
 
-        const result = await reqRepo.softRemove(requirement)
+        const result = await reqRepo.softRemove(requirement);
 
-        return result
+        return result;
       } catch (error) {
         // Delete is idempotent, but we return a promise to allow then-chaining
-        return Promise.resolve()
+        return Promise.resolve();
       }
-    })
+    });
   }
 
   /**
@@ -635,16 +643,16 @@ class ShippingOptionService extends BaseService {
    * @return {ShippingOption} the decorated ShippingOption.
    */
   async decorate(optionId, fields = [], expandFields = []) {
-    const requiredFields = ["id", "metadata"]
+    const requiredFields = ["id", "metadata"];
 
-    fields = fields.concat(requiredFields)
+    fields = fields.concat(requiredFields);
 
     const option = await this.retrieve(optionId, {
       select: fields,
       relations: expandFields,
-    })
+    });
 
-    return option
+    return option;
   }
 
   /**
@@ -654,25 +662,25 @@ class ShippingOptionService extends BaseService {
    * @return {Promise} resolves to the updated result.
    */
   async setMetadata_(option, metadata) {
-    const existing = option.metadata || {}
-    const newData = {}
+    const existing = option.metadata || {};
+    const newData = {};
     for (const [key, value] of Object.entries(metadata)) {
       if (typeof key !== "string") {
         throw new MedusaError(
           MedusaError.Types.INVALID_ARGUMENT,
           "Key type is invalid. Metadata keys must be strings"
-        )
+        );
       }
 
-      newData[key] = value
+      newData[key] = value;
     }
 
     const updated = {
       ...existing,
       ...newData,
-    }
+    };
 
-    return updated
+    return updated;
   }
 
   /**
@@ -688,10 +696,10 @@ class ShippingOptionService extends BaseService {
    */
   async getPrice_(option, data, cart) {
     if (option.price_type === "calculated") {
-      return this.providerService_.calculatePrice(option, data, cart)
+      return this.providerService_.calculatePrice(option, data, cart);
     }
-    return option.amount
+    return option.amount;
   }
 }
 
-export default ShippingOptionService
+export default ShippingOptionService;

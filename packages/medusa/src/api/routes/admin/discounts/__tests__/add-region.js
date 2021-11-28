@@ -1,10 +1,10 @@
-import { IdMap } from "medusa-test-utils"
-import { request } from "../../../../../helpers/test-request"
-import { DiscountServiceMock } from "../../../../../services/__mocks__/discount"
+import { IdMap } from "medusa-test-utils";
+import { request } from "../../../../../helpers/test-request";
+import { DiscountServiceMock } from "../../../../../services/__mocks__/discount";
 
 describe("POST /admin/discounts/:discount_id/regions/:region_id", () => {
   describe("successful addition", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
       subject = await request(
@@ -19,15 +19,15 @@ describe("POST /admin/discounts/:discount_id/regions/:region_id", () => {
             },
           },
         }
-      )
-    })
+      );
+    });
 
     it("returns 200", () => {
-      expect(subject.status).toEqual(200)
-    })
+      expect(subject.status).toEqual(200);
+    });
 
     it("calls service retrieve", () => {
-      expect(DiscountServiceMock.retrieve).toHaveBeenCalledTimes(1)
+      expect(DiscountServiceMock.retrieve).toHaveBeenCalledTimes(1);
       expect(DiscountServiceMock.retrieve).toHaveBeenCalledWith(
         IdMap.getId("total10"),
         {
@@ -50,13 +50,13 @@ describe("POST /admin/discounts/:discount_id/regions/:region_id", () => {
           ],
           relations: ["rule", "parent_discount", "regions", "rule.valid_for"],
         }
-      )
+      );
 
-      expect(DiscountServiceMock.addRegion).toHaveBeenCalledTimes(1)
+      expect(DiscountServiceMock.addRegion).toHaveBeenCalledTimes(1);
       expect(DiscountServiceMock.addRegion).toHaveBeenCalledWith(
         IdMap.getId("total10"),
         IdMap.getId("region-france")
-      )
-    })
-  })
-})
+      );
+    });
+  });
+});

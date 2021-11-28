@@ -1,6 +1,6 @@
-import { IsNotEmpty, IsObject, IsOptional, IsString } from "class-validator"
-import ProductCollectionService from "../../../../services/product-collection"
-import { validator } from "../../../../utils/validator"
+import { IsNotEmpty, IsObject, IsOptional, IsString } from "class-validator";
+import ProductCollectionService from "../../../../services/product-collection";
+import { validator } from "../../../../utils/validator";
 /**
  * @oas [post] /collections
  * operationId: "PostCollections"
@@ -36,28 +36,28 @@ import { validator } from "../../../../utils/validator"
  *              $ref: "#/components/schemas/product_collection"
  */
 export default async (req, res) => {
-  const validated = await validator(AdminPostCollectionsReq, req.body)
+  const validated = await validator(AdminPostCollectionsReq, req.body);
 
   const productCollectionService: ProductCollectionService = req.scope.resolve(
     "productCollectionService"
-  )
+  );
 
-  const created = await productCollectionService.create(validated)
-  const collection = await productCollectionService.retrieve(created.id)
+  const created = await productCollectionService.create(validated);
+  const collection = await productCollectionService.retrieve(created.id);
 
-  res.status(200).json({ collection })
-}
+  res.status(200).json({ collection });
+};
 
 export class AdminPostCollectionsReq {
   @IsString()
   @IsNotEmpty()
-  title: string
+  title: string;
 
   @IsString()
   @IsOptional()
-  handle?: string
+  handle?: string;
 
   @IsObject()
   @IsOptional()
-  metadata?: object
+  metadata?: object;
 }

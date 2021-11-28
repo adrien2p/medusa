@@ -1,4 +1,4 @@
-import { Type } from "class-transformer"
+import { Type } from "class-transformer";
 import {
   IsArray,
   IsBoolean,
@@ -10,12 +10,12 @@ import {
   IsPositive,
   IsString,
   ValidateNested,
-} from "class-validator"
-import { defaultAdminDiscountsFields, defaultAdminDiscountsRelations } from "."
-import DiscountService from "../../../../services/discount"
-import { IsGreaterThan } from "../../../../utils/validators/greater-than"
-import { validator } from "../../../../utils/validator"
-import { IsISO8601Duration } from "../../../../utils/validators/iso8601-duration"
+} from "class-validator";
+import { defaultAdminDiscountsFields, defaultAdminDiscountsRelations } from ".";
+import DiscountService from "../../../../services/discount";
+import { IsGreaterThan } from "../../../../utils/validators/greater-than";
+import { validator } from "../../../../utils/validator";
+import { IsISO8601Duration } from "../../../../utils/validators/iso8601-duration";
 
 /**
  * @oas [post] /discounts/{id}
@@ -70,89 +70,89 @@ import { IsISO8601Duration } from "../../../../utils/validators/iso8601-duration
  *               $ref: "#/components/schemas/discount"
  */
 export default async (req, res) => {
-  const { discount_id } = req.params
+  const { discount_id } = req.params;
 
-  const validated = await validator(AdminPostDiscountsDiscountReq, req.body)
-  const discountService: DiscountService = req.scope.resolve("discountService")
-  await discountService.update(discount_id, validated)
+  const validated = await validator(AdminPostDiscountsDiscountReq, req.body);
+  const discountService: DiscountService = req.scope.resolve("discountService");
+  await discountService.update(discount_id, validated);
   const discount = await discountService.retrieve(discount_id, {
     select: defaultAdminDiscountsFields,
     relations: defaultAdminDiscountsRelations,
-  })
+  });
 
-  res.status(200).json({ discount })
-}
+  res.status(200).json({ discount });
+};
 
 export class AdminPostDiscountsDiscountReq {
   @IsString()
   @IsOptional()
-  code?: string
+  code?: string;
 
   @IsOptional()
   @ValidateNested()
   @Type(() => AdminUpdateDiscountRule)
-  rule?: AdminUpdateDiscountRule
+  rule?: AdminUpdateDiscountRule;
 
   @IsBoolean()
   @IsOptional()
-  is_dynamic?: boolean
+  is_dynamic?: boolean;
 
   @IsBoolean()
   @IsOptional()
-  is_disabled?: boolean
+  is_disabled?: boolean;
 
   @IsDate()
   @IsOptional()
   @Type(() => Date)
-  starts_at?: Date
+  starts_at?: Date;
 
   @IsDate()
   @IsOptional()
   @IsGreaterThan("starts_at")
   @Type(() => Date)
-  ends_at?: Date
+  ends_at?: Date;
 
   @IsISO8601Duration()
   @IsOptional()
-  valid_duration?: string
+  valid_duration?: string;
 
   @IsNumber()
   @IsOptional()
   @IsPositive()
-  usage_limit?: number
+  usage_limit?: number;
 
   @IsArray()
   @IsOptional()
   @IsString({ each: true })
-  regions?: string[]
+  regions?: string[] = [];
 
   @IsObject()
   @IsOptional()
-  metadata?: object
+  metadata?: object;
 }
 
 export class AdminUpdateDiscountRule {
   @IsString()
   @IsNotEmpty()
-  id: string
+  id: string;
 
   @IsString()
   @IsOptional()
-  description?: string
+  description?: string;
 
   @IsString()
   @IsNotEmpty()
-  type: string
+  type: string;
 
   @IsNumber()
-  value: string
+  value: string;
 
   @IsString()
   @IsNotEmpty()
-  allocation: string
+  allocation: string;
 
   @IsArray()
   @IsOptional()
   @IsString({ each: true })
-  valid_for?: string
+  valid_for?: string[] = [];
 }

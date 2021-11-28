@@ -1,25 +1,25 @@
-import { Router } from "express"
-import { Swap } from "../../../.."
-import { PaginatedResponse } from "../../../../types/common"
-import middlewares from "../../../middlewares"
+import { Router } from "express";
+import { Swap } from "../../../..";
+import { PaginatedResponse } from "../../../../types/common";
+import middlewares from "../../../middlewares";
 
-const route = Router()
+const route = Router();
 
 export default (app) => {
-  app.use("/swaps", route)
+  app.use("/swaps", route);
 
   /**
    * List swaps
    */
-  route.get("/", middlewares.wrap(require("./list-swaps").default))
+  route.get("/", middlewares.wrap(require("./list-swaps").default));
 
   /**
    * Get a swap
    */
-  route.get("/:id", middlewares.wrap(require("./get-swap").default))
+  route.get("/:id", middlewares.wrap(require("./get-swap").default));
 
-  return app
-}
+  return app;
+};
 
 export const defaultAdminSwapRelations = [
   "order",
@@ -36,7 +36,7 @@ export const defaultAdminSwapRelations = [
   "cart.gift_cards",
   "cart.discounts",
   "cart.payment",
-]
+];
 
 export const defaultAdminSwapFields = [
   "id",
@@ -54,15 +54,15 @@ export const defaultAdminSwapFields = [
   "cart.discount_total",
   "cart.gift_card_total",
   "cart.total",
-]
+];
 
 export type AdminSwapsListRes = PaginatedResponse & {
-  swaps: Swap[]
-}
+  swaps: Swap[];
+};
 
 export type AdminSwapsRes = {
-  swap: Swap
-}
+  swap: Swap;
+};
 
-export * from "./get-swap"
-export * from "./list-swaps"
+export * from "./get-swap";
+export * from "./list-swaps";

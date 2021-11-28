@@ -1,5 +1,5 @@
-import path from "path"
-import formatRegistrationName from "../format-registration-name"
+import path from "path";
+import formatRegistrationName from "../format-registration-name";
 
 describe("formatRegistrationName", () => {
   const tests = [
@@ -23,12 +23,12 @@ describe("formatRegistrationName", () => {
       "dotModel",
     ],
     [["C:", "server", "services", "dot.js"], "dotService"],
-  ]
+  ];
 
   test.each(
     tests.map(([pathParts, expected]) => [path.join(...pathParts), expected])
   )("Service %s -> %s", (fn, expected) => {
-    const res = formatRegistrationName(fn)
-    expect(res).toEqual(expected)
-  })
-})
+    const res = formatRegistrationName(fn);
+    expect(res).toEqual(expected);
+  });
+});

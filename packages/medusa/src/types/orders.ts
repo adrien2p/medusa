@@ -1,4 +1,4 @@
-import { Type } from "class-transformer"
+import { Type } from "class-transformer";
 import {
   IsString,
   IsOptional,
@@ -7,8 +7,8 @@ import {
   ValidateNested,
   IsNotEmpty,
   IsInt,
-} from "class-validator"
-import { DateComparisonOperator } from "./common"
+} from "class-validator";
+import { DateComparisonOperator } from "./common";
 
 enum OrderStatus {
   pending = "pending",
@@ -43,86 +43,86 @@ enum PaymentStatus {
 export class AdminListOrdersSelector {
   @IsString()
   @IsOptional()
-  q?: string
+  q?: string;
 
   @IsString()
   @IsOptional()
-  id?: string
+  id?: string;
 
   @IsArray()
   @IsEnum(OrderStatus, { each: true })
   @IsOptional()
-  status?: string[]
+  status?: string[] = [];
 
   @IsArray()
   @IsEnum(FulfillmentStatus, { each: true })
   @IsOptional()
-  fulfillment_status?: string[]
+  fulfillment_status?: string[] = [];
 
   @IsArray()
   @IsEnum(PaymentStatus)
   @IsOptional()
-  payment_status?: string[]
+  payment_status?: string[] = [];
 
   @IsString()
   @IsOptional()
-  display_id?: string
+  display_id?: string;
 
   @IsString()
   @IsOptional()
-  cart_id?: string
+  cart_id?: string;
 
   @IsString()
   @IsOptional()
-  customer_id?: string
+  customer_id?: string;
 
   @IsString()
   @IsOptional()
-  email?: string
+  email?: string;
 
   @IsString()
   @IsOptional()
-  region_id?: string
+  region_id?: string;
 
   @IsString()
   @IsOptional()
-  currency_code?: string
+  currency_code?: string;
 
   @IsString()
   @IsOptional()
-  tax_rate?: string
+  tax_rate?: string;
 
   @IsOptional()
   @ValidateNested()
   @Type(() => DateComparisonOperator)
-  canceled_at?: DateComparisonOperator
+  canceled_at?: DateComparisonOperator;
 
   @IsOptional()
   @ValidateNested()
   @Type(() => DateComparisonOperator)
-  created_at?: DateComparisonOperator
+  created_at?: DateComparisonOperator;
 
   @IsOptional()
   @ValidateNested()
   @Type(() => DateComparisonOperator)
-  updated_at?: DateComparisonOperator
+  updated_at?: DateComparisonOperator;
 }
 
 export class OrdersReturnItem {
   @IsString()
   @IsNotEmpty()
-  item_id: string
+  item_id: string;
 
   @IsInt()
   @IsNotEmpty()
   @Type(() => Number)
-  quantity: number
+  quantity: number;
 
   @IsString()
   @IsOptional()
-  reason_id?: string
+  reason_id?: string;
 
   @IsString()
   @IsOptional()
-  note?: string
+  note?: string;
 }

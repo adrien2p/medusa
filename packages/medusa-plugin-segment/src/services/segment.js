@@ -1,7 +1,7 @@
-import Analytics from "analytics-node"
-import axios from "axios"
-import { BaseService } from "medusa-interfaces"
-import { humanizeAmount } from "medusa-core-utils"
+import Analytics from "analytics-node";
+import axios from "axios";
+import { BaseService } from "medusa-interfaces";
+import { humanizeAmount } from "medusa-core-utils";
 
 class SegmentService extends BaseService {
   /**
@@ -15,36 +15,36 @@ class SegmentService extends BaseService {
    *    }
    */
   constructor({ totalsService, productService }, options) {
-    super()
+    super();
 
-    this.totalsService_ = totalsService
-    this.options_ = options
-    this.productService_ = productService
+    this.totalsService_ = totalsService;
+    this.options_ = options;
+    this.productService_ = productService;
 
-    this.analytics_ = new Analytics(options.write_key)
+    this.analytics_ = new Analytics(options.write_key);
   }
 
   /**
    * Wrapper around segment's identify call
    */
   identify(data) {
-    return this.analytics_.identify(data)
+    return this.analytics_.identify(data);
   }
 
   track(data) {
-    return this.analytics_.track(data)
+    return this.analytics_.track(data);
   }
 
   async getReportingValue(rawCurrency, value) {
-    const fromCurrency = rawCurrency.toUpperCase()
-    const date = "latest"
+    const fromCurrency = rawCurrency.toUpperCase();
+    const date = "latest";
     const toCurrency =
       (this.options_.reporting_currency &&
         this.options_.reporting_currency.toUpperCase()) ||
-      "EUR"
+      "EUR";
 
     if (fromCurrency === toCurrency) {
-      return this.rounded_(value)
+      return this.rounded_(value);
     }
 
     const exchangeRate = await axios
@@ -52,28 +52,28 @@ class SegmentService extends BaseService {
         `https://api.exchangeratesapi.io/${date}?symbols=${fromCurrency}&base=${toCurrency}&access_key=${this.options_.exchange_rates_api_key}`
       )
       .then(({ data }) => {
-        return data.rates[fromCurrency]
-      })
+        return data.rates[fromCurrency];
+      });
 
-    return this.rounded_(value / exchangeRate)
+    return this.rounded_(value / exchangeRate);
   }
 
   async buildOrder(order) {
-    const curr = order.currency_code
+    const curr = order.currency_code;
 
-    const subtotal = humanizeAmount(order.subtotal, curr)
-    const total = humanizeAmount(order.total, curr)
-    const tax = humanizeAmount(order.tax_total, curr)
-    const discount = humanizeAmount(order.discount_total, curr)
-    const shipping = humanizeAmount(order.shipping_total, curr)
-    const revenue = total - tax
+    const subtotal = humanizeAmount(order.subtotal, curr);
+    const total = humanizeAmount(order.total, curr);
+    const tax = humanizeAmount(order.tax_total, curr);
+    const discount = humanizeAmount(order.discount_total, curr);
+    const shipping = humanizeAmount(order.shipping_total, curr);
+    const revenue = total - tax;
 
-    let coupon
+    let coupon;
     if (order.discounts && order.discounts.length) {
-      coupon = order.discounts[0] && order.discounts[0].code
+      coupon = order.discounts[0] && order.discounts[0].code;
     }
 
-    const taxRate = order.tax_rate / 100
+    const taxRate = order.tax_rate / 100;
 
     const orderData = {
       checkout_id: order.cart_id,
@@ -112,34 +112,34 @@ class SegmentService extends BaseService {
       currency: order.currency_code.toUpperCase(),
       products: await Promise.all(
         order.items.map(async (item) => {
-          let name = item.title
+          let name = item.title;
           const lineTotalTax = this.totalsService_.getLineItemRefund(
             order,
             item
-          )
+          );
 
-          const lineTotal = lineTotalTax / (1 + taxRate)
+          const lineTotal = lineTotalTax / (1 + taxRate);
 
           const revenue = await this.getReportingValue(
             order.currency_code,
             humanizeAmount(lineTotal, curr)
-          )
+          );
 
-          let sku = ""
-          let variant = ""
+          let sku = "";
+          let variant = "";
           if (item.variant && item.variant.sku) {
-            let skuParts = item.variant.sku.split("-")
-            skuParts.pop()
+            let skuParts = item.variant.sku.split("-");
+            skuParts.pop();
 
-            sku = skuParts.join("-")
+            sku = skuParts.join("-");
 
-            variant = item.variant.sku
+            variant = item.variant.sku;
           }
 
           const product = await this.productService_.retrieve(
             item.variant.product_id,
             { relations: ["collection", "type"] }
-          )
+          );
 
           const toReturn = {
             name,
@@ -154,30 +154,30 @@ class SegmentService extends BaseService {
             type: product.type?.value,
             sku,
             quantity: item.quantity,
-          }
+          };
 
           // If we are building a refund order include details about
           // the reason for return
           if (item.reason) {
-            toReturn.reason_id = item.reason.id
-            toReturn.reason_value = item.reason.value
+            toReturn.reason_id = item.reason.id;
+            toReturn.reason_value = item.reason.value;
           }
 
           if (item.note) {
-            toReturn.note = item.note
+            toReturn.note = item.note;
           }
 
-          return toReturn
+          return toReturn;
         })
       ),
-    }
+    };
 
-    return orderData
+    return orderData;
   }
 
   rounded_(v) {
-    return Number(Math.round(v + "e2") + "e-2")
+    return Number(Math.round(v + "e2") + "e-2");
   }
 }
 
-export default SegmentService
+export default SegmentService;

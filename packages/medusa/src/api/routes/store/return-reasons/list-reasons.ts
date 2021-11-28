@@ -1,8 +1,8 @@
 import {
   defaultStoreReturnReasonFields,
   defaultStoreReturnReasonRelations,
-} from "."
-import ReturnReasonService from "../../../../services/return-reason"
+} from ".";
+import ReturnReasonService from "../../../../services/return-reason";
 
 /**
  * @oas [get] /return-reasons
@@ -26,14 +26,14 @@ import ReturnReasonService from "../../../../services/return-reason"
 export default async (req, res) => {
   const returnReasonService: ReturnReasonService = req.scope.resolve(
     "returnReasonService"
-  )
+  );
 
-  const query = { parent_return_reason_id: null }
+  const query = { parent_return_reason_id: null };
 
   const return_reasons = await returnReasonService.list(query, {
     select: defaultStoreReturnReasonFields,
     relations: defaultStoreReturnReasonRelations,
-  })
+  });
 
-  res.status(200).json({ return_reasons })
-}
+  res.status(200).json({ return_reasons });
+};

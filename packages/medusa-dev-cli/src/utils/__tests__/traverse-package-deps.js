@@ -1,6 +1,6 @@
-const path = require(`path`)
+const path = require(`path`);
 
-const { traversePackagesDeps } = require(`../traverse-package-deps`)
+const { traversePackagesDeps } = require(`../traverse-package-deps`);
 
 jest.doMock(
   path.join(...`<monorepo-path>/packages/package-a/package.json`.split(`/`)),
@@ -10,10 +10,10 @@ jest.doMock(
         "unrelated-package": `*`,
         "package-a-dep1": `*`,
       },
-    }
+    };
   },
   { virtual: true }
-)
+);
 
 jest.doMock(
   path.join(
@@ -24,10 +24,10 @@ jest.doMock(
       dependencies: {
         "package-a-dep1-dep1": `*`,
       },
-    }
+    };
   },
   { virtual: true }
-)
+);
 
 jest.doMock(
   path.join(
@@ -36,10 +36,10 @@ jest.doMock(
   () => {
     return {
       dependencies: {},
-    }
+    };
   },
   { virtual: true }
-)
+);
 
 describe(`traversePackageDeps`, () => {
   it(`handles deep dependency chains`, () => {
@@ -52,17 +52,17 @@ describe(`traversePackageDeps`, () => {
         `package-a-dep1-dep1`,
         `package-not-used`,
       ],
-    })
+    });
 
     expect(seenPackages).toEqual([
       `package-a`,
       `package-a-dep1`,
       `package-a-dep1-dep1`,
-    ])
+    ]);
 
     expect(depTree).toEqual({
       "package-a-dep1": new Set([`package-a`]),
       "package-a-dep1-dep1": new Set([`package-a-dep1`]),
-    })
-  })
-})
+    });
+  });
+});

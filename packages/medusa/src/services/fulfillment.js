@@ -1,5 +1,5 @@
-import { BaseService } from "medusa-interfaces"
-import { MedusaError } from "medusa-core-utils"
+import { BaseService } from "medusa-interfaces";
+import { MedusaError } from "medusa-core-utils";
 
 /**
  * Handles Fulfillments
@@ -15,33 +15,33 @@ class FulfillmentService extends BaseService {
     lineItemService,
     fulfillmentProviderService,
   }) {
-    super()
+    super();
 
     /** @private @const {EntityManager} */
-    this.manager_ = manager
+    this.manager_ = manager;
 
     /** @private @const {TotalsService} */
-    this.totalsService_ = totalsService
+    this.totalsService_ = totalsService;
 
     /** @private @const {FulfillmentRepository} */
-    this.fulfillmentRepository_ = fulfillmentRepository
+    this.fulfillmentRepository_ = fulfillmentRepository;
 
     /** @private @const {TrackingLinkRepository} */
-    this.trackingLinkRepository_ = trackingLinkRepository
+    this.trackingLinkRepository_ = trackingLinkRepository;
 
     /** @private @const {ShippingProfileService} */
-    this.shippingProfileService_ = shippingProfileService
+    this.shippingProfileService_ = shippingProfileService;
 
     /** @private @const {LineItemService} */
-    this.lineItemService_ = lineItemService
+    this.lineItemService_ = lineItemService;
 
     /** @private @const {FulfillmentProviderService} */
-    this.fulfillmentProviderService_ = fulfillmentProviderService
+    this.fulfillmentProviderService_ = fulfillmentProviderService;
   }
 
   withTransaction(transactionManager) {
     if (!transactionManager) {
-      return this
+      return this;
     }
 
     const cloned = new FulfillmentService({
@@ -52,33 +52,33 @@ class FulfillmentService extends BaseService {
       shippingProfileService: this.shippingProfileService_,
       lineItemService: this.lineItemService_,
       fulfillmentProviderService: this.fulfillmentProviderService_,
-    })
+    });
 
-    cloned.transactionManager_ = transactionManager
+    cloned.transactionManager_ = transactionManager;
 
-    return cloned
+    return cloned;
   }
 
   partitionItems_(shippingMethods, items) {
-    const partitioned = []
+    const partitioned = [];
     // partition order items to their dedicated shipping method
     for (const method of shippingMethods) {
-      const temp = { shipping_method: method }
+      const temp = { shipping_method: method };
 
       // for each method find the items in the order, that are associated
       // with the profile on the current shipping method
       if (shippingMethods.length === 1) {
-        temp.items = items
+        temp.items = items;
       } else {
-        const methodProfile = method.shipping_option.profile_id
+        const methodProfile = method.shipping_option.profile_id;
 
         temp.items = items.filter(({ variant }) => {
-          variant.product.profile_id === methodProfile
-        })
+          variant.product.profile_id === methodProfile;
+        });
       }
-      partitioned.push(temp)
+      partitioned.push(temp);
     }
-    return partitioned
+    return partitioned;
   }
 
   /**
@@ -94,12 +94,12 @@ class FulfillmentService extends BaseService {
   async getFulfillmentItems_(order, items, transformer) {
     const toReturn = await Promise.all(
       items.map(async ({ item_id, quantity }) => {
-        const item = order.items.find((i) => i.id === item_id)
-        return transformer(item, quantity)
+        const item = order.items.find((i) => i.id === item_id);
+        return transformer(item, quantity);
       })
-    )
+    );
 
-    return toReturn.filter((i) => !!i)
+    return toReturn.filter((i) => !!i);
   }
 
   /**
@@ -118,19 +118,19 @@ class FulfillmentService extends BaseService {
       // This will in most cases be called by a webhook so to ensure that
       // things go through smoothly in instances where extra items outside
       // of Medusa are added we allow unknown items
-      return null
+      return null;
     }
 
     if (quantity > item.quantity - item.fulfilled_quantity) {
       throw new MedusaError(
         MedusaError.Types.NOT_ALLOWED,
         "Cannot fulfill more items than have been purchased"
-      )
+      );
     }
     return {
       ...item,
       quantity,
-    }
+    };
   }
 
   /**
@@ -142,20 +142,20 @@ class FulfillmentService extends BaseService {
   async retrieve(id, config = {}) {
     const fulfillmentRepository = this.manager_.getCustomRepository(
       this.fulfillmentRepository_
-    )
+    );
 
-    const validatedId = this.validateId_(id)
-    const query = this.buildQuery_({ id: validatedId }, config)
+    const validatedId = this.validateId_(id);
+    const query = this.buildQuery_({ id: validatedId }, config);
 
-    const fulfillment = await fulfillmentRepository.findOne(query)
+    const fulfillment = await fulfillmentRepository.findOne(query);
 
     if (!fulfillment) {
       throw new MedusaError(
         MedusaError.Types.NOT_FOUND,
         `Fulfillment with id: ${id} was not found`
-      )
+      );
     }
-    return fulfillment
+    return fulfillment;
   }
 
   /**
@@ -172,18 +172,18 @@ class FulfillmentService extends BaseService {
     return this.atomicPhase_(async (manager) => {
       const fulfillmentRepository = manager.getCustomRepository(
         this.fulfillmentRepository_
-      )
+      );
 
       const lineItems = await this.getFulfillmentItems_(
         order,
         itemsToFulfill,
         this.validateFulfillmentLineItem_
-      )
+      );
 
-      const { shipping_methods } = order
+      const { shipping_methods } = order;
 
       // partition order items to their dedicated shipping method
-      const fulfillments = this.partitionItems_(shipping_methods, lineItems)
+      const fulfillments = this.partitionItems_(shipping_methods, lineItems);
 
       const created = await Promise.all(
         fulfillments.map(async ({ shipping_method, items }) => {
@@ -192,9 +192,9 @@ class FulfillmentService extends BaseService {
             provider_id: shipping_method.shipping_option.provider_id,
             items: items.map((i) => ({ item_id: i.id, quantity: i.quantity })),
             data: {},
-          })
+          });
 
-          const result = await fulfillmentRepository.save(ful)
+          const result = await fulfillmentRepository.save(ful);
 
           result.data =
             await this.fulfillmentProviderService_.createFulfillment(
@@ -202,14 +202,14 @@ class FulfillmentService extends BaseService {
               items,
               { ...order },
               { ...result }
-            )
+            );
 
-          return fulfillmentRepository.save(result)
+          return fulfillmentRepository.save(result);
         })
-      )
+      );
 
-      return created
-    })
+      return created;
+    });
   }
 
   /**
@@ -222,41 +222,41 @@ class FulfillmentService extends BaseService {
    */
   cancelFulfillment(fulfillmentOrId) {
     return this.atomicPhase_(async (manager) => {
-      let id = fulfillmentOrId
+      let id = fulfillmentOrId;
       if (typeof fulfillmentOrId === "object") {
-        id = fulfillmentOrId.id
+        id = fulfillmentOrId.id;
       }
       const fulfillment = await this.retrieve(id, {
         relations: ["items", "claim_order", "swap"],
-      })
+      });
 
       if (fulfillment.shipped_at) {
         throw new MedusaError(
           MedusaError.Types.NOT_ALLOWED,
           `The fulfillment has already been shipped. Shipped fulfillments cannot be canceled`
-        )
+        );
       }
 
-      await this.fulfillmentProviderService_.cancelFulfillment(fulfillment)
+      await this.fulfillmentProviderService_.cancelFulfillment(fulfillment);
 
-      fulfillment.canceled_at = new Date()
+      fulfillment.canceled_at = new Date();
 
-      const lineItemService = this.lineItemService_.withTransaction(manager)
+      const lineItemService = this.lineItemService_.withTransaction(manager);
 
       for (const fItem of fulfillment.items) {
-        const item = await lineItemService.retrieve(fItem.item_id)
-        const fulfilledQuantity = item.fulfilled_quantity - fItem.quantity
+        const item = await lineItemService.retrieve(fItem.item_id);
+        const fulfilledQuantity = item.fulfilled_quantity - fItem.quantity;
         await lineItemService.update(item.id, {
           fulfilled_quantity: fulfilledQuantity,
-        })
+        });
       }
 
       const fulfillmentRepo = manager.getCustomRepository(
         this.fulfillmentRepository_
-      )
-      const canceled = await fulfillmentRepo.save(fulfillment)
-      return canceled
-    })
+      );
+      const canceled = await fulfillmentRepo.save(fulfillment);
+      return canceled;
+    });
   }
 
   /**
@@ -275,47 +275,47 @@ class FulfillmentService extends BaseService {
       no_notification: undefined,
     }
   ) {
-    const { metadata, no_notification } = config
+    const { metadata, no_notification } = config;
 
     return this.atomicPhase_(async (manager) => {
       const fulfillmentRepository = manager.getCustomRepository(
         this.fulfillmentRepository_
-      )
+      );
       const trackingLinkRepo = manager.getCustomRepository(
         this.trackingLinkRepository_
-      )
+      );
 
       const fulfillment = await this.retrieve(fulfillmentId, {
         relations: ["items"],
-      })
+      });
 
       if (fulfillment.canceled_at) {
         throw new MedusaError(
           MedusaError.Types.NOT_ALLOWED,
           "Fulfillment has been canceled"
-        )
+        );
       }
 
-      const now = new Date()
-      fulfillment.shipped_at = now
+      const now = new Date();
+      fulfillment.shipped_at = now;
 
       fulfillment.tracking_links = trackingLinks.map((tl) =>
         trackingLinkRepo.create(tl)
-      )
+      );
 
       if (no_notification) {
-        fulfillment.no_notification = no_notification
+        fulfillment.no_notification = no_notification;
       }
 
       fulfillment.metadata = {
         ...fulfillment.metadata,
         ...metadata,
-      }
+      };
 
-      const updated = fulfillmentRepository.save(fulfillment)
-      return updated
-    })
+      const updated = fulfillmentRepository.save(fulfillment);
+      return updated;
+    });
   }
 }
 
-export default FulfillmentService
+export default FulfillmentService;

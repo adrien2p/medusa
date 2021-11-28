@@ -1,7 +1,7 @@
-import { IsOptional, IsString } from "class-validator"
-import { defaultStoreCartFields, defaultStoreCartRelations } from "."
-import { CartService } from "../../../../services"
-import { validator } from "../../../../utils/validator"
+import { IsObject, IsOptional, IsString } from "class-validator";
+import { defaultStoreCartFields, defaultStoreCartRelations } from ".";
+import { CartService } from "../../../../services";
+import { validator } from "../../../../utils/validator";
 
 /**
  * @oas [post] /store/carts/{id}
@@ -36,28 +36,29 @@ import { validator } from "../../../../utils/validator"
  *               $ref: "#/components/schemas/cart"
  */
 export default async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params;
 
   const validated = await validator(
     StorePostCartsCartPaymentMethodUpdateReq,
     req.body
-  )
+  );
 
-  const cartService: CartService = req.scope.resolve("cartService")
+  const cartService: CartService = req.scope.resolve("cartService");
 
-  let cart = await cartService.setPaymentMethod(id, validated)
+  let cart = await cartService.setPaymentMethod(id, validated);
   cart = await cartService.retrieve(id, {
     select: defaultStoreCartFields,
     relations: defaultStoreCartRelations,
-  })
+  });
 
-  res.status(200).json({ cart })
-}
+  res.status(200).json({ cart });
+};
 
 export class StorePostCartsCartPaymentMethodUpdateReq {
   @IsString()
-  provider_id: string
+  provider_id: string;
 
+  @IsObject()
   @IsOptional()
-  data?: object
+  data?: object = {};
 }

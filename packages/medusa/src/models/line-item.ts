@@ -9,15 +9,15 @@ import {
   PrimaryColumn,
   ManyToOne,
   JoinColumn,
-} from "typeorm"
-import { ulid } from "ulid"
-import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column"
+} from "typeorm";
+import { ulid } from "ulid";
+import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column";
 
-import { Swap } from "./swap"
-import { Cart } from "./cart"
-import { Order } from "./order"
-import { ClaimOrder } from "./claim-order"
-import { ProductVariant } from "./product-variant"
+import { Swap } from "./swap";
+import { Cart } from "./cart";
+import { Order } from "./order";
+import { ClaimOrder } from "./claim-order";
+import { ProductVariant } from "./product-variant";
 
 @Check(`"fulfilled_quantity" <= "quantity"`)
 @Check(`"shipped_quantity" <= "fulfilled_quantity"`)
@@ -26,112 +26,100 @@ import { ProductVariant } from "./product-variant"
 @Entity()
 export class LineItem {
   @PrimaryColumn()
-  id: string
+  id: string;
 
   @Index()
   @Column({ nullable: true })
-  cart_id: string
+  cart_id: string;
 
-  @ManyToOne(
-    () => Cart,
-    cart => cart.items
-  )
+  @ManyToOne(() => Cart, (cart) => cart.items)
   @JoinColumn({ name: "cart_id" })
-  cart: Cart
+  cart: Cart;
 
   @Index()
   @Column({ nullable: true })
-  order_id: string
+  order_id: string;
 
-  @ManyToOne(
-    () => Order,
-    order => order.items
-  )
+  @ManyToOne(() => Order, (order) => order.items)
   @JoinColumn({ name: "order_id" })
-  order: Order
+  order: Order;
 
   @Index()
   @Column({ nullable: true })
-  swap_id: string
+  swap_id: string;
 
-  @ManyToOne(
-    () => Swap,
-    swap => swap.additional_items
-  )
+  @ManyToOne(() => Swap, (swap) => swap.additional_items)
   @JoinColumn({ name: "swap_id" })
-  swap: Swap
+  swap: Swap;
 
   @Index()
   @Column({ nullable: true })
-  claim_order_id: string
+  claim_order_id: string;
 
-  @ManyToOne(
-    () => ClaimOrder,
-    co => co.additional_items
-  )
+  @ManyToOne(() => ClaimOrder, (co) => co.additional_items)
   @JoinColumn({ name: "claim_order_id" })
-  claim_order: ClaimOrder
+  claim_order: ClaimOrder;
 
   @Column()
-  title: string
+  title: string;
 
   @Column({ nullable: true })
-  description: string
+  description: string;
 
   @Column({ nullable: true })
-  thumbnail: string
+  thumbnail: string;
 
   @Column({ default: false })
-  is_giftcard: boolean
+  is_giftcard: boolean;
 
   @Column({ default: true })
-  should_merge: boolean
+  should_merge: boolean;
 
   @Column({ default: true })
-  allow_discounts: boolean
+  allow_discounts: boolean;
 
   @Column({ nullable: true })
-  has_shipping: boolean
+  has_shipping: boolean;
 
   @Column({ type: "int" })
-  unit_price: number
+  unit_price: number;
 
   @Index()
   @Column({ nullable: true })
-  variant_id: string
+  variant_id: string;
 
   @ManyToOne(() => ProductVariant, { eager: true })
   @JoinColumn({ name: "variant_id" })
-  variant: ProductVariant
+  variant: ProductVariant;
 
   @Column({ type: "int" })
-  quantity: number
+  quantity: number;
 
   @Column({ nullable: true, type: "int" })
-  fulfilled_quantity: number
+  fulfilled_quantity: number;
 
   @Column({ nullable: true, type: "int" })
-  returned_quantity: number
+  returned_quantity: number;
 
   @Column({ nullable: true, type: "int" })
-  shipped_quantity: number
+  shipped_quantity: number;
 
   @CreateDateColumn({ type: resolveDbType("timestamptz") })
-  created_at: Date
+  created_at: Date;
 
   @UpdateDateColumn({ type: resolveDbType("timestamptz") })
-  updated_at: Date
+  updated_at: Date;
 
   @DbAwareColumn({ type: "jsonb", nullable: true })
-  metadata: any
+  metadata: any;
 
-  refundable: number | null
+  refundable: number | null;
 
   @BeforeInsert()
   private beforeInsert() {
-    if (this.id) return
-    const id = ulid()
-    this.id = `item_${id}`
+    if (this.id) return;
+    const id = ulid();
+    this.id = `item_${id}`;
   }
 }
 

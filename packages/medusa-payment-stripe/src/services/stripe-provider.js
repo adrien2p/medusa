@@ -1,12 +1,12 @@
-import _ from "lodash"
-import Stripe from "stripe"
-import { PaymentService } from "medusa-interfaces"
+import _ from "lodash";
+import Stripe from "stripe";
+import { PaymentService } from "medusa-interfaces";
 
 class StripeProviderService extends PaymentService {
-  static identifier = "stripe"
+  static identifier = "stripe";
 
   constructor({ customerService, totalsService, regionService }, options) {
-    super()
+    super();
 
     /**
      * Required Stripe options:
@@ -17,19 +17,19 @@ class StripeProviderService extends PaymentService {
      *    capture: true
      *  }
      */
-    this.options_ = options
+    this.options_ = options;
 
     /** @private @const {Stripe} */
-    this.stripe_ = Stripe(options.api_key)
+    this.stripe_ = Stripe(options.api_key);
 
     /** @private @const {CustomerService} */
-    this.customerService_ = customerService
+    this.customerService_ = customerService;
 
     /** @private @const {RegionService} */
-    this.regionService_ = regionService
+    this.regionService_ = regionService;
 
     /** @private @const {TotalsService} */
-    this.totalsService_ = totalsService
+    this.totalsService_ = totalsService;
   }
 
   /**
@@ -39,40 +39,40 @@ class StripeProviderService extends PaymentService {
    * @returns {string} the status of the payment intent
    */
   async getStatus(paymentData) {
-    const { id } = paymentData
-    const paymentIntent = await this.stripe_.paymentIntents.retrieve(id)
+    const { id } = paymentData;
+    const paymentIntent = await this.stripe_.paymentIntents.retrieve(id);
 
-    let status = "pending"
+    let status = "pending";
 
     if (paymentIntent.status === "requires_payment_method") {
-      return status
+      return status;
     }
 
     if (paymentIntent.status === "requires_confirmation") {
-      return status
+      return status;
     }
 
     if (paymentIntent.status === "processing") {
-      return status
+      return status;
     }
 
     if (paymentIntent.status === "requires_action") {
-      status = "requires_more"
+      status = "requires_more";
     }
 
     if (paymentIntent.status === "canceled") {
-      status = "canceled"
+      status = "canceled";
     }
 
     if (paymentIntent.status === "requires_capture") {
-      status = "authorized"
+      status = "authorized";
     }
 
     if (paymentIntent.status === "succeeded") {
-      status = "authorized"
+      status = "authorized";
     }
 
-    return status
+    return status;
   }
 
   /**
@@ -85,12 +85,12 @@ class StripeProviderService extends PaymentService {
       const methods = await this.stripe_.paymentMethods.list({
         customer: customer.metadata.stripe_id,
         type: "card",
-      })
+      });
 
-      return methods.data
+      return methods.data;
     }
 
-    return Promise.resolve([])
+    return Promise.resolve([]);
   }
 
   /**
@@ -100,9 +100,9 @@ class StripeProviderService extends PaymentService {
    */
   async retrieveCustomer(customerId) {
     if (!customerId) {
-      return Promise.resolve()
+      return Promise.resolve();
     }
-    return this.stripe_.customers.retrieve(customerId)
+    return this.stripe_.customers.retrieve(customerId);
   }
 
   /**
@@ -114,17 +114,17 @@ class StripeProviderService extends PaymentService {
     try {
       const stripeCustomer = await this.stripe_.customers.create({
         email: customer.email,
-      })
+      });
 
       if (customer.id) {
         await this.customerService_.update(customer.id, {
           metadata: { stripe_id: stripeCustomer.id },
-        })
+        });
       }
 
-      return stripeCustomer
+      return stripeCustomer;
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
@@ -135,10 +135,10 @@ class StripeProviderService extends PaymentService {
    * @returns {object} Stripe payment intent
    */
   async createPayment(cart) {
-    const { customer_id, region_id, email } = cart
-    const { currency_code } = await this.regionService_.retrieve(region_id)
+    const { customer_id, region_id, email } = cart;
+    const { currency_code } = await this.regionService_.retrieve(region_id);
 
-    const amount = await this.totalsService_.getTotal(cart)
+    const amount = await this.totalsService_.getTotal(cart);
 
     const intentRequest = {
       amount: Math.round(amount),
@@ -146,34 +146,34 @@ class StripeProviderService extends PaymentService {
       setup_future_usage: "on_session",
       capture_method: this.options_.capture ? "automatic" : "manual",
       metadata: { cart_id: `${cart.id}` },
-    }
+    };
 
     if (customer_id) {
-      const customer = await this.customerService_.retrieve(customer_id)
+      const customer = await this.customerService_.retrieve(customer_id);
 
       if (customer.metadata?.stripe_id) {
-        intentRequest.customer = customer.metadata.stripe_id
+        intentRequest.customer = customer.metadata.stripe_id;
       } else {
         const stripeCustomer = await this.createCustomer({
           email,
           id: customer_id,
-        })
+        });
 
-        intentRequest.customer = stripeCustomer.id
+        intentRequest.customer = stripeCustomer.id;
       }
     } else {
       const stripeCustomer = await this.createCustomer({
         email,
-      })
+      });
 
-      intentRequest.customer = stripeCustomer.id
+      intentRequest.customer = stripeCustomer.id;
     }
 
     const paymentIntent = await this.stripe_.paymentIntents.create(
       intentRequest
-    )
+    );
 
-    return paymentIntent
+    return paymentIntent;
   }
 
   /**
@@ -183,9 +183,9 @@ class StripeProviderService extends PaymentService {
    */
   async retrievePayment(data) {
     try {
-      return this.stripe_.paymentIntents.retrieve(data.id)
+      return this.stripe_.paymentIntents.retrieve(data.id);
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
@@ -196,9 +196,9 @@ class StripeProviderService extends PaymentService {
    */
   async getPaymentData(sessionData) {
     try {
-      return this.stripe_.paymentIntents.retrieve(sessionData.data.id)
+      return this.stripe_.paymentIntents.retrieve(sessionData.data.id);
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
@@ -210,12 +210,12 @@ class StripeProviderService extends PaymentService {
    * @returns {Promise<{ status: string, data: object }>} result with data and status
    */
   async authorizePayment(sessionData, context = {}) {
-    const stat = await this.getStatus(sessionData.data)
+    const stat = await this.getStatus(sessionData.data);
 
     try {
-      return { data: sessionData.data, status: stat }
+      return { data: sessionData.data, status: stat };
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
@@ -223,9 +223,9 @@ class StripeProviderService extends PaymentService {
     try {
       return this.stripe_.paymentIntents.update(sessionData.id, {
         ...update.data,
-      })
+      });
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
@@ -237,35 +237,35 @@ class StripeProviderService extends PaymentService {
    */
   async updatePayment(sessionData, cart) {
     try {
-      const stripeId = cart.customer?.metadata?.stripe_id || undefined
+      const stripeId = cart.customer?.metadata?.stripe_id || undefined;
 
       if (stripeId !== sessionData.customer) {
-        return this.createPayment(cart)
+        return this.createPayment(cart);
       } else {
         if (cart.total && sessionData.amount === Math.round(cart.total)) {
-          return sessionData
+          return sessionData;
         }
 
         return this.stripe_.paymentIntents.update(sessionData.id, {
           amount: Math.round(cart.total),
-        })
+        });
       }
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
   async deletePayment(payment) {
     try {
-      const { id } = payment.data
+      const { id } = payment.data;
       return this.stripe_.paymentIntents.cancel(id).catch((err) => {
         if (err.statusCode === 400) {
-          return
+          return;
         }
-        throw err
-      })
+        throw err;
+      });
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
@@ -279,9 +279,9 @@ class StripeProviderService extends PaymentService {
     try {
       return this.stripe_.paymentIntents.update(paymentIntentId, {
         customer: customerId,
-      })
+      });
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
@@ -291,17 +291,17 @@ class StripeProviderService extends PaymentService {
    * @returns {object} Stripe payment intent
    */
   async capturePayment(payment) {
-    const { id } = payment.data
+    const { id } = payment.data;
     try {
-      const intent = await this.stripe_.paymentIntents.capture(id)
-      return intent
+      const intent = await this.stripe_.paymentIntents.capture(id);
+      return intent;
     } catch (error) {
       if (error.code === "payment_intent_unexpected_state") {
         if (error.payment_intent.status === "succeeded") {
-          return error.payment_intent
+          return error.payment_intent;
         }
       }
-      throw error
+      throw error;
     }
   }
 
@@ -312,16 +312,16 @@ class StripeProviderService extends PaymentService {
    * @returns {string} refunded payment intent
    */
   async refundPayment(payment, amountToRefund) {
-    const { id } = payment.data
+    const { id } = payment.data;
     try {
       await this.stripe_.refunds.create({
         amount: Math.round(amountToRefund),
         payment_intent: id,
-      })
+      });
 
-      return payment.data
+      return payment.data;
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
@@ -331,15 +331,15 @@ class StripeProviderService extends PaymentService {
    * @returns {object} canceled payment intent
    */
   async cancelPayment(payment) {
-    const { id } = payment.data
+    const { id } = payment.data;
     try {
-      return await this.stripe_.paymentIntents.cancel(id)
+      return await this.stripe_.paymentIntents.cancel(id);
     } catch (error) {
       if (error.payment_intent.status === "canceled") {
-        return error.payment_intent
+        return error.payment_intent;
       }
 
-      throw error
+      throw error;
     }
   }
 
@@ -355,8 +355,8 @@ class StripeProviderService extends PaymentService {
       data,
       signature,
       this.options_.webhook_secret
-    )
+    );
   }
 }
 
-export default StripeProviderService
+export default StripeProviderService;

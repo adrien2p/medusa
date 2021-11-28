@@ -1,8 +1,8 @@
-import { IdMap } from "medusa-test-utils"
-import { AddOnModelMock, addOns } from "../../models/__mocks__/add-on"
-import AddOnService from "../add-on"
-import { EventBusServiceMock } from "../__mocks__/event-bus"
-import { ProductServiceMock } from "../__mocks__/product"
+import { IdMap } from "medusa-test-utils";
+import { AddOnModelMock, addOns } from "../../models/__mocks__/add-on";
+import AddOnService from "../add-on";
+import { EventBusServiceMock } from "../__mocks__/event-bus";
+import { ProductServiceMock } from "../__mocks__/product";
 
 describe("AddOnService", () => {
   describe("create", () => {
@@ -10,11 +10,11 @@ describe("AddOnService", () => {
       addOnModel: AddOnModelMock,
       productService: ProductServiceMock,
       eventBusService: EventBusServiceMock,
-    })
+    });
 
     beforeEach(async () => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     it("calls model layer create", async () => {
       await addOnService.create({
@@ -26,9 +26,9 @@ describe("AddOnService", () => {
           },
         ],
         valid_for: [IdMap.getId("test-product")],
-      })
+      });
 
-      expect(AddOnModelMock.create).toBeCalledTimes(1)
+      expect(AddOnModelMock.create).toBeCalledTimes(1);
       expect(AddOnModelMock.create).toBeCalledWith({
         name: "Chili",
         prices: [
@@ -38,50 +38,50 @@ describe("AddOnService", () => {
           },
         ],
         valid_for: [IdMap.getId("test-product")],
-      })
-    })
-  })
+      });
+    });
+  });
 
   describe("retrieve", () => {
-    let result
+    let result;
     beforeAll(async () => {
-      jest.clearAllMocks()
+      jest.clearAllMocks();
       const addOnService = new AddOnService({
         addOnModel: AddOnModelMock,
-      })
-      result = await addOnService.retrieve(IdMap.getId("test-add-on"))
-    })
+      });
+      result = await addOnService.retrieve(IdMap.getId("test-add-on"));
+    });
 
     it("calls model layer retrieve", async () => {
-      expect(AddOnModelMock.findOne).toBeCalledTimes(1)
+      expect(AddOnModelMock.findOne).toBeCalledTimes(1);
       expect(AddOnModelMock.findOne).toBeCalledWith({
         _id: IdMap.getId("test-add-on"),
-      })
-    })
+      });
+    });
 
     it("returns the add-on", () => {
-      expect(result).toEqual(addOns.testAddOn)
-    })
-  })
+      expect(result).toEqual(addOns.testAddOn);
+    });
+  });
 
   describe("update", () => {
     const addOnService = new AddOnService({
       addOnModel: AddOnModelMock,
       productService: ProductServiceMock,
       eventBusService: EventBusServiceMock,
-    })
+    });
 
     beforeEach(async () => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     it("calls model layer create", async () => {
       await addOnService.update(IdMap.getId("test-add-on"), {
         name: "Chili Spice",
         valid_for: [IdMap.getId("test-product"), IdMap.getId("test-product-2")],
-      })
+      });
 
-      expect(AddOnModelMock.updateOne).toBeCalledTimes(1)
+      expect(AddOnModelMock.updateOne).toBeCalledTimes(1);
       expect(AddOnModelMock.updateOne).toBeCalledWith(
         { _id: IdMap.getId("test-add-on") },
         {
@@ -94,41 +94,41 @@ describe("AddOnService", () => {
           },
         },
         { runValidators: true }
-      )
-    })
-  })
+      );
+    });
+  });
 
   describe("retrieveByProduct", () => {
     describe("successful retrieval", () => {
-      let result
+      let result;
       beforeAll(async () => {
-        jest.clearAllMocks()
+        jest.clearAllMocks();
         const addOnService = new AddOnService({
           addOnModel: AddOnModelMock,
           productService: ProductServiceMock,
-        })
+        });
         result = await addOnService.retrieveByProduct(
           IdMap.getId("test-product")
-        )
-      })
+        );
+      });
 
       it("calls ProductService retrieve", async () => {
-        expect(ProductServiceMock.retrieve).toBeCalledTimes(1)
+        expect(ProductServiceMock.retrieve).toBeCalledTimes(1);
         expect(ProductServiceMock.retrieve).toBeCalledWith(
           IdMap.getId("test-product")
-        )
-      })
+        );
+      });
 
       it("calls model layer", () => {
-        expect(AddOnModelMock.find).toBeCalledTimes(1)
+        expect(AddOnModelMock.find).toBeCalledTimes(1);
         expect(AddOnModelMock.find).toBeCalledWith({
           valid_for: IdMap.getId("test-product"),
-        })
-      })
+        });
+      });
 
       it("returns the add-ons", () => {
-        expect(result).toEqual([addOns.testAddOn, addOns.testAddOn2])
-      })
-    })
-  })
-})
+        expect(result).toEqual([addOns.testAddOn, addOns.testAddOn2]);
+      });
+    });
+  });
+});

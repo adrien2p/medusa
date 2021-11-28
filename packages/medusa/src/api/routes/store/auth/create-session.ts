@@ -1,9 +1,9 @@
-import { IsEmail, IsNotEmpty } from "class-validator"
-import jwt from "jsonwebtoken"
-import config from "../../../../config"
-import AuthService from "../../../../services/auth"
-import CustomerService from "../../../../services/customer"
-import { validator } from "../../../../utils/validator"
+import { IsEmail, IsNotEmpty } from "class-validator";
+import jwt from "jsonwebtoken";
+import config from "../../../../config";
+import AuthService from "../../../../services/auth";
+import CustomerService from "../../../../services/customer";
+import { validator } from "../../../../utils/validator";
 
 /**
  * @oas [post] /auth
@@ -26,18 +26,18 @@ import { validator } from "../../../../utils/validator"
  *              $ref: "#/components/schemas/customer"
  */
 export default async (req, res) => {
-  const validated = await validator(StorePostAuthReq, req.body)
+  const validated = await validator(StorePostAuthReq, req.body);
 
-  const authService: AuthService = req.scope.resolve("authService")
-  const customerService: CustomerService = req.scope.resolve("customerService")
+  const authService: AuthService = req.scope.resolve("authService");
+  const customerService: CustomerService = req.scope.resolve("customerService");
 
   const result = await authService.authenticateCustomer(
     validated.email,
     validated.password
-  )
+  );
   if (!result.success) {
-    res.sendStatus(401)
-    return
+    res.sendStatus(401);
+    return;
   }
 
   // Add JWT to cookie
@@ -47,19 +47,19 @@ export default async (req, res) => {
     {
       expiresIn: "30d",
     }
-  )
+  );
 
   const customer = await customerService.retrieve(result.customer?.id || "", {
     relations: ["orders", "orders.items"],
-  })
+  });
 
-  res.json({ customer })
-}
+  res.json({ customer });
+};
 
 export class StorePostAuthReq {
   @IsEmail()
-  email: string
+  email: string;
 
   @IsNotEmpty()
-  password: string
+  password: string;
 }

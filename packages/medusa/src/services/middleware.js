@@ -1,24 +1,24 @@
-import { MedusaError } from "medusa-core-utils"
+import { MedusaError } from "medusa-core-utils";
 
 /**
  * Orchestrates dynamic middleware registered through the Medusa Middleware API
  */
 class MiddlewareService {
   constructor(container) {
-    this.postAuthentication_ = []
-    this.preAuthentication_ = []
-    this.preCartCreation_ = []
-    this.routers = {}
+    this.postAuthentication_ = [];
+    this.preAuthentication_ = [];
+    this.preCartCreation_ = [];
+    this.routers = {};
   }
 
   addRouter(path, router) {
-    const existing = this.routers[path] || []
-    this.routers[path] = [...existing, router]
+    const existing = this.routers[path] || [];
+    this.routers[path] = [...existing, router];
   }
 
   getRouters(path) {
-    const routers = this.routers[path] || []
-    return routers
+    const routers = this.routers[path] || [];
+    return routers;
   }
 
   /**
@@ -30,7 +30,7 @@ class MiddlewareService {
       throw new MedusaError(
         MedusaError.Types.NOT_ALLOWED,
         "Middleware must be a function"
-      )
+      );
     }
   }
 
@@ -43,11 +43,11 @@ class MiddlewareService {
    * @return {void}
    */
   addPostAuthentication(middleware, options) {
-    this.validateMiddleware_(middleware)
+    this.validateMiddleware_(middleware);
     this.postAuthentication_.push({
       middleware,
       options: options || {},
-    })
+    });
   }
 
   /**
@@ -59,11 +59,11 @@ class MiddlewareService {
    * @return {void}
    */
   addPreAuthentication(middleware, options) {
-    this.validateMiddleware_(middleware)
+    this.validateMiddleware_(middleware);
     this.preAuthentication_.push({
       middleware,
       options: options || {},
-    })
+    });
   }
 
   /**
@@ -73,8 +73,8 @@ class MiddlewareService {
    * @return {void}
    */
   addPreCartCreation(middleware) {
-    this.validateMiddleware_(middleware)
-    this.preCartCreation_.push(middleware)
+    this.validateMiddleware_(middleware);
+    this.preCartCreation_.push(middleware);
   }
 
   /**
@@ -84,7 +84,7 @@ class MiddlewareService {
    */
   usePostAuthentication(app) {
     for (const object of this.postAuthentication_) {
-      app.use(object.middleware(object.options))
+      app.use(object.middleware(object.options));
     }
   }
 
@@ -95,13 +95,13 @@ class MiddlewareService {
    */
   usePreAuthentication(app) {
     for (const object of this.preAuthentication_) {
-      app.use(object.middleware(object.options))
+      app.use(object.middleware(object.options));
     }
   }
 
   usePreCartCreation() {
-    return this.preCartCreation_
+    return this.preCartCreation_;
   }
 }
 
-export default MiddlewareService
+export default MiddlewareService;

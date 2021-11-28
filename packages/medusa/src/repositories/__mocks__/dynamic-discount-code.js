@@ -1,4 +1,4 @@
-import { IdMap } from "medusa-test-utils"
+import { IdMap } from "medusa-test-utils";
 
 export const dynamicDiscounts = {
   dynamicOff: {
@@ -8,18 +8,18 @@ export const dynamicDiscounts = {
     disabled: false,
     usage_count: 0,
   },
-}
+};
 
 export const DynamicDiscountCodeModelMock = {
   create: jest.fn().mockReturnValue(Promise.resolve()),
   updateOne: jest.fn().mockImplementation((query, update) => {
-    return Promise.resolve()
+    return Promise.resolve();
   }),
   deleteOne: jest.fn().mockReturnValue(Promise.resolve()),
-  findOne: jest.fn().mockImplementation(query => {
+  findOne: jest.fn().mockImplementation((query) => {
     if (query.code === "DYNAMICOFF") {
-      return Promise.resolve(dynamicDiscounts.dynamicOff)
+      return Promise.resolve(dynamicDiscounts.dynamicOff);
     }
-    return Promise.resolve(undefined)
+    return Promise.resolve(undefined);
   }),
-}
+};

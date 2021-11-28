@@ -1,10 +1,10 @@
-import { MedusaError } from "medusa-core-utils"
+import { MedusaError } from "medusa-core-utils";
 import {
   CartService,
   IdempotencyKeyService,
   OrderService,
   SwapService,
-} from "../../../../services"
+} from "../../../../services";
 
 /**
  * @oas [post] /carts/{id}/complete
@@ -40,37 +40,37 @@ import {
  *                  $ref: "#/components/schemas/cart"
  */
 export default async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params;
 
   const idempotencyKeyService: IdempotencyKeyService = req.scope.resolve(
     "idempotencyKeyService"
-  )
+  );
 
-  const headerKey = req.get("Idempotency-Key") || ""
+  const headerKey = req.get("Idempotency-Key") || "";
 
-  let idempotencyKey
+  let idempotencyKey;
   try {
     idempotencyKey = await idempotencyKeyService.initializeRequest(
       headerKey,
       req.method,
       req.params,
       req.path
-    )
+    );
   } catch (error) {
-    console.log(error)
-    res.status(409).send("Failed to create idempotency key")
-    return
+    console.log(error);
+    res.status(409).send("Failed to create idempotency key");
+    return;
   }
 
-  res.setHeader("Access-Control-Expose-Headers", "Idempotency-Key")
-  res.setHeader("Idempotency-Key", idempotencyKey.idempotency_key)
+  res.setHeader("Access-Control-Expose-Headers", "Idempotency-Key");
+  res.setHeader("Idempotency-Key", idempotencyKey.idempotency_key);
 
-  const cartService: CartService = req.scope.resolve("cartService")
-  const orderService: OrderService = req.scope.resolve("orderService")
-  const swapService: SwapService = req.scope.resolve("swapService")
+  const cartService: CartService = req.scope.resolve("cartService");
+  const orderService: OrderService = req.scope.resolve("orderService");
+  const swapService: SwapService = req.scope.resolve("swapService");
 
-  let inProgress = true
-  let err = false
+  let inProgress = true;
+  let err = false;
 
   while (inProgress) {
     switch (idempotencyKey.recovery_point) {
@@ -78,7 +78,7 @@ export default async (req, res) => {
         const { key, error } = await idempotencyKeyService.workStage(
           idempotencyKey.idempotency_key,
           async (manager) => {
-            let cart = await cartService.withTransaction(manager).retrieve(id)
+            let cart = await cartService.withTransaction(manager).retrieve(id);
 
             if (cart.completed_at) {
               return {
@@ -88,7 +88,7 @@ export default async (req, res) => {
                   message: "Cart has already been completed",
                   type: MedusaError.Types.NOT_ALLOWED,
                 },
-              }
+              };
             }
 
             cart = await cartService
@@ -96,7 +96,7 @@ export default async (req, res) => {
               .authorizePayment(id, {
                 ...req.request_context,
                 idempotency_key: idempotencyKey.idempotency_key,
-              })
+              });
 
             if (cart.payment_session) {
               if (
@@ -110,23 +110,23 @@ export default async (req, res) => {
                     payment_status: cart.payment_session.status,
                     type: "cart",
                   },
-                }
+                };
               }
             }
 
             return {
               recovery_point: "payment_authorized",
-            }
+            };
           }
-        )
+        );
 
         if (error) {
-          inProgress = false
-          err = error
+          inProgress = false;
+          err = error;
         } else {
-          idempotencyKey = key
+          idempotencyKey = key;
         }
-        break
+        break;
       }
 
       case "payment_authorized": {
@@ -138,27 +138,27 @@ export default async (req, res) => {
               .retrieve(id, {
                 select: ["total"],
                 relations: ["payment", "payment_sessions"],
-              })
+              });
 
-            let order
+            let order;
 
             // If cart is part of swap, we register swap as complete
             switch (cart.type) {
               case "swap": {
                 try {
-                  const swapId = cart.metadata?.swap_id
+                  const swapId = cart.metadata?.swap_id;
                   let swap = await swapService
                     .withTransaction(manager)
-                    .registerCartCompletion(swapId)
+                    .registerCartCompletion(swapId);
 
                   swap = await swapService
                     .withTransaction(manager)
-                    .retrieve(swap.id, { relations: ["shipping_address"] })
+                    .retrieve(swap.id, { relations: ["shipping_address"] });
 
                   return {
                     response_code: 200,
                     response_body: { data: swap, type: "swap" },
-                  }
+                  };
                 } catch (error) {
                   if (
                     error &&
@@ -171,9 +171,9 @@ export default async (req, res) => {
                         type: error.type,
                         code: error.code,
                       },
-                    }
+                    };
                   } else {
-                    throw error
+                    throw error;
                   }
                 }
               }
@@ -183,13 +183,13 @@ export default async (req, res) => {
                   throw new MedusaError(
                     MedusaError.Types.INVALID_DATA,
                     `Cart payment not authorized`
-                  )
+                  );
                 }
 
                 try {
                   order = await orderService
                     .withTransaction(manager)
-                    .createFromCart(cart.id)
+                    .createFromCart(cart.id);
                 } catch (error) {
                   if (
                     error &&
@@ -206,12 +206,12 @@ export default async (req, res) => {
                           "total",
                         ],
                         relations: ["shipping_address", "items", "payments"],
-                      })
+                      });
 
                     return {
                       response_code: 200,
                       response_body: { data: order, type: "order" },
-                    }
+                    };
                   } else if (
                     error &&
                     error.code === MedusaError.Codes.INSUFFICIENT_INVENTORY
@@ -223,9 +223,9 @@ export default async (req, res) => {
                         type: error.type,
                         code: error.code,
                       },
-                    }
+                    };
                   } else {
-                    throw error
+                    throw error;
                   }
                 }
               }
@@ -242,27 +242,27 @@ export default async (req, res) => {
                   "total",
                 ],
                 relations: ["shipping_address", "items", "payments"],
-              })
+              });
 
             return {
               response_code: 200,
               response_body: { data: order, type: "order" },
-            }
+            };
           }
-        )
+        );
 
         if (error) {
-          inProgress = false
-          err = error
+          inProgress = false;
+          err = error;
         } else {
-          idempotencyKey = key
+          idempotencyKey = key;
         }
-        break
+        break;
       }
 
       case "finished": {
-        inProgress = false
-        break
+        inProgress = false;
+        break;
       }
 
       default:
@@ -273,14 +273,14 @@ export default async (req, res) => {
             response_code: 500,
             response_body: { message: "Unknown recovery point" },
           }
-        )
-        break
+        );
+        break;
     }
   }
 
   if (err) {
-    throw err
+    throw err;
   }
 
-  res.status(idempotencyKey.response_code).json(idempotencyKey.response_body)
-}
+  res.status(idempotencyKey.response_code).json(idempotencyKey.response_body);
+};

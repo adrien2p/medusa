@@ -1,11 +1,11 @@
-import { IdMap } from "medusa-test-utils"
-import { defaultStoreCartFields, defaultStoreCartRelations } from ".."
-import { request } from "../../../../../helpers/test-request"
-import { CartServiceMock } from "../../../../../services/__mocks__/cart"
+import { IdMap } from "medusa-test-utils";
+import { defaultStoreCartFields, defaultStoreCartRelations } from "..";
+import { request } from "../../../../../helpers/test-request";
+import { CartServiceMock } from "../../../../../services/__mocks__/cart";
 
 describe("POST /store/carts/:id", () => {
   describe("successfully updates all fields", () => {
-    let subject
+    let subject;
     const address = {
       first_name: "LeBron",
       last_name: "James",
@@ -16,7 +16,7 @@ describe("POST /store/carts/:id", () => {
       province: "CA",
       postal_code: "91092",
       phone: "+1 (222) 333 4444",
-    }
+    };
 
     beforeAll(async () => {
       subject = await request(
@@ -35,15 +35,15 @@ describe("POST /store/carts/:id", () => {
             ],
           },
         }
-      )
-    })
+      );
+    });
 
     afterAll(() => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     it("Call CartService update", () => {
-      expect(CartServiceMock.update).toHaveBeenCalledTimes(1)
+      expect(CartServiceMock.update).toHaveBeenCalledTimes(1);
       expect(CartServiceMock.update).toHaveBeenCalledWith(
         IdMap.getId("emptyCart"),
         {
@@ -57,48 +57,48 @@ describe("POST /store/carts/:id", () => {
             },
           ],
         }
-      )
-    })
+      );
+    });
 
     it("calls get product from productService", () => {
-      expect(CartServiceMock.retrieve).toHaveBeenCalledTimes(2)
+      expect(CartServiceMock.retrieve).toHaveBeenCalledTimes(2);
       expect(CartServiceMock.retrieve).toHaveBeenCalledWith(
         IdMap.getId("emptyCart"),
         {
           relations: ["payment_sessions", "shipping_methods"],
         }
-      )
+      );
       expect(CartServiceMock.retrieve).toHaveBeenCalledWith(
         IdMap.getId("emptyCart"),
         {
           relations: defaultStoreCartRelations,
           select: defaultStoreCartFields,
         }
-      )
-    })
+      );
+    });
 
     it("returns 200", () => {
-      expect(subject.status).toEqual(200)
-    })
+      expect(subject.status).toEqual(200);
+    });
 
     it("returns cart", () => {
-      expect(subject.body.cart.id).toEqual(IdMap.getId("emptyCart"))
-    })
-  })
+      expect(subject.body.cart.id).toEqual(IdMap.getId("emptyCart"));
+    });
+  });
 
   describe("returns 404 on undefined cart", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
-      subject = await request("POST", `/store/carts/none`)
-    })
+      subject = await request("POST", `/store/carts/none`);
+    });
 
     afterAll(() => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     it("returns 404", () => {
-      expect(subject.status).toEqual(404)
-    })
-  })
-})
+      expect(subject.status).toEqual(404);
+    });
+  });
+});

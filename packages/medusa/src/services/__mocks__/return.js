@@ -1,8 +1,8 @@
-import { IdMap } from "medusa-test-utils"
+import { IdMap } from "medusa-test-utils";
 
 export const ReturnService = {
-  withTransaction: function() {
-    return this
+  withTransaction: function () {
+    return this;
   },
   create: jest.fn(() => Promise.resolve({ id: "return" })),
   fulfill: jest.fn(),
@@ -14,10 +14,10 @@ export const ReturnService = {
     })
   ),
   retrieve: jest.fn(() => Promise.resolve("test-return")),
-}
+};
 
 const mock = jest.fn().mockImplementation(() => {
-  return ReturnService
-})
+  return ReturnService;
+});
 
-export default mock
+export default mock;

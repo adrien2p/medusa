@@ -1,16 +1,17 @@
-import { Type } from "class-transformer"
+import { Type } from "class-transformer";
 import {
   IsArray,
   IsEmail,
+  IsObject,
   IsOptional,
   IsString,
   ValidateNested,
-} from "class-validator"
-import { defaultStoreCartFields, defaultStoreCartRelations } from "."
-import { CartService } from "../../../../services"
-import { AddressPayload } from "../../../../types/common"
-import { IsType } from "../../../../utils/validators/is-type"
-import { validator } from "../../../../utils/validator"
+} from "class-validator";
+import { defaultStoreCartFields, defaultStoreCartRelations } from ".";
+import { CartService } from "../../../../services";
+import { AddressPayload } from "../../../../types/common";
+import { IsType } from "../../../../utils/validators/is-type";
+import { validator } from "../../../../utils/validator";
 
 /**
  * @oas [post] /store/carts/{id}
@@ -80,79 +81,80 @@ import { validator } from "../../../../utils/validator"
  *               $ref: "#/components/schemas/cart"
  */
 export default async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params;
 
-  const validated = await validator(StorePostCartsCartReq, req.body)
+  const validated = await validator(StorePostCartsCartReq, req.body);
 
-  const cartService: CartService = req.scope.resolve("cartService")
+  const cartService: CartService = req.scope.resolve("cartService");
 
   // Update the cart
-  await cartService.update(id, validated)
+  await cartService.update(id, validated);
 
   // If the cart has payment sessions update these
   const updated = await cartService.retrieve(id, {
     relations: ["payment_sessions", "shipping_methods"],
-  })
+  });
 
   if (updated.payment_sessions?.length && !validated.region_id) {
-    await cartService.setPaymentSessions(id)
+    await cartService.setPaymentSessions(id);
   }
 
   const cart = await cartService.retrieve(id, {
     select: defaultStoreCartFields,
     relations: defaultStoreCartRelations,
-  })
+  });
 
-  res.json({ cart })
-}
+  res.json({ cart });
+};
 
 class GiftCard {
   @IsString()
-  code: string
+  code: string;
 }
 
 class Discount {
   @IsString()
-  code: string
+  code: string;
 }
 
 export class StorePostCartsCartReq {
   @IsOptional()
   @IsString()
-  region_id?: string
+  region_id?: string;
 
   @IsOptional()
   @IsString()
-  country_code?: string
+  country_code?: string;
 
   @IsEmail()
   @IsOptional()
-  email?: string
+  email?: string;
 
   @IsOptional()
   @IsType([AddressPayload, String])
-  billing_address?: AddressPayload | string
+  billing_address?: AddressPayload | string = {} as AddressPayload;
 
   @IsOptional()
   @IsType([AddressPayload, String])
-  shipping_address?: AddressPayload | string
+  shipping_address?: AddressPayload | string = {} as AddressPayload;
 
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => GiftCard)
-  gift_cards?: GiftCard[]
+  gift_cards?: GiftCard[] = [];
 
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => Discount)
-  discounts?: Discount[]
+  discounts?: Discount[] = [];
 
   @IsString()
   @IsOptional()
-  customer_id?: string
+  customer_id?: string;
 
+  @IsObject()
   @IsOptional()
-  context?: object
+  context?: object = {};
 }

@@ -1,10 +1,10 @@
-import { IdMap } from "medusa-test-utils"
-import { request } from "../../../../../helpers/test-request"
-import { RegionServiceMock } from "../../../../../services/__mocks__/region"
+import { IdMap } from "medusa-test-utils";
+import { request } from "../../../../../helpers/test-request";
+import { RegionServiceMock } from "../../../../../services/__mocks__/region";
 
 describe("POST /admin/regions", () => {
   describe("successful creation", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
       subject = await request("POST", "/admin/regions", {
@@ -21,15 +21,15 @@ describe("POST /admin/regions", () => {
             userId: IdMap.getId("admin_user"),
           },
         },
-      })
-    })
+      });
+    });
 
     it("returns 200", () => {
-      expect(subject.status).toEqual(200)
-    })
+      expect(subject.status).toEqual(200);
+    });
 
     it("calls service create", () => {
-      expect(RegionServiceMock.create).toHaveBeenCalledTimes(1)
+      expect(RegionServiceMock.create).toHaveBeenCalledTimes(1);
       expect(RegionServiceMock.create).toHaveBeenCalledWith({
         name: "New Region",
         currency_code: "dkk",
@@ -37,7 +37,7 @@ describe("POST /admin/regions", () => {
         tax_rate: 0.3,
         payment_providers: ["default_provider"],
         fulfillment_providers: ["default_provider"],
-      })
-    })
-  })
-})
+      });
+    });
+  });
+});

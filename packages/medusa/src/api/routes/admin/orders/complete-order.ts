@@ -1,4 +1,4 @@
-import { OrderService } from "../../../../services"
+import { OrderService } from "../../../../services";
 
 /**
  * @oas [post] /orders/{id}/complete
@@ -21,15 +21,15 @@ import { OrderService } from "../../../../services"
  *               $ref: "#/components/schemas/order"
  */
 export default async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params;
 
-  const orderService: OrderService = req.scope.resolve("orderService")
+  const orderService: OrderService = req.scope.resolve("orderService");
 
-  await orderService.completeOrder(id)
+  await orderService.completeOrder(id);
 
   const order = await orderService.retrieve(id, {
     relations: ["region", "customer", "swaps"],
-  })
+  });
 
-  res.json({ order })
-}
+  res.json({ order });
+};

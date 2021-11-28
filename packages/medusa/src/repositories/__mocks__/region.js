@@ -1,4 +1,4 @@
-import { IdMap } from "medusa-test-utils"
+import { IdMap } from "medusa-test-utils";
 
 export const regions = {
   testRegion: {
@@ -37,30 +37,30 @@ export const regions = {
     fulfillment_providers: ["sweden_provider"],
     currency_code: "SEK",
   },
-}
+};
 
 export const RegionModelMock = {
   create: jest.fn().mockReturnValue(Promise.resolve()),
   updateOne: jest.fn().mockImplementation((query, update) => {}),
   deleteOne: jest.fn().mockReturnValue(Promise.resolve()),
-  findOne: jest.fn().mockImplementation(query => {
+  findOne: jest.fn().mockImplementation((query) => {
     if (query.countries === "SE") {
-      return Promise.resolve(regions.regionSweden)
+      return Promise.resolve(regions.regionSweden);
     }
 
     switch (query._id) {
       case IdMap.getId("testRegion"):
-        return Promise.resolve(regions.testRegion)
+        return Promise.resolve(regions.testRegion);
       case IdMap.getId("region-france"):
-        return Promise.resolve(regions.regionFrance)
+        return Promise.resolve(regions.regionFrance);
       case IdMap.getId("region-us"):
-        return Promise.resolve(regions.regionUs)
+        return Promise.resolve(regions.regionUs);
       case IdMap.getId("region-de"):
-        return Promise.resolve(regions.regionGermany)
+        return Promise.resolve(regions.regionGermany);
       case IdMap.getId("region-se"):
-        return Promise.resolve(regions.regionSweden)
+        return Promise.resolve(regions.regionSweden);
       default:
-        return Promise.resolve(undefined)
+        return Promise.resolve(undefined);
     }
   }),
-}
+};

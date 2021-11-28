@@ -12,15 +12,15 @@ import {
   OneToMany,
   JoinColumn,
   JoinTable,
-} from "typeorm"
-import { ulid } from "ulid"
-import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column"
+} from "typeorm";
+import { ulid } from "ulid";
+import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column";
 
-import { LineItem } from "./line-item"
-import { ClaimImage } from "./claim-image"
-import { ClaimTag } from "./claim-tag"
-import { ClaimOrder } from "./claim-order"
-import { ProductVariant } from "./product-variant"
+import { LineItem } from "./line-item";
+import { ClaimImage } from "./claim-image";
+import { ClaimTag } from "./claim-tag";
+import { ClaimOrder } from "./claim-order";
+import { ProductVariant } from "./product-variant";
 
 export enum ClaimReason {
   MISSING_ITEM = "missing_item",
@@ -32,50 +32,45 @@ export enum ClaimReason {
 @Entity()
 export class ClaimItem {
   @PrimaryColumn()
-  id: string
+  id: string;
 
-  @OneToMany(
-    () => ClaimImage,
-    ci => ci.claim_item,
-    { cascade: ["insert", "remove"] }
-  )
-  images: ClaimImage[]
+  @OneToMany(() => ClaimImage, (ci) => ci.claim_item, {
+    cascade: ["insert", "remove"],
+  })
+  images: ClaimImage[];
 
   @Index()
   @Column()
-  claim_order_id: string
+  claim_order_id: string;
 
-  @ManyToOne(
-    () => ClaimOrder,
-    co => co.claim_items
-  )
+  @ManyToOne(() => ClaimOrder, (co) => co.claim_items)
   @JoinColumn({ name: "claim_order_id" })
-  claim_order: ClaimOrder
+  claim_order: ClaimOrder;
 
   @Index()
   @Column()
-  item_id: string
+  item_id: string;
 
   @ManyToOne(() => LineItem)
   @JoinColumn({ name: "item_id" })
-  item: LineItem
+  item: LineItem;
 
   @Index()
   @Column()
-  variant_id: string
+  variant_id: string;
 
   @ManyToOne(() => ProductVariant)
   @JoinColumn({ name: "variant_id" })
-  variant: ProductVariant
+  variant: ProductVariant;
 
   @DbAwareColumn({ type: "enum", enum: ClaimReason })
-  reason: ClaimReason
+  reason: ClaimReason;
 
   @Column({ nullable: true })
-  note: string
+  note: string;
 
   @Column({ type: "int" })
-  quantity: number
+  quantity: number;
 
   @ManyToMany(() => ClaimTag, { cascade: ["insert"] })
   @JoinTable({
@@ -89,25 +84,25 @@ export class ClaimItem {
       referencedColumnName: "id",
     },
   })
-  tags: ClaimTag[]
+  tags: ClaimTag[];
 
   @CreateDateColumn({ type: resolveDbType("timestamptz") })
-  created_at: Date
+  created_at: Date;
 
   @UpdateDateColumn({ type: resolveDbType("timestamptz") })
-  updated_at: Date
+  updated_at: Date;
 
   @DeleteDateColumn({ type: resolveDbType("timestamptz") })
-  deleted_at: Date
+  deleted_at: Date;
 
   @DbAwareColumn({ type: "jsonb", nullable: true })
-  metadata: any
+  metadata: any;
 
   @BeforeInsert()
   private beforeInsert() {
-    if (this.id) return
-    const id = ulid()
-    this.id = `citm_${id}`
+    if (this.id) return;
+    const id = ulid();
+    this.id = `citm_${id}`;
   }
 }
 

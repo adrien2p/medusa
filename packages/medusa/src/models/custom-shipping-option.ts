@@ -10,54 +10,54 @@ import {
   PrimaryColumn,
   Unique,
   UpdateDateColumn,
-} from "typeorm"
-import { ulid } from "ulid"
-import { DbAwareColumn, resolveDbType } from "../utils/db-aware-column"
-import { Cart } from "./cart"
-import { ShippingOption } from "./shipping-option"
+} from "typeorm";
+import { ulid } from "ulid";
+import { DbAwareColumn, resolveDbType } from "../utils/db-aware-column";
+import { Cart } from "./cart";
+import { ShippingOption } from "./shipping-option";
 
 @Entity()
 @Unique(["shipping_option_id", "cart_id"])
 export class CustomShippingOption {
   @PrimaryColumn()
-  id: string
+  id: string;
 
   @Column({ type: "int" })
-  price: number
+  price: number;
 
   @Index()
   @Column()
-  shipping_option_id: string
+  shipping_option_id: string;
 
   @ManyToOne(() => ShippingOption)
   @JoinColumn({ name: "shipping_option_id" })
-  shipping_option: ShippingOption
+  shipping_option: ShippingOption;
 
   @Index()
   @Column({ nullable: true })
-  cart_id: string
+  cart_id: string;
 
   @ManyToOne(() => Cart)
   @JoinColumn({ name: "cart_id" })
-  cart: Cart
+  cart: Cart;
 
   @CreateDateColumn({ type: resolveDbType("timestamptz") })
-  created_at: Date
+  created_at: Date;
 
   @UpdateDateColumn({ type: resolveDbType("timestamptz") })
-  updated_at: Date
+  updated_at: Date;
 
   @DeleteDateColumn({ type: resolveDbType("timestamptz") })
-  deleted_at: Date
+  deleted_at: Date;
 
   @DbAwareColumn({ type: "jsonb", nullable: true })
-  metadata: any
+  metadata: any;
 
   @BeforeInsert()
   private beforeInsert() {
-    if (this.id) return
-    const id = ulid()
-    this.id = `cso_${id}`
+    if (this.id) return;
+    const id = ulid();
+    this.id = `cso_${id}`;
   }
 }
 

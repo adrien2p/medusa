@@ -1,77 +1,77 @@
-import { MedusaError } from "medusa-core-utils"
-import { BaseService } from "medusa-interfaces"
+import { MedusaError } from "medusa-core-utils";
+import { BaseService } from "medusa-interfaces";
 
 class ReturnReasonService extends BaseService {
   constructor({ manager, returnReasonRepository }) {
-    super()
+    super();
 
     /** @private @constant {EntityManager} */
-    this.manager_ = manager
+    this.manager_ = manager;
 
     /** @private @constant {ReturnReasonRepository} */
-    this.retReasonRepo_ = returnReasonRepository
+    this.retReasonRepo_ = returnReasonRepository;
   }
 
   withTransaction(manager) {
     if (!manager) {
-      return this
+      return this;
     }
 
     const cloned = new ReturnReasonService({
       manager,
       returnReasonRepository: this.retReasonRepo_,
-    })
+    });
 
-    cloned.transactionManager_ = manager
+    cloned.transactionManager_ = manager;
 
-    return cloned
+    return cloned;
   }
 
   create(data) {
     return this.atomicPhase_(async (manager) => {
-      const rrRepo = manager.getCustomRepository(this.retReasonRepo_)
+      const rrRepo = manager.getCustomRepository(this.retReasonRepo_);
 
       if (data.parent_return_reason_id && data.parent_return_reason_id !== "") {
-        const parentReason = await this.retrieve(data.parent_return_reason_id)
+        const parentReason = await this.retrieve(data.parent_return_reason_id);
 
         if (parentReason.parent_return_reason_id) {
           throw new MedusaError(
             MedusaError.Types.INVALID_DATA,
             "Doubly nested return reasons is not supported"
-          )
+          );
         }
       }
 
-      const created = rrRepo.create(data)
+      const created = rrRepo.create(data);
 
-      const result = await rrRepo.save(created)
-      return result
-    })
+      const result = await rrRepo.save(created);
+      return result;
+    });
   }
 
   update(id, data) {
     return this.atomicPhase_(async (manager) => {
-      const rrRepo = manager.getCustomRepository(this.retReasonRepo_)
-      const reason = await this.retrieve(id)
+      const rrRepo = manager.getCustomRepository(this.retReasonRepo_);
+      const reason = await this.retrieve(id);
 
-      const { description, label, parent_return_reason_id } = data
+      const { description, label, parent_return_reason_id } = data;
 
       if (description) {
-        reason.description = data.description
+        reason.description = data.description;
       }
 
       if (label) {
-        reason.label = data.label
+        reason.label = data.label;
       }
 
       if (parent_return_reason_id) {
-        reason.parent_return_reason_id = parent_return_reason_id
+        reason.parent_return_reason_id = parent_return_reason_id;
       }
 
-      await rrRepo.save(reason)
+      await rrRepo.save(reason);
 
-      return reason
-    })
+      return reason;
+    });
   }
 
   /**
@@ -83,9 +83,9 @@ class ReturnReasonService extends BaseService {
     selector,
     config = { skip: 0, take: 50, order: { created_at: "DESC" } }
   ) {
-    const rrRepo = this.manager_.getCustomRepository(this.retReasonRepo_)
-    const query = this.buildQuery_(selector, config)
-    return rrRepo.find(query)
+    const rrRepo = this.manager_.getCustomRepository(this.retReasonRepo_);
+    const query = this.buildQuery_(selector, config);
+    return rrRepo.find(query);
   }
 
   /**
@@ -95,40 +95,40 @@ class ReturnReasonService extends BaseService {
    * @return {Promise<Order>} the order document
    */
   async retrieve(id, config = {}) {
-    const rrRepo = this.manager_.getCustomRepository(this.retReasonRepo_)
-    const validatedId = this.validateId_(id)
+    const rrRepo = this.manager_.getCustomRepository(this.retReasonRepo_);
+    const validatedId = this.validateId_(id);
 
-    const query = this.buildQuery_({ id: validatedId }, config)
-    const item = await rrRepo.findOne(query)
+    const query = this.buildQuery_({ id: validatedId }, config);
+    const item = await rrRepo.findOne(query);
 
     if (!item) {
       throw new MedusaError(
         MedusaError.Types.NOT_FOUND,
         `Return Reason with id: ${id} was not found.`
-      )
+      );
     }
 
-    return item
+    return item;
   }
 
   async delete(returnReasonId) {
     return this.atomicPhase_(async (manager) => {
-      const rrRepo = manager.getCustomRepository(this.retReasonRepo_)
+      const rrRepo = manager.getCustomRepository(this.retReasonRepo_);
 
       // We include the relation 'return_reason_children' to enable cascading deletes of return reasons if a parent is removed
       const reason = await this.retrieve(returnReasonId, {
         relations: ["return_reason_children"],
-      })
+      });
 
       if (!reason) {
-        return Promise.resolve()
+        return Promise.resolve();
       }
 
-      await rrRepo.softRemove(reason)
+      await rrRepo.softRemove(reason);
 
-      return Promise.resolve()
-    })
+      return Promise.resolve();
+    });
   }
 }
 
-export default ReturnReasonService
+export default ReturnReasonService;

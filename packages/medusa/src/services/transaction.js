@@ -1,14 +1,14 @@
-import { BaseService } from "medusa-interfaces"
-import mongoose from "mongoose"
+import { BaseService } from "medusa-interfaces";
+import mongoose from "mongoose";
 
 class TransactionService extends BaseService {
   constructor() {
-    super()
+    super();
   }
 
   async createSession() {
-    return mongoose.startSession()
+    return mongoose.startSession();
   }
 }
 
-export default TransactionService
+export default TransactionService;

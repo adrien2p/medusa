@@ -1,10 +1,10 @@
-import { AxiosPromise } from "axios"
+import { AxiosPromise } from "axios";
 import {
   StoreCollectionsRes,
   StoreCollectionsListRes,
   StoreGetCollectionsParams,
-} from "@medusajs/medusa"
-import BaseResource from "./base"
+} from "@medusajs/medusa";
+import BaseResource from "./base";
 
 class CollectionsResource extends BaseResource {
   /**
@@ -13,8 +13,8 @@ class CollectionsResource extends BaseResource {
    * @return {AxiosPromise<StoreCollectionsRes>}
    */
   retrieve(id: string): AxiosPromise<StoreCollectionsRes> {
-    const path = `/store/collections/${id}`
-    return this.client.request("GET", path)
+    const path = `/store/collections/${id}`;
+    return this.client.request("GET", path);
   }
 
   /**
@@ -25,18 +25,18 @@ class CollectionsResource extends BaseResource {
   list(
     query?: StoreGetCollectionsParams
   ): AxiosPromise<StoreCollectionsListRes> {
-    let path = `/store/collections`
+    let path = `/store/collections`;
 
     if (query) {
       const queryString = Object.entries(query).map(([key, value]) => {
-        return `${key}=${value}`
-      })
+        return `${key}=${value}`;
+      });
 
-      path = `/store/collections?${queryString.join("&")}`
+      path = `/store/collections?${queryString.join("&")}`;
     }
 
-    return this.client.request("GET", path)
+    return this.client.request("GET", path);
   }
 }
 
-export default CollectionsResource
+export default CollectionsResource;

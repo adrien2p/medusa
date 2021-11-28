@@ -1,8 +1,8 @@
-import { IsOptional, IsString } from "class-validator"
-import { EntityManager } from "typeorm"
-import { defaultStoreCartFields, defaultStoreCartRelations } from "."
-import { CartService } from "../../../../services"
-import { validator } from "../../../../utils/validator"
+import { IsObject, IsOptional, IsString } from "class-validator";
+import { EntityManager } from "typeorm";
+import { defaultStoreCartFields, defaultStoreCartRelations } from ".";
+import { CartService } from "../../../../services";
+import { validator } from "../../../../utils/validator";
 
 /**
  * @oas [post] /carts/{id}/shipping-methods
@@ -26,46 +26,47 @@ import { validator } from "../../../../utils/validator"
  *              $ref: "#/components/schemas/cart"
  */
 export default async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params;
 
   const validated = await validator(
     StorePostCartsCartShippingMethodReq,
     req.body
-  )
+  );
 
-  const manager: EntityManager = req.scope.resolve("manager")
-  const cartService: CartService = req.scope.resolve("cartService")
+  const manager: EntityManager = req.scope.resolve("manager");
+  const cartService: CartService = req.scope.resolve("cartService");
 
   await manager.transaction(async (m) => {
-    const txCartService = cartService.withTransaction(m)
+    const txCartService = cartService.withTransaction(m);
 
     await txCartService.addShippingMethod(
       id,
       validated.option_id,
       validated.data
-    )
+    );
 
     const updated = await txCartService.retrieve(id, {
       relations: ["payment_sessions"],
-    })
+    });
 
     if (updated.payment_sessions?.length) {
-      await txCartService.setPaymentSessions(id)
+      await txCartService.setPaymentSessions(id);
     }
-  })
+  });
 
   const updatedCart = await cartService.retrieve(id, {
     select: defaultStoreCartFields,
     relations: defaultStoreCartRelations,
-  })
+  });
 
-  res.status(200).json({ cart: updatedCart })
-}
+  res.status(200).json({ cart: updatedCart });
+};
 
 export class StorePostCartsCartShippingMethodReq {
   @IsString()
-  option_id: string
+  option_id: string;
 
+  @IsObject()
   @IsOptional()
-  data?: object = {}
+  data?: object = {};
 }

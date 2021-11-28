@@ -14,15 +14,15 @@ import {
   ManyToMany,
   JoinColumn,
   JoinTable,
-} from "typeorm"
-import { ulid } from "ulid"
-import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column"
+} from "typeorm";
+import { ulid } from "ulid";
+import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column";
 
-import { Order } from "./order"
-import { Swap } from "./swap"
-import { ClaimOrder } from "./claim-order"
-import { ReturnItem } from "./return-item"
-import { ShippingMethod } from "./shipping-method"
+import { Order } from "./order";
+import { Swap } from "./swap";
+import { ClaimOrder } from "./claim-order";
+import { ReturnItem } from "./return-item";
+import { ShippingMethod } from "./shipping-method";
 
 export enum ReturnStatus {
   REQUESTED = "requested",
@@ -34,91 +34,79 @@ export enum ReturnStatus {
 @Entity()
 export class Return {
   @PrimaryColumn()
-  id: string
+  id: string;
 
   @DbAwareColumn({
     type: "enum",
     enum: ReturnStatus,
     default: ReturnStatus.REQUESTED,
   })
-  status: ReturnStatus
+  status: ReturnStatus;
 
-  @OneToMany(
-    () => ReturnItem,
-    item => item.return_order,
-    { eager: true, cascade: ["insert"] }
-  )
-  items: ReturnItem[]
+  @OneToMany(() => ReturnItem, (item) => item.return_order, {
+    eager: true,
+    cascade: ["insert"],
+  })
+  items: ReturnItem[];
 
   @Index()
   @Column({ nullable: true })
-  swap_id: string
+  swap_id: string;
 
-  @OneToOne(
-    () => Swap,
-    swap => swap.return_order
-  )
+  @OneToOne(() => Swap, (swap) => swap.return_order)
   @JoinColumn({ name: "swap_id" })
-  swap: Swap
+  swap: Swap;
 
   @Index()
   @Column({ nullable: true })
-  claim_order_id: string
+  claim_order_id: string;
 
-  @OneToOne(
-    () => ClaimOrder,
-    co => co.return_order
-  )
+  @OneToOne(() => ClaimOrder, (co) => co.return_order)
   @JoinColumn({ name: "claim_order_id" })
-  claim_order: ClaimOrder
+  claim_order: ClaimOrder;
 
   @Index()
   @Column({ nullable: true })
-  order_id: string
+  order_id: string;
 
-  @ManyToOne(
-    () => Order,
-    o => o.returns
-  )
+  @ManyToOne(() => Order, (o) => o.returns)
   @JoinColumn({ name: "order_id" })
-  order: Order
+  order: Order;
 
-  @OneToOne(
-    () => ShippingMethod,
-    method => method.return_order,
-    { cascade: true }
-  )
-  shipping_method: ShippingMethod
+  @OneToOne(() => ShippingMethod, (method) => method.return_order, {
+    cascade: true,
+  })
+  shipping_method: ShippingMethod;
 
   @DbAwareColumn({ type: "jsonb", nullable: true })
-  shipping_data: any
+  shipping_data: any;
 
   @Column({ type: "int" })
-  refund_amount: number
+  refund_amount: number;
 
   @Column({ type: resolveDbType("timestamptz"), nullable: true })
-  received_at: Date
+  received_at: Date;
 
   @CreateDateColumn({ type: resolveDbType("timestamptz") })
-  created_at: Date
+  created_at: Date;
 
   @UpdateDateColumn({ type: resolveDbType("timestamptz") })
-  updated_at: Date
+  updated_at: Date;
 
   @Column({ type: "boolean", nullable: true })
-  no_notification: Boolean
+  no_notification: Boolean;
 
   @DbAwareColumn({ type: "jsonb", nullable: true })
-  metadata: any
+  metadata: any;
 
   @Column({ nullable: true })
-  idempotency_key: string
+  idempotency_key: string;
 
   @BeforeInsert()
   private beforeInsert() {
-    if (this.id) return
-    const id = ulid()
-    this.id = `ret_${id}`
+    if (this.id) return;
+    const id = ulid();
+    this.id = `ret_${id}`;
   }
 }
 

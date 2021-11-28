@@ -1,10 +1,10 @@
-jest.unmock("axios")
+jest.unmock("axios");
 
-import BrightpearlService from "../brightpearl"
-import { mockCreateOrder, mockCreateCredit } from "../../utils/brightpearl"
-import MockAdapter from "axios-mock-adapter"
+import BrightpearlService from "../brightpearl";
+import { mockCreateOrder, mockCreateCredit } from "../../utils/brightpearl";
+import MockAdapter from "axios-mock-adapter";
 
-jest.mock("../../utils/brightpearl")
+jest.mock("../../utils/brightpearl");
 
 const order = {
   region: {
@@ -45,7 +45,7 @@ const order = {
     phone: "12345678",
   },
   email: "test@example.com",
-}
+};
 
 const krwOrder = {
   region: {
@@ -86,7 +86,7 @@ const krwOrder = {
     phone: "12345678",
   },
   email: "test@example.com",
-}
+};
 
 const roundingOrder = {
   region: {
@@ -138,23 +138,23 @@ const roundingOrder = {
     phone: "12345678",
   },
   email: "test@example.com",
-}
+};
 
 const OrderService = {
   retrieve: (id) => {
     if (id === "rounding") {
-      return Promise.resolve(roundingOrder)
+      return Promise.resolve(roundingOrder);
     }
-    return Promise.resolve(order)
+    return Promise.resolve(order);
   },
   update: () => {
-    return Promise.resolve()
+    return Promise.resolve();
   },
-}
+};
 
 const TotalsService = {
   getTotal: () => {
-    return Promise.resolve(123)
+    return Promise.resolve(123);
   },
   getLineDiscounts: (o) => {
     if (o.id === "rounding") {
@@ -163,24 +163,24 @@ const TotalsService = {
           item: { id: "rounding-item", quantity: 1 },
           amount: 15800,
         },
-      ]
+      ];
     }
-    return []
+    return [];
   },
   getShippingTotal: (o) => {
     if (o.id === "rounding") {
-      return 0
+      return 0;
     }
-    return 12399
+    return 12399;
   },
   rounded: (value) => {
-    return Math.round(value)
+    return Math.round(value);
     // const decimalPlaces = 4
     // return Number(
     //   Math.round(parseFloat(value + "e" + decimalPlaces)) + "e-" + decimalPlaces
     // )
   },
-}
+};
 
 const OAuthService = {
   retrieveByName: () => {
@@ -188,59 +188,59 @@ const OAuthService = {
       data: {
         access_token: "12345",
       },
-    })
+    });
   },
-}
+};
 
 const RegionService = {
   retrieve: () => {
     return Promise.resolve({
       tax_code: "1234",
-    })
+    });
   },
-}
+};
 
 describe("BrightpearlService", () => {
   describe("getClient", () => {
     it("creates client", async () => {
-      let token = "bad"
+      let token = "bad";
       const oauth = {
         refreshToken: () => {
-          token = "good"
+          token = "good";
           return Promise.resolve({
             data: {
               access_token: "good",
             },
-          })
+          });
         },
         retrieveByName: () => {
           return Promise.resolve({
             data: {
               access_token: token,
             },
-          })
+          });
         },
-      }
+      };
 
-      const bpService = new BrightpearlService({ oauthService: oauth }, {})
-      const client = await bpService.getClient()
+      const bpService = new BrightpearlService({ oauthService: oauth }, {});
+      const client = await bpService.getClient();
 
-      const mockServer = new MockAdapter(client.client)
+      const mockServer = new MockAdapter(client.client);
 
       mockServer.onGet("/success").reply(() => {
-        return [200]
-      })
+        return [200];
+      });
       mockServer.onGet("/fail").reply((req) => {
         if (req.headers.Authorization === "Bearer good") {
-          return [200]
+          return [200];
         }
-        return [401]
-      })
+        return [401];
+      });
 
-      await client.test.fail()
-      await client.test.fail()
-    })
-  })
+      await client.test.fail();
+      await client.test.fail();
+    });
+  });
 
   describe("createSalesOrder", () => {
     const bpService = new BrightpearlService(
@@ -251,12 +251,12 @@ describe("BrightpearlService", () => {
         regionService: RegionService,
       },
       { account: "test" }
-    )
+    );
 
     it("successfully builds sales order", async () => {
-      jest.clearAllMocks()
+      jest.clearAllMocks();
 
-      await bpService.createSalesOrder(order)
+      await bpService.createSalesOrder(order);
 
       expect(mockCreateOrder).toHaveBeenCalledWith({
         currency: { code: "DKK" },
@@ -308,9 +308,9 @@ describe("BrightpearlService", () => {
             nominalCode: "4040",
           },
         ],
-      })
-    })
-  })
+      });
+    });
+  });
 
   describe("rounding", () => {
     const bpService = new BrightpearlService(
@@ -321,13 +321,13 @@ describe("BrightpearlService", () => {
         regionService: RegionService,
       },
       { account: "test" }
-    )
+    );
 
     it("rounds correctly", async () => {
-      jest.clearAllMocks()
-      await bpService.createSalesOrder("rounding")
+      jest.clearAllMocks();
+      await bpService.createSalesOrder("rounding");
 
-      expect(mockCreateOrder).toHaveBeenCalledTimes(1)
+      expect(mockCreateOrder).toHaveBeenCalledTimes(1);
       expect(mockCreateOrder).toHaveBeenCalledWith({
         currency: { code: "DKK" },
         ref: "1234",
@@ -378,14 +378,14 @@ describe("BrightpearlService", () => {
             nominalCode: "4040",
           },
         ],
-      })
-    })
+      });
+    });
 
     it("rounds correctly", async () => {
-      jest.clearAllMocks()
-      await bpService.createSalesOrder("rounding")
+      jest.clearAllMocks();
+      await bpService.createSalesOrder("rounding");
 
-      expect(mockCreateOrder).toHaveBeenCalledTimes(1)
+      expect(mockCreateOrder).toHaveBeenCalledTimes(1);
       expect(mockCreateOrder).toHaveBeenCalledWith({
         currency: { code: "DKK" },
         ref: "1234",
@@ -436,9 +436,9 @@ describe("BrightpearlService", () => {
             nominalCode: "4040",
           },
         ],
-      })
-    })
-  })
+      });
+    });
+  });
 
   describe("bpnum_", () => {
     const bpService = new BrightpearlService(
@@ -449,22 +449,22 @@ describe("BrightpearlService", () => {
         regionService: RegionService,
       },
       { account: "test" }
-    )
+    );
 
     it("sales credit diff. calc - KRW", async () => {
-      jest.clearAllMocks()
-      const total = 100000
-      const refund_amount = 100000
-      const difference = bpService.bpnum_(refund_amount, "krw") - total
-      expect(difference).toEqual(0)
-    })
+      jest.clearAllMocks();
+      const total = 100000;
+      const refund_amount = 100000;
+      const difference = bpService.bpnum_(refund_amount, "krw") - total;
+      expect(difference).toEqual(0);
+    });
 
     it("sales credit diff. calc - DKK", async () => {
-      jest.clearAllMocks()
-      const total = 100000
-      const refund_amount = 100000
-      const difference = bpService.bpnum_(refund_amount, "dkk") - total
-      expect(difference).toEqual(-99000)
-    })
-  })
-})
+      jest.clearAllMocks();
+      const total = 100000;
+      const refund_amount = 100000;
+      const difference = bpService.bpnum_(refund_amount, "dkk") - total;
+      expect(difference).toEqual(-99000);
+    });
+  });
+});

@@ -1,4 +1,4 @@
-import { IdMap } from "medusa-test-utils"
+import { IdMap } from "medusa-test-utils";
 
 export const addOns = {
   testAddOn: {
@@ -34,37 +34,37 @@ export const addOns = {
     ],
     valid_for: [],
   },
-}
+};
 
 export const AddOnServiceMock = {
   retrieve: jest.fn().mockImplementation((addOnId) => {
     if (addOnId === IdMap.getId("test-add-on")) {
-      return Promise.resolve(addOns.testAddOn)
+      return Promise.resolve(addOns.testAddOn);
     }
     if (addOnId === IdMap.getId("test-add-on-2")) {
-      return Promise.resolve(addOns.testAddOn2)
+      return Promise.resolve(addOns.testAddOn2);
     }
     if (addOnId === IdMap.getId("test-add-on-3")) {
-      return Promise.resolve(addOns.testAddOn3)
+      return Promise.resolve(addOns.testAddOn3);
     }
-    return Promise.resolve(undefined)
+    return Promise.resolve(undefined);
   }),
   getRegionPrice: jest.fn().mockImplementation((addOnId, regionId) => {
     if (addOnId === IdMap.getId("test-add-on")) {
-      return Promise.resolve(20)
+      return Promise.resolve(20);
     }
     if (addOnId === IdMap.getId("test-add-on-2")) {
-      return Promise.resolve(20)
+      return Promise.resolve(20);
     }
     if (addOnId === IdMap.getId("test-add-on-3")) {
-      return Promise.resolve(20)
+      return Promise.resolve(20);
     }
-    return Promise.resolve(undefined)
+    return Promise.resolve(undefined);
   }),
-}
+};
 
 const mock = jest.fn().mockImplementation(() => {
-  return AddOnServiceMock
-})
+  return AddOnServiceMock;
+});
 
-export default mock
+export default mock;

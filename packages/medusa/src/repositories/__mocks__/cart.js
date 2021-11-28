@@ -1,5 +1,5 @@
-import { IdMap } from "medusa-test-utils"
-import { discounts } from "./discount"
+import { IdMap } from "medusa-test-utils";
+import { discounts } from "./discount";
 
 export const carts = {
   emptyCart: {
@@ -423,39 +423,39 @@ export const carts = {
       },
     ],
   },
-}
+};
 
 export const CartModelMock = {
-  create: jest.fn().mockImplementation(data => Promise.resolve(data)),
+  create: jest.fn().mockImplementation((data) => Promise.resolve(data)),
   updateOne: jest.fn().mockImplementation((query, update) => {
-    return Promise.resolve(update)
+    return Promise.resolve(update);
   }),
   deleteOne: jest.fn().mockReturnValue(Promise.resolve()),
-  findOne: jest.fn().mockImplementation(query => {
+  findOne: jest.fn().mockImplementation((query) => {
     if (query._id === IdMap.getId("withShippingOptions")) {
-      return Promise.resolve(carts.withShippingOptions)
+      return Promise.resolve(carts.withShippingOptions);
     }
     if (query._id === IdMap.getId("cartWithPaySessionsDifRegion")) {
-      return Promise.resolve(carts.cartWithPaySessionsDifRegion)
+      return Promise.resolve(carts.cartWithPaySessionsDifRegion);
     }
     if (query._id === IdMap.getId("cartWithPaySessions")) {
-      return Promise.resolve(carts.cartWithPaySessions)
+      return Promise.resolve(carts.cartWithPaySessions);
     }
     if (query._id === IdMap.getId("emptyCart")) {
-      return Promise.resolve(carts.emptyCart)
+      return Promise.resolve(carts.emptyCart);
     }
     if (query._id === IdMap.getId("cartWithLine")) {
-      return Promise.resolve(carts.cartWithLine)
+      return Promise.resolve(carts.cartWithLine);
     }
     if (query._id === IdMap.getId("fr-cart")) {
-      return Promise.resolve(carts.frCart)
+      return Promise.resolve(carts.frCart);
     }
     if (query._id === IdMap.getId("complete-cart")) {
-      return Promise.resolve(carts.completeCart)
+      return Promise.resolve(carts.completeCart);
     }
     if (query._id === IdMap.getId("discount-cart-with-existing")) {
-      return Promise.resolve(carts.discountCartWithExisting)
+      return Promise.resolve(carts.discountCartWithExisting);
     }
-    return Promise.resolve(undefined)
+    return Promise.resolve(undefined);
   }),
-}
+};

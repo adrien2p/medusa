@@ -1,10 +1,10 @@
-import { IdMap } from "medusa-test-utils"
-import { request } from "../../../../../helpers/test-request"
-import { ProductVariantServiceMock } from "../../../../../services/__mocks__/product-variant"
+import { IdMap } from "medusa-test-utils";
+import { request } from "../../../../../helpers/test-request";
+import { ProductVariantServiceMock } from "../../../../../services/__mocks__/product-variant";
 
 describe("POST /admin/products/:id/variants/:variantId", () => {
   describe("successful removes variant", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
       subject = await request(
@@ -19,19 +19,19 @@ describe("POST /admin/products/:id/variants/:variantId", () => {
             },
           },
         }
-      )
-    })
+      );
+    });
 
     it("returns 200", () => {
-      expect(subject.status).toEqual(200)
-    })
+      expect(subject.status).toEqual(200);
+    });
 
     it("calls service removeVariant", () => {
-      expect(ProductVariantServiceMock.delete).toHaveBeenCalledTimes(1)
+      expect(ProductVariantServiceMock.delete).toHaveBeenCalledTimes(1);
       expect(ProductVariantServiceMock.delete).toHaveBeenCalledWith(
         IdMap.getId("variant1")
-      )
-    })
+      );
+    });
 
     it("returns delete result", () => {
       expect(subject.body).toEqual({
@@ -39,7 +39,7 @@ describe("POST /admin/products/:id/variants/:variantId", () => {
         object: "product-variant",
         deleted: true,
         product: expect.any(Object),
-      })
-    })
-  })
-})
+      });
+    });
+  });
+});

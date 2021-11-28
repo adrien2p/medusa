@@ -1,5 +1,5 @@
-import { defaultStoreCartFields, defaultStoreCartRelations } from "."
-import { CartService } from "../../../../services"
+import { defaultStoreCartFields, defaultStoreCartRelations } from ".";
+import { CartService } from "../../../../services";
 
 /**
  * @oas [get] /carts/{id}
@@ -21,13 +21,13 @@ import { CartService } from "../../../../services"
  *               $ref: "#/components/schemas/cart"
  */
 export default async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params;
 
-  const cartService: CartService = req.scope.resolve("cartService")
+  const cartService: CartService = req.scope.resolve("cartService");
 
   let cart = await cartService.retrieve(id, {
     relations: ["customer"],
-  })
+  });
 
   // If there is a logged in user add the user to the cart
   if (req.user && req.user.customer_id) {
@@ -38,14 +38,14 @@ export default async (req, res) => {
     ) {
       await cartService.update(id, {
         customer_id: req.user.customer_id,
-      })
+      });
     }
   }
 
   cart = await cartService.retrieve(id, {
     select: defaultStoreCartFields,
     relations: defaultStoreCartRelations,
-  })
+  });
 
-  res.json({ cart })
-}
+  res.json({ cart });
+};

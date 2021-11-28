@@ -1,6 +1,6 @@
-import { IdMap } from "medusa-test-utils"
-import { request } from "../../../../../helpers/test-request"
-import { DiscountServiceMock } from "../../../../../services/__mocks__/discount"
+import { IdMap } from "medusa-test-utils";
+import { request } from "../../../../../helpers/test-request";
+import { DiscountServiceMock } from "../../../../../services/__mocks__/discount";
 
 const defaultFields = [
   "id",
@@ -18,18 +18,18 @@ const defaultFields = [
   "deleted_at",
   "metadata",
   "valid_duration",
-]
+];
 
 const defaultRelations = [
   "rule",
   "parent_discount",
   "regions",
   "rule.valid_for",
-]
+];
 
 describe("DELETE /admin/discounts/:discount_id/products/:variant_id", () => {
   describe("successful addition", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
       subject = await request(
@@ -44,28 +44,28 @@ describe("DELETE /admin/discounts/:discount_id/products/:variant_id", () => {
             },
           },
         }
-      )
-    })
+      );
+    });
 
     it("returns 200", () => {
-      expect(subject.status).toEqual(200)
-    })
+      expect(subject.status).toEqual(200);
+    });
 
     it("calls service retrieve", () => {
-      expect(DiscountServiceMock.retrieve).toHaveBeenCalledTimes(1)
+      expect(DiscountServiceMock.retrieve).toHaveBeenCalledTimes(1);
       expect(DiscountServiceMock.retrieve).toHaveBeenCalledWith(
         IdMap.getId("total10"),
         {
           select: defaultFields,
           relations: defaultRelations,
         }
-      )
+      );
 
-      expect(DiscountServiceMock.removeValidProduct).toHaveBeenCalledTimes(1)
+      expect(DiscountServiceMock.removeValidProduct).toHaveBeenCalledTimes(1);
       expect(DiscountServiceMock.removeValidProduct).toHaveBeenCalledWith(
         IdMap.getId("total10"),
         IdMap.getId("testVariant")
-      )
-    })
-  })
-})
+      );
+    });
+  });
+});

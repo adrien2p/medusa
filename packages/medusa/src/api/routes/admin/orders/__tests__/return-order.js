@@ -1,14 +1,14 @@
-import { IdMap } from "medusa-test-utils"
-import { request } from "../../../../../helpers/test-request"
-import { ReturnService } from "../../../../../services/__mocks__/return"
-import { EventBusServiceMock } from "../../../../../services/__mocks__/event-bus"
+import { IdMap } from "medusa-test-utils";
+import { request } from "../../../../../helpers/test-request";
+import { ReturnService } from "../../../../../services/__mocks__/return";
+import { EventBusServiceMock } from "../../../../../services/__mocks__/event-bus";
 
 describe("POST /admin/orders/:id/return", () => {
   describe("successfully returns full order", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
-      jest.clearAllMocks()
+      jest.clearAllMocks();
       subject = await request(
         "POST",
         `/admin/orders/${IdMap.getId("test-order")}/return`,
@@ -29,15 +29,15 @@ describe("POST /admin/orders/:id/return", () => {
             },
           },
         }
-      )
-    })
+      );
+    });
 
     it("returns 200", () => {
-      expect(subject.status).toEqual(200)
-    })
+      expect(subject.status).toEqual(200);
+    });
 
     it("calls OrderService return", () => {
-      expect(ReturnService.create).toHaveBeenCalledTimes(1)
+      expect(ReturnService.create).toHaveBeenCalledTimes(1);
       expect(ReturnService.create).toHaveBeenCalledWith({
         order_id: IdMap.getId("test-order"),
         idempotency_key: "testkey",
@@ -50,15 +50,15 @@ describe("POST /admin/orders/:id/return", () => {
         refund_amount: 10,
         no_notification: true,
         shipping_method: undefined,
-      })
-    })
-  })
+      });
+    });
+  });
 
   describe("defaults to 0 on negative refund amount", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
-      jest.clearAllMocks()
+      jest.clearAllMocks();
       subject = await request(
         "POST",
         `/admin/orders/${IdMap.getId("test-order")}/return`,
@@ -79,15 +79,15 @@ describe("POST /admin/orders/:id/return", () => {
             },
           },
         }
-      )
-    })
+      );
+    });
 
     it("returns 200", () => {
-      expect(subject.status).toEqual(200)
-    })
+      expect(subject.status).toEqual(200);
+    });
 
     it("calls OrderService return", () => {
-      expect(ReturnService.create).toHaveBeenCalledTimes(1)
+      expect(ReturnService.create).toHaveBeenCalledTimes(1);
       expect(ReturnService.create).toHaveBeenCalledWith({
         order_id: IdMap.getId("test-order"),
         idempotency_key: "testkey",
@@ -100,15 +100,15 @@ describe("POST /admin/orders/:id/return", () => {
         refund_amount: 0,
         no_notification: true,
         shipping_method: undefined,
-      })
-    })
-  })
+      });
+    });
+  });
 
   describe("defaults to 0 on negative refund amount", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
-      jest.clearAllMocks()
+      jest.clearAllMocks();
       subject = await request(
         "POST",
         `/admin/orders/${IdMap.getId("test-order")}/return`,
@@ -129,15 +129,15 @@ describe("POST /admin/orders/:id/return", () => {
             },
           },
         }
-      )
-    })
+      );
+    });
 
     it("returns 200", () => {
-      expect(subject.status).toEqual(200)
-    })
+      expect(subject.status).toEqual(200);
+    });
 
     it("calls OrderService return", () => {
-      expect(ReturnService.create).toHaveBeenCalledTimes(1)
+      expect(ReturnService.create).toHaveBeenCalledTimes(1);
       expect(ReturnService.create).toHaveBeenCalledWith({
         order_id: IdMap.getId("test-order"),
         idempotency_key: "testkey",
@@ -150,15 +150,15 @@ describe("POST /admin/orders/:id/return", () => {
         refund_amount: 0,
         no_notification: true,
         shipping_method: undefined,
-      })
-    })
-  })
+      });
+    });
+  });
 
   describe("fulfills", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
-      jest.clearAllMocks()
+      jest.clearAllMocks();
       subject = await request(
         "POST",
         `/admin/orders/${IdMap.getId("test-order")}/return`,
@@ -183,15 +183,15 @@ describe("POST /admin/orders/:id/return", () => {
             },
           },
         }
-      )
-    })
+      );
+    });
 
     it("returns 200", () => {
-      expect(subject.status).toEqual(200)
-    })
+      expect(subject.status).toEqual(200);
+    });
 
     it("calls OrderService return", () => {
-      expect(ReturnService.create).toHaveBeenCalledTimes(1)
+      expect(ReturnService.create).toHaveBeenCalledTimes(1);
       expect(ReturnService.create).toHaveBeenCalledWith({
         order_id: IdMap.getId("test-order"),
         idempotency_key: "testkey",
@@ -207,16 +207,16 @@ describe("POST /admin/orders/:id/return", () => {
           option_id: "opt_1234",
           price: 12,
         },
-      })
+      });
 
-      expect(ReturnService.fulfill).toHaveBeenCalledTimes(1)
-      expect(ReturnService.fulfill).toHaveBeenCalledWith("return")
-    })
-  })
+      expect(ReturnService.fulfill).toHaveBeenCalledTimes(1);
+      expect(ReturnService.fulfill).toHaveBeenCalledWith("return");
+    });
+  });
 
   describe("the api call overrides notification settings of order", () => {
     it("eventBus is called with the proper no notification feature", async () => {
-      jest.clearAllMocks()
+      jest.clearAllMocks();
       const subject = await request(
         "POST",
         `/admin/orders/${IdMap.getId("test-order")}/return`,
@@ -241,7 +241,7 @@ describe("POST /admin/orders/:id/return", () => {
             },
           },
         }
-      )
+      );
       expect(EventBusServiceMock.emit).toHaveBeenCalledWith(
         expect.any(String),
         {
@@ -249,13 +249,13 @@ describe("POST /admin/orders/:id/return", () => {
           no_notification: false,
           return_id: expect.any(String),
         }
-      )
-    })
-  })
+      );
+    });
+  });
 
   describe("the api call inherits notification settings of order", () => {
     it("eventBus is called with the proper no notification feature", async () => {
-      jest.clearAllMocks()
+      jest.clearAllMocks();
       await request(
         "POST",
         `/admin/orders/${IdMap.getId("test-order")}/return`,
@@ -279,7 +279,7 @@ describe("POST /admin/orders/:id/return", () => {
             },
           },
         }
-      )
+      );
 
       expect(EventBusServiceMock.emit).toHaveBeenCalledWith(
         expect.any(String),
@@ -288,7 +288,7 @@ describe("POST /admin/orders/:id/return", () => {
           no_notification: true,
           return_id: expect.any(String),
         }
-      )
-    })
-  })
-})
+      );
+    });
+  });
+});

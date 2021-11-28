@@ -1,9 +1,9 @@
 import {
   StoreGetShippingOptionsParams,
   StoreShippingOptionsListRes,
-} from "@medusajs/medusa"
-import { AxiosPromise } from "axios"
-import BaseResource from "./base"
+} from "@medusajs/medusa";
+import { AxiosPromise } from "axios";
+import BaseResource from "./base";
 
 class ShippingOptionsResource extends BaseResource {
   /**
@@ -12,8 +12,8 @@ class ShippingOptionsResource extends BaseResource {
    * @return {AxiosPromise<StoreShippingOptionsListRes>}
    */
   listCartOptions(cart_id: string): AxiosPromise<StoreShippingOptionsListRes> {
-    const path = `/store/shipping-options/${cart_id}`
-    return this.client.request("GET", path)
+    const path = `/store/shipping-options/${cart_id}`;
+    return this.client.request("GET", path);
   }
 
   /**
@@ -24,21 +24,21 @@ class ShippingOptionsResource extends BaseResource {
   list(
     query?: StoreGetShippingOptionsParams
   ): AxiosPromise<StoreShippingOptionsListRes> {
-    let path = `/store/shipping-options`
+    let path = `/store/shipping-options`;
 
     const queryString = Object.entries(query || {}).map(([key, value]) => {
-      let val = value
+      let val = value;
       if (Array.isArray(value)) {
-        val = value.join(",")
+        val = value.join(",");
       }
 
-      return `${key}=${val}`
-    })
+      return `${key}=${val}`;
+    });
 
-    path = `/store/shipping-options?${queryString.join("&")}`
+    path = `/store/shipping-options?${queryString.join("&")}`;
 
-    return this.client.request("GET", path)
+    return this.client.request("GET", path);
   }
 }
 
-export default ShippingOptionsResource
+export default ShippingOptionsResource;

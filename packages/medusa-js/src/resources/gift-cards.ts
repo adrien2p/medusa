@@ -1,6 +1,6 @@
-import { StoreGiftCardsRes } from "@medusajs/medusa"
-import { AxiosPromise } from "axios"
-import BaseResource from "./base"
+import { StoreGiftCardsRes } from "@medusajs/medusa";
+import { AxiosPromise } from "axios";
+import BaseResource from "./base";
 
 class GiftCardsResource extends BaseResource {
   /**
@@ -9,9 +9,9 @@ class GiftCardsResource extends BaseResource {
    * @return {AxiosPromise<StoreGiftCardsRes>}
    */
   retrieve(code: string): AxiosPromise<StoreGiftCardsRes> {
-    const path = `/store/gift-cards/${code}`
-    return this.client.request("GET", path)
+    const path = `/store/gift-cards/${code}`;
+    return this.client.request("GET", path);
   }
 }
 
-export default GiftCardsResource
+export default GiftCardsResource;

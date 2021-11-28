@@ -1,10 +1,10 @@
-import { IsOptional, IsString } from "class-validator"
+import { IsOptional, IsString } from "class-validator";
 import {
   defaultAdminReturnReasonsFields,
   defaultAdminReturnReasonsRelations,
-} from "."
-import { ReturnReasonService } from "../../../../services"
-import { validator } from "../../../../utils/validator"
+} from ".";
+import { ReturnReasonService } from "../../../../services";
+import { validator } from "../../../../utils/validator";
 
 /**
  * @oas [post] /return-reasons/{id}
@@ -41,37 +41,37 @@ import { validator } from "../../../../utils/validator"
  *               $ref: "#/components/schemas/return_reason"
  */
 export default async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params;
 
-  const validated = await validator(AdminPostReturnReasonsReasonReq, req.body)
+  const validated = await validator(AdminPostReturnReasonsReasonReq, req.body);
 
   const returnReasonService: ReturnReasonService = req.scope.resolve(
     "returnReasonService"
-  )
+  );
 
-  await returnReasonService.update(id, validated)
+  await returnReasonService.update(id, validated);
 
   const reason = await returnReasonService.retrieve(id, {
     select: defaultAdminReturnReasonsFields,
     relations: defaultAdminReturnReasonsRelations,
-  })
+  });
 
-  res.status(200).json({ return_reason: reason })
-}
+  res.status(200).json({ return_reason: reason });
+};
 
 export class AdminPostReturnReasonsReasonReq {
   @IsOptional()
   @IsString()
-  label?: string
+  label?: string;
 
   @IsOptional()
   @IsString()
-  value?: string
+  value?: string;
 
   @IsOptional()
   @IsString()
-  description?: string
+  description?: string;
 
   @IsOptional()
-  metadata?: object
+  metadata?: object;
 }

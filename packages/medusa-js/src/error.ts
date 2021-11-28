@@ -1,24 +1,24 @@
-"use strict"
+"use strict";
 /**
  * MedusaError is the base error for every other MedusaError
  */
 export default class MedusaError extends Error {
   constructor() {
-    super()
+    super();
   }
 
   public static factory(type: ErrorType): MedusaError {
     switch (type) {
       case ErrorType.INVALID_REQUEST:
-        return new MedusaInvalidRequestError()
+        return new MedusaInvalidRequestError();
       case ErrorType.AUTHENTICATION:
-        return new MedusaAuthenticationError()
+        return new MedusaAuthenticationError();
       case ErrorType.API:
-        return new MedusaAPIError()
+        return new MedusaAPIError();
       case ErrorType.PERMISSION:
-        return new MedusaPermissionError()
+        return new MedusaPermissionError();
       case ErrorType.CONNECTION:
-        return new MedusaConnectionError()
+        return new MedusaConnectionError();
     }
   }
 }

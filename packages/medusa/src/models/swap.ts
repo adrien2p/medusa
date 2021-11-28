@@ -13,18 +13,18 @@ import {
   ManyToMany,
   JoinColumn,
   JoinTable,
-} from "typeorm"
-import { ulid } from "ulid"
-import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column"
+} from "typeorm";
+import { ulid } from "ulid";
+import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column";
 
-import { Order } from "./order"
-import { Fulfillment } from "./fulfillment"
-import { Address } from "./address"
-import { LineItem } from "./line-item"
-import { Return } from "./return"
-import { Cart } from "./cart"
-import { Payment } from "./payment"
-import { ShippingMethod } from "./shipping-method"
+import { Order } from "./order";
+import { Fulfillment } from "./fulfillment";
+import { Address } from "./address";
+import { LineItem } from "./line-item";
+import { Return } from "./return";
+import { Cart } from "./cart";
+import { Payment } from "./payment";
+import { ShippingMethod } from "./shipping-method";
 
 export enum FulfillmentStatus {
   NOT_FULFILLED = "not_fulfilled",
@@ -49,109 +49,90 @@ export enum PaymentStatus {
 @Entity()
 export class Swap {
   @PrimaryColumn()
-  id: string
+  id: string;
 
   @DbAwareColumn({ type: "enum", enum: FulfillmentStatus })
-  fulfillment_status: FulfillmentStatus
+  fulfillment_status: FulfillmentStatus;
 
   @DbAwareColumn({ type: "enum", enum: PaymentStatus })
-  payment_status: PaymentStatus
+  payment_status: PaymentStatus;
 
   @Index()
   @Column({ type: "string" })
-  order_id: string
+  order_id: string;
 
-  @ManyToOne(
-    () => Order,
-    o => o.swaps
-  )
+  @ManyToOne(() => Order, (o) => o.swaps)
   @JoinColumn({ name: "order_id" })
-  order: Order
+  order: Order;
 
-  @OneToMany(
-    () => LineItem,
-    item => item.swap,
-    { cascade: ["insert"] }
-  )
-  additional_items: LineItem
+  @OneToMany(() => LineItem, (item) => item.swap, { cascade: ["insert"] })
+  additional_items: LineItem;
 
-  @OneToOne(
-    () => Return,
-    ret => ret.swap,
-    { cascade: ["insert"] }
-  )
-  return_order: Return
+  @OneToOne(() => Return, (ret) => ret.swap, { cascade: ["insert"] })
+  return_order: Return;
 
-  @OneToMany(
-    () => Fulfillment,
-    fulfillment => fulfillment.swap,
-    { cascade: ["insert"] }
-  )
-  fulfillments: Fulfillment[]
+  @OneToMany(() => Fulfillment, (fulfillment) => fulfillment.swap, {
+    cascade: ["insert"],
+  })
+  fulfillments: Fulfillment[];
 
-  @OneToOne(
-    () => Payment,
-    p => p.swap,
-    { cascade: ["insert"] }
-  )
-  payment: Payment
+  @OneToOne(() => Payment, (p) => p.swap, { cascade: ["insert"] })
+  payment: Payment;
 
   @Column({ type: "int", nullable: true })
-  difference_due: number
+  difference_due: number;
 
   @Column({ nullable: true })
-  shipping_address_id: string
+  shipping_address_id: string;
 
   @ManyToOne(() => Address, { cascade: ["insert"] })
   @JoinColumn({ name: "shipping_address_id" })
-  shipping_address: Address
+  shipping_address: Address;
 
-  @OneToMany(
-    () => ShippingMethod,
-    method => method.swap,
-    { cascade: ["insert"] }
-  )
-  shipping_methods: ShippingMethod[]
+  @OneToMany(() => ShippingMethod, (method) => method.swap, {
+    cascade: ["insert"],
+  })
+  shipping_methods: ShippingMethod[];
 
   @Column({ nullable: true })
-  cart_id: string
+  cart_id: string;
 
   @OneToOne(() => Cart)
   @JoinColumn({ name: "cart_id" })
-  cart: Cart
+  cart: Cart;
 
   @Column({ type: resolveDbType("timestamptz"), nullable: true })
-  confirmed_at: Date
+  confirmed_at: Date;
 
   @CreateDateColumn({ type: resolveDbType("timestamptz") })
-  created_at: Date
+  created_at: Date;
 
   @UpdateDateColumn({ type: resolveDbType("timestamptz") })
-  updated_at: Date
+  updated_at: Date;
 
   @DeleteDateColumn({ type: resolveDbType("timestamptz") })
-  deleted_at: Date
+  deleted_at: Date;
 
   @Column({ type: resolveDbType("timestamptz"), nullable: true })
-  canceled_at: Date
+  canceled_at: Date;
 
   @Column({ type: "boolean", nullable: true })
-  no_notification: Boolean
+  no_notification: Boolean;
 
   @Column({ type: "boolean", default: false })
-  allow_backorder: Boolean
+  allow_backorder: Boolean;
 
   @DbAwareColumn({ type: "jsonb", nullable: true })
-  metadata: any
+  metadata: any;
 
   @Column({ nullable: true })
-  idempotency_key: string
+  idempotency_key: string;
 
   @BeforeInsert()
   private beforeInsert() {
-    if (this.id) return
-    const id = ulid()
-    this.id = `swap_${id}`
+    if (this.id) return;
+    const id = ulid();
+    this.id = `swap_${id}`;
   }
 }
 

@@ -9,54 +9,48 @@ import {
   Column,
   PrimaryColumn,
   JoinColumn,
-} from "typeorm"
-import { ulid } from "ulid"
-import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column"
+} from "typeorm";
+import { ulid } from "ulid";
+import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column";
 
-import { Product } from "./product"
-import { ProductOptionValue } from "./product-option-value"
+import { Product } from "./product";
+import { ProductOptionValue } from "./product-option-value";
 
 @Entity()
 export class ProductOption {
   @PrimaryColumn()
-  id: string
+  id: string;
 
   @Column()
-  title: string
+  title: string;
 
-  @OneToMany(
-    () => ProductOptionValue,
-    value => value.option
-  )
-  values: ProductOptionValue
+  @OneToMany(() => ProductOptionValue, (value) => value.option)
+  values: ProductOptionValue;
 
   @Column()
-  product_id: string
+  product_id: string;
 
-  @ManyToOne(
-    () => Product,
-    product => product.options
-  )
+  @ManyToOne(() => Product, (product) => product.options)
   @JoinColumn({ name: "product_id" })
-  product: Product
+  product: Product;
 
   @CreateDateColumn({ type: resolveDbType("timestamptz") })
-  created_at: Date
+  created_at: Date;
 
   @UpdateDateColumn({ type: resolveDbType("timestamptz") })
-  updated_at: Date
+  updated_at: Date;
 
   @DeleteDateColumn({ type: resolveDbType("timestamptz") })
-  deleted_at: Date
+  deleted_at: Date;
 
   @DbAwareColumn({ type: "jsonb", nullable: true })
-  metadata: any
+  metadata: any;
 
   @BeforeInsert()
   private beforeInsert() {
-    if (this.id) return
-    const id = ulid()
-    this.id = `opt_${id}`
+    if (this.id) return;
+    const id = ulid();
+    this.id = `opt_${id}`;
   }
 }
 

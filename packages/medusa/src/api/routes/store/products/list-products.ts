@@ -1,8 +1,8 @@
-import { Type } from "class-transformer"
-import { IsBoolean, IsInt, IsNumber, IsOptional } from "class-validator"
-import { defaultStoreProductsRelations } from "."
-import { ProductService } from "../../../../services"
-import { validator } from "../../../../utils/validator"
+import { Type } from "class-transformer";
+import { IsBoolean, IsInt, IsNumber, IsOptional } from "class-validator";
+import { defaultStoreProductsRelations } from ".";
+import { ProductService } from "../../../../services";
+import { validator } from "../../../../utils/validator";
 
 /**
  * @oas [get] /products
@@ -33,48 +33,48 @@ import { validator } from "../../../../utils/validator"
  *                 $ref: "#/components/schemas/product"
  */
 export default async (req, res) => {
-  const productService: ProductService = req.scope.resolve("productService")
+  const productService: ProductService = req.scope.resolve("productService");
 
-  const validated = await validator(StoreGetProductsParams, req.query)
+  const validated = await validator(StoreGetProductsParams, req.query);
 
-  const selector = {}
+  const selector = {};
 
   if (validated.is_giftcard && validated.is_giftcard === true) {
-    selector["is_giftcard"] = validated.is_giftcard
+    selector["is_giftcard"] = validated.is_giftcard;
   }
 
-  selector["status"] = ["published"]
+  selector["status"] = ["published"];
 
   const listConfig = {
     relations: defaultStoreProductsRelations,
     skip: validated.offset,
     take: validated.limit,
-  }
+  };
 
   const [products, count] = await productService.listAndCount(
     selector,
     listConfig
-  )
+  );
 
   res.json({
     products,
     count,
     offset: validated.offset,
     limit: validated.limit,
-  })
-}
+  });
+};
 
 export class StoreGetProductsParams {
   @IsInt()
   @Type(() => Number)
-  limit = 100
+  limit = 100;
 
   @IsInt()
   @Type(() => Number)
-  offset = 0
+  offset = 0;
 
   @IsOptional()
   @IsBoolean()
   @Type(() => Boolean)
-  is_giftcard?: boolean
+  is_giftcard?: boolean;
 }

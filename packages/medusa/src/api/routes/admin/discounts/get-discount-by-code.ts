@@ -1,5 +1,5 @@
-import { defaultAdminDiscountsRelations } from "."
-import DiscountService from "../../../../services/discount"
+import { defaultAdminDiscountsRelations } from ".";
+import DiscountService from "../../../../services/discount";
 /**
  * @oas [get] /discounts/code/{code}
  * operationId: "GetDiscountsDiscountCode"
@@ -21,13 +21,13 @@ import DiscountService from "../../../../services/discount"
  *               $ref: "#/components/schemas/discount"
  */
 export default async (req, res) => {
-  const { code } = req.params
+  const { code } = req.params;
 
-  const discountService: DiscountService = req.scope.resolve("discountService")
+  const discountService: DiscountService = req.scope.resolve("discountService");
   const discount = await discountService.retrieveByCode(
     code,
     defaultAdminDiscountsRelations
-  )
+  );
 
-  res.status(200).json({ discount })
-}
+  res.status(200).json({ discount });
+};

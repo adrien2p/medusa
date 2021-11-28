@@ -1,4 +1,4 @@
-import { ShippingProfileService } from "../../../../services"
+import { ShippingProfileService } from "../../../../services";
 
 /**
  * @oas [delete] /shipping-profiles/{id}
@@ -27,16 +27,16 @@ import { ShippingProfileService } from "../../../../services"
  *               type: boolean
  */
 export default async (req, res) => {
-  const { profile_id } = req.params
+  const { profile_id } = req.params;
   const profileService: ShippingProfileService = req.scope.resolve(
     "shippingProfileService"
-  )
+  );
 
-  await profileService.delete(profile_id)
+  await profileService.delete(profile_id);
 
   res.status(200).json({
     id: profile_id,
     object: "shipping_profile",
     deleted: true,
-  })
-}
+  });
+};

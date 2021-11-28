@@ -1,10 +1,10 @@
-import { IdMap } from "medusa-test-utils"
-import { request } from "../../../../../helpers/test-request"
-import { DiscountServiceMock } from "../../../../../services/__mocks__/discount"
+import { IdMap } from "medusa-test-utils";
+import { request } from "../../../../../helpers/test-request";
+import { DiscountServiceMock } from "../../../../../services/__mocks__/discount";
 
 describe("POST /admin/discounts", () => {
   describe("successful creation", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
       subject = await request("POST", "/admin/discounts", {
@@ -24,15 +24,15 @@ describe("POST /admin/discounts", () => {
             userId: IdMap.getId("admin_user"),
           },
         },
-      })
-    })
+      });
+    });
 
     it("returns 200", () => {
-      expect(subject.status).toEqual(200)
-    })
+      expect(subject.status).toEqual(200);
+    });
 
     it("calls service create", () => {
-      expect(DiscountServiceMock.create).toHaveBeenCalledTimes(1)
+      expect(DiscountServiceMock.create).toHaveBeenCalledTimes(1);
       expect(DiscountServiceMock.create).toHaveBeenCalledWith({
         code: "TEST",
         rule: {
@@ -45,15 +45,15 @@ describe("POST /admin/discounts", () => {
         ends_at: new Date("03/14/2021 04:30"),
         is_disabled: false,
         is_dynamic: false,
-      })
-    })
-  })
+      });
+    });
+  });
 
   describe("unsuccessful creation with dynamic discount using an invalid iso8601 duration", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
-      jest.clearAllMocks()
+      jest.clearAllMocks();
       subject = await request("POST", "/admin/discounts", {
         payload: {
           code: "TEST",
@@ -72,25 +72,25 @@ describe("POST /admin/discounts", () => {
             userId: IdMap.getId("admin_user"),
           },
         },
-      })
-    })
+      });
+    });
 
     it("returns 400", () => {
-      expect(subject.status).toEqual(400)
-    })
+      expect(subject.status).toEqual(400);
+    });
 
     it("returns error", () => {
       expect(subject.body.message).toEqual(
         `"valid_duration" must be a valid ISO 8601 duration`
-      )
-    })
-  })
+      );
+    });
+  });
 
   describe("successful creation with dynamic discount", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
-      jest.clearAllMocks()
+      jest.clearAllMocks();
       subject = await request("POST", "/admin/discounts", {
         payload: {
           code: "TEST",
@@ -109,15 +109,15 @@ describe("POST /admin/discounts", () => {
             userId: IdMap.getId("admin_user"),
           },
         },
-      })
-    })
+      });
+    });
 
     it("returns 200", () => {
-      expect(subject.status).toEqual(200)
-    })
+      expect(subject.status).toEqual(200);
+    });
 
     it("calls service create", () => {
-      expect(DiscountServiceMock.create).toHaveBeenCalledTimes(1)
+      expect(DiscountServiceMock.create).toHaveBeenCalledTimes(1);
       expect(DiscountServiceMock.create).toHaveBeenCalledWith({
         code: "TEST",
         rule: {
@@ -130,12 +130,12 @@ describe("POST /admin/discounts", () => {
         is_disabled: false,
         is_dynamic: true,
         valid_duration: "P1Y2M03DT04H05M",
-      })
-    })
-  })
+      });
+    });
+  });
 
   describe("fails on invalid data", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
       subject = await request("POST", "/admin/discounts", {
@@ -152,22 +152,22 @@ describe("POST /admin/discounts", () => {
             userId: IdMap.getId("admin_user"),
           },
         },
-      })
-    })
+      });
+    });
 
     it("returns 400", () => {
-      expect(subject.status).toEqual(400)
-    })
+      expect(subject.status).toEqual(400);
+    });
 
     it("returns error", () => {
       expect(subject.body.message).toEqual(
         `type should not be empty, type must be a string`
-      )
-    })
-  })
+      );
+    });
+  });
 
   describe("fails on invalid date intervals", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
       subject = await request("POST", "/admin/discounts", {
@@ -187,25 +187,25 @@ describe("POST /admin/discounts", () => {
             userId: IdMap.getId("admin_user"),
           },
         },
-      })
-    })
+      });
+    });
 
     it("returns 400", () => {
-      expect(subject.status).toEqual(400)
-    })
+      expect(subject.status).toEqual(400);
+    });
 
     it("returns error", () => {
       expect(subject.body.message).toEqual(
         `"ends_at" must be greater than "starts_at"`
-      )
-    })
-  })
+      );
+    });
+  });
 
   describe("succesfully creates a dynamic discount without setting valid duration", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
-      jest.clearAllMocks()
+      jest.clearAllMocks();
       subject = await request("POST", "/admin/discounts", {
         payload: {
           code: "TEST",
@@ -223,12 +223,12 @@ describe("POST /admin/discounts", () => {
             userId: IdMap.getId("admin_user"),
           },
         },
-      })
-    })
+      });
+    });
 
     it("returns 200", () => {
-      expect(subject.status).toEqual(200)
-    })
+      expect(subject.status).toEqual(200);
+    });
 
     it("returns error", () => {
       expect(DiscountServiceMock.create).toHaveBeenCalledWith({
@@ -242,7 +242,7 @@ describe("POST /admin/discounts", () => {
           allocation: "total",
         },
         starts_at: new Date("03/14/2021 14:30"),
-      })
-    })
-  })
-})
+      });
+    });
+  });
+});

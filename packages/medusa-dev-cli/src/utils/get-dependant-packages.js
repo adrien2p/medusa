@@ -9,22 +9,22 @@ const getDependantPackages = ({
 }) => {
   if (packagesToPublish.has(packageName)) {
     // bail early if package was already handled
-    return packagesToPublish
+    return packagesToPublish;
   }
 
-  packagesToPublish.add(packageName)
-  const dependants = depTree[packageName]
+  packagesToPublish.add(packageName);
+  const dependants = depTree[packageName];
   if (dependants) {
-    dependants.forEach(dependant =>
+    dependants.forEach((dependant) =>
       getDependantPackages({
         packageName: dependant,
         depTree,
         packagesToPublish,
       })
-    )
+    );
   }
 
-  return packagesToPublish
-}
+  return packagesToPublish;
+};
 
-exports.getDependantPackages = getDependantPackages
+exports.getDependantPackages = getDependantPackages;

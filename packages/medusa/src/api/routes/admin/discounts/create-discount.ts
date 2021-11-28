@@ -1,4 +1,4 @@
-import { Type } from "class-transformer"
+import { Type } from "class-transformer";
 import {
   IsArray,
   IsBoolean,
@@ -10,12 +10,12 @@ import {
   IsPositive,
   IsString,
   ValidateNested,
-} from "class-validator"
-import { defaultAdminDiscountsRelations } from "."
-import DiscountService from "../../../../services/discount"
-import { IsGreaterThan } from "../../../../utils/validators/greater-than"
-import { validator } from "../../../../utils/validator"
-import { IsISO8601Duration } from "../../../../utils/validators/iso8601-duration"
+} from "class-validator";
+import { defaultAdminDiscountsRelations } from ".";
+import DiscountService from "../../../../services/discount";
+import { IsGreaterThan } from "../../../../utils/validators/greater-than";
+import { validator } from "../../../../utils/validator";
+import { IsISO8601Duration } from "../../../../utils/validators/iso8601-duration";
 /**
  * @oas [post] /discounts
  * operationId: "PostDiscounts"
@@ -75,84 +75,84 @@ import { IsISO8601Duration } from "../../../../utils/validators/iso8601-duration
  *               $ref: "#/components/schemas/discount"
  */
 export default async (req, res) => {
-  const validated = await validator(AdminPostDiscountsReq, req.body)
+  const validated = await validator(AdminPostDiscountsReq, req.body);
 
-  const discountService: DiscountService = req.scope.resolve("discountService")
-  const created = await discountService.create(validated)
+  const discountService: DiscountService = req.scope.resolve("discountService");
+  const created = await discountService.create(validated);
   const discount = await discountService.retrieve(
     created.id,
     defaultAdminDiscountsRelations
-  )
+  );
 
-  res.status(200).json({ discount })
-}
+  res.status(200).json({ discount });
+};
 
 export class AdminPostDiscountsReq {
   @IsString()
   @IsNotEmpty()
-  code: string
+  code: string;
 
   @IsNotEmpty()
   @ValidateNested()
   @Type(() => AdminPostDiscountsDiscountRule)
-  rule: AdminPostDiscountsDiscountRule
+  rule: AdminPostDiscountsDiscountRule;
 
   @IsBoolean()
   @IsOptional()
-  is_dynamic = false
+  is_dynamic = false;
 
   @IsBoolean()
   @IsOptional()
-  is_disabled = false
+  is_disabled = false;
 
   @IsDate()
   @IsOptional()
   @Type(() => Date)
-  starts_at?: Date
+  starts_at?: Date;
 
   @IsDate()
   @IsOptional()
   @IsGreaterThan("starts_at")
   @Type(() => Date)
-  ends_at?: Date
+  ends_at?: Date;
 
   @IsISO8601Duration()
   @IsOptional()
-  valid_duration?: string
+  valid_duration?: string;
 
   @IsNumber()
   @IsOptional()
   @IsPositive()
-  usage_limit?: number
+  usage_limit?: number;
 
   @IsArray()
   @IsOptional()
   @IsString({ each: true })
-  regions?: string[]
+  regions?: string[] = [];
 
   @IsObject()
   @IsOptional()
-  metadata?: object
+  metadata?: object;
 }
 
 export class AdminPostDiscountsDiscountRule {
   @IsString()
   @IsOptional()
-  description?: string
+  description?: string;
 
   @IsString()
   @IsNotEmpty()
-  type: string
+  type: string;
 
   @IsNumber()
-  value: number
+  value: number;
 
   @IsString()
   @IsNotEmpty()
-  allocation: string
+  allocation: string;
 
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  valid_for?: string[]
+  valid_for?: string[] = [];
 }

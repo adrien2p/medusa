@@ -13,53 +13,50 @@ import {
   ManyToMany,
   JoinColumn,
   JoinTable,
-} from "typeorm"
-import { ulid } from "ulid"
-import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column"
+} from "typeorm";
+import { ulid } from "ulid";
+import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column";
 
-import { Fulfillment } from "./fulfillment"
+import { Fulfillment } from "./fulfillment";
 
 @Entity()
 export class TrackingLink {
   @PrimaryColumn()
-  id: string
+  id: string;
 
   @Column({ nullable: true })
-  url: string
+  url: string;
 
   @Column()
-  tracking_number: string
+  tracking_number: string;
 
   @Column()
-  fulfillment_id: string
+  fulfillment_id: string;
 
-  @ManyToOne(
-    () => Fulfillment,
-    ful => ful.tracking_links
-  )
+  @ManyToOne(() => Fulfillment, (ful) => ful.tracking_links)
   @JoinColumn({ name: "fulfillment_id" })
-  fulfillment: Fulfillment
+  fulfillment: Fulfillment;
 
   @CreateDateColumn({ type: resolveDbType("timestamptz") })
-  created_at: Date
+  created_at: Date;
 
   @UpdateDateColumn({ type: resolveDbType("timestamptz") })
-  updated_at: Date
+  updated_at: Date;
 
   @DeleteDateColumn({ type: resolveDbType("timestamptz") })
-  deleted_at: Date
+  deleted_at: Date;
 
   @DbAwareColumn({ type: "jsonb", nullable: true })
-  metadata: any
+  metadata: any;
 
   @Column({ nullable: true })
-  idempotency_key: string
+  idempotency_key: string;
 
   @BeforeInsert()
   private beforeInsert() {
-    if (this.id) return
-    const id = ulid()
-    this.id = `tlink_${id}`
+    if (this.id) return;
+    const id = ulid();
+    this.id = `tlink_${id}`;
   }
 }
 

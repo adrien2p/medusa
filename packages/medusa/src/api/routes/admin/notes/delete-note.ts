@@ -1,4 +1,4 @@
-import NoteService from "../../../../services/note"
+import NoteService from "../../../../services/note";
 
 /**
  * @oas [delete] /notes/{id}
@@ -25,10 +25,10 @@ import NoteService from "../../../../services/note"
  *               description: Whether or not the Note was deleted.
  */
 export default async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params;
 
-  const noteService: NoteService = req.scope.resolve("noteService")
-  await noteService.delete(id)
+  const noteService: NoteService = req.scope.resolve("noteService");
+  await noteService.delete(id);
 
-  res.status(200).json({ id, object: "note", deleted: true })
-}
+  res.status(200).json({ id, object: "note", deleted: true });
+};

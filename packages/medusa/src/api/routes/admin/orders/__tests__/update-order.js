@@ -1,10 +1,10 @@
-import { IdMap } from "medusa-test-utils"
-import { request } from "../../../../../helpers/test-request"
-import { OrderServiceMock } from "../../../../../services/__mocks__/order"
+import { IdMap } from "medusa-test-utils";
+import { request } from "../../../../../helpers/test-request";
+import { OrderServiceMock } from "../../../../../services/__mocks__/order";
 
 describe("POST /admin/orders/:id", () => {
   describe("successfully updates an order", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
       subject = await request(
@@ -20,23 +20,23 @@ describe("POST /admin/orders/:id", () => {
             },
           },
         }
-      )
-    })
+      );
+    });
 
     it("returns 200", () => {
-      expect(subject.status).toEqual(200)
-    })
+      expect(subject.status).toEqual(200);
+    });
 
     it("calls OrderService update", () => {
-      expect(OrderServiceMock.update).toHaveBeenCalledTimes(1)
+      expect(OrderServiceMock.update).toHaveBeenCalledTimes(1);
       expect(OrderServiceMock.update).toHaveBeenCalledWith(
         IdMap.getId("test-order"),
         {
           email: "oliver@test.dk",
         }
-      )
-    })
-  })
+      );
+    });
+  });
 
   describe("handles failed update operation", () => {
     it("throws if metadata is to be updated", async () => {
@@ -51,13 +51,13 @@ describe("POST /admin/orders/:id", () => {
               userId: IdMap.getId("admin_user"),
             },
           },
-        })
+        });
       } catch (error) {
-        expect(error.status).toEqual(400)
+        expect(error.status).toEqual(400);
         expect(error.message).toEqual(
           "Use setMetadata to update metadata fields"
-        )
+        );
       }
-    })
-  })
-})
+    });
+  });
+});

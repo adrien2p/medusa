@@ -14,11 +14,11 @@ import {
   ManyToMany,
   JoinColumn,
   JoinTable,
-} from "typeorm"
-import { ulid } from "ulid"
-import { DbAwareColumn, resolveDbType } from "../utils/db-aware-column"
+} from "typeorm";
+import { ulid } from "ulid";
+import { DbAwareColumn, resolveDbType } from "../utils/db-aware-column";
 
-import { ShippingOption } from "./shipping-option"
+import { ShippingOption } from "./shipping-option";
 
 export enum RequirementType {
   MIN_SUBTOTAL = "min_subtotal",
@@ -28,30 +28,30 @@ export enum RequirementType {
 @Entity()
 export class ShippingOptionRequirement {
   @PrimaryColumn()
-  id: string
+  id: string;
 
   @Index()
   @Column()
-  shipping_option_id: string
+  shipping_option_id: string;
 
   @ManyToOne(() => ShippingOption)
   @JoinColumn({ name: "shipping_option_id" })
-  shipping_option: ShippingOption
+  shipping_option: ShippingOption;
 
   @DbAwareColumn({ type: "enum", enum: RequirementType })
-  type: RequirementType
+  type: RequirementType;
 
   @Column({ type: "int" })
-  amount: number
+  amount: number;
 
   @DeleteDateColumn({ type: resolveDbType("timestamptz") })
-  deleted_at: Date
+  deleted_at: Date;
 
   @BeforeInsert()
   private beforeInsert() {
-    if (this.id) return
-    const id = ulid()
-    this.id = `sor_${id}`
+    if (this.id) return;
+    const id = ulid();
+    this.id = `sor_${id}`;
   }
 }
 

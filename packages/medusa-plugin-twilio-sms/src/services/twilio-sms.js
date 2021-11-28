@@ -1,5 +1,5 @@
-import { BaseService } from "medusa-interfaces"
-import twilio from "twilio"
+import { BaseService } from "medusa-interfaces";
+import twilio from "twilio";
 
 class TwilioSmsService extends BaseService {
   /**
@@ -12,11 +12,11 @@ class TwilioSmsService extends BaseService {
    *    }
    */
   constructor({}, options) {
-    super()
+    super();
 
-    this.options_ = options
+    this.options_ = options;
 
-    this.twilioClient = twilio(options.account_sid, options.auth_token)
+    this.twilioClient = twilio(options.account_sid, options.auth_token);
   }
 
   /**
@@ -27,8 +27,8 @@ class TwilioSmsService extends BaseService {
     return this.twilioClient.messages.create({
       from: this.options_.from_number,
       ...data,
-    })
+    });
   }
 }
 
-export default TwilioSmsService
+export default TwilioSmsService;

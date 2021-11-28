@@ -1,10 +1,10 @@
-import { IdMap } from "medusa-test-utils"
-import { request } from "../../../../../helpers/test-request"
-import { ProductServiceMock } from "../../../../../services/__mocks__/product"
+import { IdMap } from "medusa-test-utils";
+import { request } from "../../../../../helpers/test-request";
+import { ProductServiceMock } from "../../../../../services/__mocks__/product";
 
 describe("POST /admin/products/:id", () => {
   describe("successfully updates a product", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
       subject = await request(
@@ -22,15 +22,15 @@ describe("POST /admin/products/:id", () => {
             },
           },
         }
-      )
-    })
+      );
+    });
 
     it("returns 200", () => {
-      expect(subject.status).toEqual(200)
-    })
+      expect(subject.status).toEqual(200);
+    });
 
     it("calls update", () => {
-      expect(ProductServiceMock.update).toHaveBeenCalledTimes(1)
+      expect(ProductServiceMock.update).toHaveBeenCalledTimes(1);
       expect(ProductServiceMock.update).toHaveBeenCalledWith(
         IdMap.getId("product1"),
         expect.objectContaining({
@@ -38,9 +38,9 @@ describe("POST /admin/products/:id", () => {
           description: "Updated test description",
           handle: "handle",
         })
-      )
-    })
-  })
+      );
+    });
+  });
 
   describe("handles failed update operation", () => {
     it("throws if metadata is to be updated", async () => {
@@ -56,14 +56,14 @@ describe("POST /admin/products/:id", () => {
               userId: IdMap.getId("admin_user"),
             },
           },
-        })
+        });
       } catch (error) {
-        expect(error.status).toEqual(400)
+        expect(error.status).toEqual(400);
         expect(error.message).toEqual(
           "Use setMetadata to update metadata fields"
-        )
+        );
       }
-    })
+    });
 
     it("throws if variants is to be updated", async () => {
       try {
@@ -78,13 +78,13 @@ describe("POST /admin/products/:id", () => {
               userId: IdMap.getId("admin_user"),
             },
           },
-        })
+        });
       } catch (error) {
-        expect(error.status).toEqual(400)
+        expect(error.status).toEqual(400);
         expect(error.message).toEqual(
           "Use addVariant, reorderVariants, removeVariant to update Product Variants"
-        )
+        );
       }
-    })
-  })
-})
+    });
+  });
+});

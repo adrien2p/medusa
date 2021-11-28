@@ -1,4 +1,4 @@
-import { IdMap } from "medusa-test-utils"
+import { IdMap } from "medusa-test-utils";
 
 export const CustomerServiceMock = {
   retrieve: jest.fn().mockImplementation((id) => {
@@ -12,7 +12,7 @@ export const CustomerServiceMock = {
         metadata: {
           stripe_id: "cus_123456789_new",
         },
-      })
+      });
     }
     if (id === IdMap.getId("vvd")) {
       return Promise.resolve({
@@ -22,15 +22,15 @@ export const CustomerServiceMock = {
         email: "virg@vvd.com",
         password_hash: "1234",
         metadata: {},
-      })
+      });
     }
-    return Promise.resolve(undefined)
+    return Promise.resolve(undefined);
   }),
   setMetadata: jest.fn().mockReturnValue(Promise.resolve()),
-}
+};
 
 const mock = jest.fn().mockImplementation(() => {
-  return CustomerServiceMock
-})
+  return CustomerServiceMock;
+});
 
-export default mock
+export default mock;

@@ -1,10 +1,10 @@
-import { IdMap } from "medusa-test-utils"
-import { request } from "../../../../../helpers/test-request"
-import { OrderServiceMock } from "../../../../../services/__mocks__/order"
+import { IdMap } from "medusa-test-utils";
+import { request } from "../../../../../helpers/test-request";
+import { OrderServiceMock } from "../../../../../services/__mocks__/order";
 
 describe("POST /admin/orders/:id/fulfillments/:fulfillment_id/cancel", () => {
   describe("successfully cancels a fulfillment", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
       subject = await request(
@@ -19,23 +19,23 @@ describe("POST /admin/orders/:id/fulfillments/:fulfillment_id/cancel", () => {
             },
           },
         }
-      )
-    })
+      );
+    });
 
     afterAll(() => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     it("calls OrderService cancelFulfillment", () => {
-      expect(OrderServiceMock.cancelFulfillment).toHaveBeenCalledTimes(1)
+      expect(OrderServiceMock.cancelFulfillment).toHaveBeenCalledTimes(1);
       expect(OrderServiceMock.cancelFulfillment).toHaveBeenCalledWith(
         IdMap.getId("order-fulfillment")
-      )
-    })
-  })
+      );
+    });
+  });
 
   describe("Trying to cancel a fulfillment unrelated to the order fails", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
       subject = await request(
@@ -50,15 +50,15 @@ describe("POST /admin/orders/:id/fulfillments/:fulfillment_id/cancel", () => {
             },
           },
         }
-      )
-    })
+      );
+    });
 
     afterAll(() => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     it("returns error", () => {
-      expect(subject.status).toEqual(404)
-    })
-  })
-})
+      expect(subject.status).toEqual(404);
+    });
+  });
+});

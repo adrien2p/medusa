@@ -1,10 +1,10 @@
-import { IdMap } from "medusa-test-utils"
-import { request } from "../../../../../helpers/test-request"
-import { ProductServiceMock } from "../../../../../services/__mocks__/product"
+import { IdMap } from "medusa-test-utils";
+import { request } from "../../../../../helpers/test-request";
+import { ProductServiceMock } from "../../../../../services/__mocks__/product";
 
 describe("GET /admin/products/:id", () => {
   describe("successfully gets a product", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
       subject = await request(
@@ -17,15 +17,15 @@ describe("GET /admin/products/:id", () => {
             },
           },
         }
-      )
-    })
+      );
+    });
 
     afterAll(() => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     it("calls get product from productSerice", () => {
-      expect(ProductServiceMock.retrieve).toHaveBeenCalledTimes(1)
+      expect(ProductServiceMock.retrieve).toHaveBeenCalledTimes(1);
       expect(ProductServiceMock.retrieve).toHaveBeenCalledWith(
         IdMap.getId("product1"),
         {
@@ -64,11 +64,11 @@ describe("GET /admin/products/:id", () => {
             "collection",
           ],
         }
-      )
-    })
+      );
+    });
 
     it("returns product decorated", () => {
-      expect(subject.body.product.id).toEqual(IdMap.getId("product1"))
-    })
-  })
-})
+      expect(subject.body.product.id).toEqual(IdMap.getId("product1"));
+    });
+  });
+});

@@ -1,4 +1,4 @@
-import { PaymentProviderService } from "../../../../services"
+import { PaymentProviderService } from "../../../../services";
 /**
  * @oas [get] /store/payment-providers
  * operationId: "GetStorePaymentProviders"
@@ -22,7 +22,7 @@ import { PaymentProviderService } from "../../../../services"
 export default async (req, res) => {
   const paymentProviderService: PaymentProviderService = req.scope.resolve(
     "paymentProviderService"
-  )
-  const paymentProviders = await paymentProviderService.list()
-  res.status(200).json({ payment_providers: paymentProviders })
-}
+  );
+  const paymentProviders = await paymentProviderService.list();
+  res.status(200).json({ payment_providers: paymentProviders });
+};

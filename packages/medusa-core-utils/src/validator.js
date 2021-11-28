@@ -1,6 +1,6 @@
-import Joi from "joi"
+import Joi from "joi";
 
-Joi.objectId = require("joi-objectid")(Joi)
+Joi.objectId = require("joi-objectid")(Joi);
 
 // if address is a string, we assume that it is an id
 Joi.address = () => {
@@ -10,22 +10,16 @@ Joi.address = () => {
       first_name: Joi.string().required(),
       last_name: Joi.string().required(),
       address_1: Joi.string().required(),
-      address_2: Joi.string()
-        .allow(null, "")
-        .optional(),
+      address_2: Joi.string().allow(null, "").optional(),
       city: Joi.string().required(),
       country_code: Joi.string().required(),
-      province: Joi.string()
-        .allow(null, "")
-        .optional(),
+      province: Joi.string().allow(null, "").optional(),
       postal_code: Joi.string().required(),
       phone: Joi.string().optional(),
-      metadata: Joi.object()
-        .allow(null, {})
-        .optional(),
+      metadata: Joi.object().allow(null, {}).optional(),
     })
-  )
-}
+  );
+};
 
 Joi.dateFilter = () => {
   return Joi.object({
@@ -33,8 +27,8 @@ Joi.dateFilter = () => {
     gt: Joi.alternatives(Joi.date().timestamp("unix"), Joi.date()),
     gte: Joi.alternatives(Joi.date().timestamp("unix"), Joi.date()),
     lte: Joi.alternatives(Joi.date().timestamp("unix"), Joi.date()),
-  })
-}
+  });
+};
 
 Joi.orderFilter = () => {
   return Joi.object().keys({
@@ -93,8 +87,8 @@ Joi.orderFilter = () => {
     canceled_at: Joi.dateFilter(),
     created_at: Joi.dateFilter(),
     updated_at: Joi.dateFilter(),
-  })
-}
+  });
+};
 
 Joi.productFilter = () => {
   return Joi.object().keys({
@@ -103,12 +97,8 @@ Joi.productFilter = () => {
     status: Joi.array()
       .items(Joi.string().valid("proposed", "draft", "published", "rejected"))
       .single(),
-    collection_id: Joi.array()
-      .items(Joi.string())
-      .single(),
-    tags: Joi.array()
-      .items(Joi.string())
-      .single(),
+    collection_id: Joi.array().items(Joi.string()).single(),
+    tags: Joi.array().items(Joi.string()).single(),
     title: Joi.string(),
     description: Joi.string(),
     handle: Joi.string(),
@@ -122,7 +112,7 @@ Joi.productFilter = () => {
     created_at: Joi.dateFilter(),
     updated_at: Joi.dateFilter(),
     deleted_at: Joi.dateFilter(),
-  })
-}
+  });
+};
 
-export default Joi
+export default Joi;

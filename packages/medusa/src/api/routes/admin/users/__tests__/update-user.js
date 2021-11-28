@@ -1,10 +1,10 @@
-import { IdMap } from "medusa-test-utils"
-import { request } from "../../../../../helpers/test-request"
-import { UserServiceMock } from "../../../../../services/__mocks__/user"
+import { IdMap } from "medusa-test-utils";
+import { request } from "../../../../../helpers/test-request";
+import { UserServiceMock } from "../../../../../services/__mocks__/user";
 
 describe("POST /admin/users/:id", () => {
   describe("successful update", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
       subject = await request(
@@ -20,21 +20,21 @@ describe("POST /admin/users/:id", () => {
             },
           },
         }
-      )
-    })
+      );
+    });
 
     it("returns 200", () => {
-      expect(subject.status).toEqual(200)
-    })
+      expect(subject.status).toEqual(200);
+    });
 
     it("calls service method", () => {
-      expect(UserServiceMock.update).toHaveBeenCalledTimes(1)
+      expect(UserServiceMock.update).toHaveBeenCalledTimes(1);
       expect(UserServiceMock.update).toHaveBeenCalledWith(
         IdMap.getId("test-user"),
         {
           name: "Oliver Juhl",
         }
-      )
-    })
-  })
-})
+      );
+    });
+  });
+});

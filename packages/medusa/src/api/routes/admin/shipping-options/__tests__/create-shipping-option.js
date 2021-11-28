@@ -1,13 +1,13 @@
-import { IdMap } from "medusa-test-utils"
-import { request } from "../../../../../helpers/test-request"
-import { ShippingOptionServiceMock } from "../../../../../services/__mocks__/shipping-option"
+import { IdMap } from "medusa-test-utils";
+import { request } from "../../../../../helpers/test-request";
+import { ShippingOptionServiceMock } from "../../../../../services/__mocks__/shipping-option";
 
 describe("POST /admin/shipping-options", () => {
   describe("successful creation", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
-      jest.clearAllMocks()
+      jest.clearAllMocks();
       subject = await request("POST", "/admin/shipping-options", {
         payload: {
           name: "Test option",
@@ -28,15 +28,15 @@ describe("POST /admin/shipping-options", () => {
             userId: IdMap.getId("admin_user"),
           },
         },
-      })
-    })
+      });
+    });
 
     it("returns 200", () => {
-      expect(subject.status).toEqual(200)
-    })
+      expect(subject.status).toEqual(200);
+    });
 
     it("calls service create", () => {
-      expect(ShippingOptionServiceMock.create).toHaveBeenCalledTimes(1)
+      expect(ShippingOptionServiceMock.create).toHaveBeenCalledTimes(1);
       expect(ShippingOptionServiceMock.create).toHaveBeenCalledWith({
         is_return: false,
         admin_only: false,
@@ -53,15 +53,15 @@ describe("POST /admin/shipping-options", () => {
             amount: 1,
           },
         ],
-      })
-    })
-  })
+      });
+    });
+  });
 
   describe("fails on invalid data", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
-      jest.clearAllMocks()
+      jest.clearAllMocks();
       subject = await request("POST", "/admin/shipping-options", {
         payload: {
           price_type: "flat_rate",
@@ -78,15 +78,15 @@ describe("POST /admin/shipping-options", () => {
             userId: IdMap.getId("admin_user"),
           },
         },
-      })
-    })
+      });
+    });
 
     it("returns 400", () => {
-      expect(subject.status).toEqual(400)
-    })
+      expect(subject.status).toEqual(400);
+    });
 
     it("returns error", () => {
-      expect(subject.body.message[0].message).toEqual(`"name" is required`)
-    })
-  })
-})
+      expect(subject.body.message[0].message).toEqual(`"name" is required`);
+    });
+  });
+});

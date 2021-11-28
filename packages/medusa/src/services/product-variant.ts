@@ -1,23 +1,23 @@
-import { MedusaError } from "medusa-core-utils"
-import { BaseService } from "medusa-interfaces"
-import { EntityManager, ILike, IsNull, SelectQueryBuilder } from "typeorm"
-import { MoneyAmount } from "../models/money-amount"
-import { Product } from "../models/product"
-import { ProductOptionValue } from "../models/product-option-value"
-import { ProductVariant } from "../models/product-variant"
-import { MoneyAmountRepository } from "../repositories/money-amount"
-import { ProductRepository } from "../repositories/product"
-import { ProductOptionValueRepository } from "../repositories/product-option-value"
-import { ProductVariantRepository } from "../repositories/product-variant"
-import EventBusService from "../services/event-bus"
-import RegionService from "../services/region"
-import { FindConfig } from "../types/common"
+import { MedusaError } from "medusa-core-utils";
+import { BaseService } from "medusa-interfaces";
+import { EntityManager, ILike, IsNull, SelectQueryBuilder } from "typeorm";
+import { MoneyAmount } from "../models/money-amount";
+import { Product } from "../models/product";
+import { ProductOptionValue } from "../models/product-option-value";
+import { ProductVariant } from "../models/product-variant";
+import { MoneyAmountRepository } from "../repositories/money-amount";
+import { ProductRepository } from "../repositories/product";
+import { ProductOptionValueRepository } from "../repositories/product-option-value";
+import { ProductVariantRepository } from "../repositories/product-variant";
+import EventBusService from "../services/event-bus";
+import RegionService from "../services/region";
+import { FindConfig } from "../types/common";
 import {
   CreateProductVariantInput,
   FilterableProductVariantProps,
   ProductVariantPrice,
   UpdateProductVariantInput,
-} from "../types/product-variant"
+} from "../types/product-variant";
 
 /**
  * Provides layer to manipulate product variants.
@@ -28,15 +28,15 @@ class ProductVariantService extends BaseService {
     UPDATED: "product-variant.updated",
     CREATED: "product-variant.created",
     DELETED: "product-variant.deleted",
-  }
+  };
 
-  private manager_: EntityManager
-  private productVariantRepository_: typeof ProductVariantRepository
-  private productRepository_: typeof ProductRepository
-  private eventBus_: EventBusService
-  private regionService_: RegionService
-  private moneyAmountRepository_: typeof MoneyAmountRepository
-  private productOptionValueRepository_: typeof ProductOptionValueRepository
+  private manager_: EntityManager;
+  private productVariantRepository_: typeof ProductVariantRepository;
+  private productRepository_: typeof ProductRepository;
+  private eventBus_: EventBusService;
+  private regionService_: RegionService;
+  private moneyAmountRepository_: typeof MoneyAmountRepository;
+  private productOptionValueRepository_: typeof ProductOptionValueRepository;
 
   constructor({
     manager,
@@ -47,31 +47,31 @@ class ProductVariantService extends BaseService {
     moneyAmountRepository,
     productOptionValueRepository,
   }) {
-    super()
+    super();
 
     /** @private @const {EntityManager} */
-    this.manager_ = manager
+    this.manager_ = manager;
 
     /** @private @const {ProductVariantModel} */
-    this.productVariantRepository_ = productVariantRepository
+    this.productVariantRepository_ = productVariantRepository;
 
     /** @private @const {ProductModel} */
-    this.productRepository_ = productRepository
+    this.productRepository_ = productRepository;
 
     /** @private @const {EventBus} */
-    this.eventBus_ = eventBusService
+    this.eventBus_ = eventBusService;
 
     /** @private @const {RegionService} */
-    this.regionService_ = regionService
+    this.regionService_ = regionService;
 
-    this.moneyAmountRepository_ = moneyAmountRepository
+    this.moneyAmountRepository_ = moneyAmountRepository;
 
-    this.productOptionValueRepository_ = productOptionValueRepository
+    this.productOptionValueRepository_ = productOptionValueRepository;
   }
 
   withTransaction(transactionManager: EntityManager): ProductVariantService {
     if (!transactionManager) {
-      return this
+      return this;
     }
 
     const cloned = new ProductVariantService({
@@ -82,11 +82,11 @@ class ProductVariantService extends BaseService {
       regionService: this.regionService_,
       moneyAmountRepository: this.moneyAmountRepository_,
       productOptionValueRepository: this.productOptionValueRepository_,
-    })
+    });
 
-    cloned.transactionManager_ = transactionManager
+    cloned.transactionManager_ = transactionManager;
 
-    return cloned
+    return cloned;
   }
 
   /**
@@ -101,19 +101,19 @@ class ProductVariantService extends BaseService {
   ): Promise<ProductVariant> {
     const variantRepo = this.manager_.getCustomRepository(
       this.productVariantRepository_
-    )
-    const validatedId = this.validateId_(variantId)
-    const query = this.buildQuery_({ id: validatedId }, config)
-    const variant = await variantRepo.findOne(query)
+    );
+    const validatedId = this.validateId_(variantId);
+    const query = this.buildQuery_({ id: validatedId }, config);
+    const variant = await variantRepo.findOne(query);
 
     if (!variant) {
       throw new MedusaError(
         MedusaError.Types.NOT_FOUND,
         `Variant with id: ${variantId} was not found`
-      )
+      );
     }
 
-    return variant
+    return variant;
   }
 
   /**
@@ -128,18 +128,18 @@ class ProductVariantService extends BaseService {
   ): Promise<ProductVariant> {
     const variantRepo = this.manager_.getCustomRepository(
       this.productVariantRepository_
-    )
-    const query = this.buildQuery_({ sku }, config)
-    const variant = await variantRepo.findOne(query)
+    );
+    const query = this.buildQuery_({ sku }, config);
+    const variant = await variantRepo.findOne(query);
 
     if (!variant) {
       throw new MedusaError(
         MedusaError.Types.NOT_FOUND,
         `Variant with sku: ${sku} was not found`
-      )
+      );
     }
 
-    return variant
+    return variant;
   }
 
   /**
@@ -154,32 +154,32 @@ class ProductVariantService extends BaseService {
     variant: CreateProductVariantInput
   ): Promise<ProductVariant> {
     return this.atomicPhase_(async (manager: EntityManager) => {
-      const productRepo = manager.getCustomRepository(this.productRepository_)
+      const productRepo = manager.getCustomRepository(this.productRepository_);
       const variantRepo = manager.getCustomRepository(
         this.productVariantRepository_
-      )
+      );
 
-      const { prices, ...rest } = variant
+      const { prices, ...rest } = variant;
 
-      let product = productOrProductId as Product
+      let product = productOrProductId;
 
       if (typeof product === `string`) {
         product = (await productRepo.findOne({
           where: { id: productOrProductId },
           relations: ["variants", "variants.options", "options"],
-        })) as Product
+        })) as Product;
       } else if (!product.id) {
         throw new MedusaError(
           MedusaError.Types.INVALID_DATA,
           `Product id missing`
-        )
+        );
       }
 
       if (product.options.length !== variant.options.length) {
         throw new MedusaError(
           MedusaError.Types.INVALID_DATA,
           `Product options length does not match variant options length. Product has ${product.options.length} and variant has ${variant.options.length}.`
-        )
+        );
       }
 
       product.options.forEach((option) => {
@@ -187,39 +187,39 @@ class ProductVariantService extends BaseService {
           throw new MedusaError(
             MedusaError.Types.INVALID_DATA,
             `Variant options do not contain value for ${option.title}`
-          )
+          );
         }
-      })
+      });
 
       const variantExists = product.variants.find((v) => {
         return v.options.every((option) => {
           const variantOption = variant.options.find(
             (o) => option.option_id === o.option_id
-          )
+          );
 
-          return option.value === variantOption?.value
-        })
-      })
+          return option.value === variantOption?.value;
+        });
+      });
 
       if (variantExists) {
         throw new MedusaError(
           MedusaError.Types.DUPLICATE_ERROR,
           `Variant with title ${variantExists.title} with provided options already exists`
-        )
+        );
       }
 
       if (!rest.variant_rank) {
-        rest.variant_rank = product.variants.length
+        rest.variant_rank = product.variants.length;
       }
 
       const toCreate = {
         ...rest,
         product_id: product.id,
-      }
+      };
 
-      const productVariant = variantRepo.create(toCreate)
+      const productVariant = variantRepo.create(toCreate);
 
-      const result = await variantRepo.save(productVariant)
+      const result = await variantRepo.save(productVariant);
 
       if (prices) {
         for (const price of prices) {
@@ -228,9 +228,9 @@ class ProductVariantService extends BaseService {
               amount: price.amount,
               region_id: price.region_id,
               sale_amount: price.sale_amount,
-            })
+            });
           } else {
-            await this.setCurrencyPrice(result.id, price)
+            await this.setCurrencyPrice(result.id, price);
           }
         }
       }
@@ -240,10 +240,10 @@ class ProductVariantService extends BaseService {
         .emit(ProductVariantService.Events.CREATED, {
           id: result.id,
           product_id: result.product_id,
-        })
+        });
 
-      return result
-    })
+      return result;
+    });
   }
 
   /**
@@ -261,19 +261,19 @@ class ProductVariantService extends BaseService {
     return this.atomicPhase_(async (manager: EntityManager) => {
       const variantRepo = manager.getCustomRepository(
         this.productVariantRepository_
-      )
+      );
 
-      let variant = variantOrVariantId as ProductVariant
+      let variant = variantOrVariantId as ProductVariant;
       if (typeof variant === `string`) {
-        variant = await this.retrieve(variantOrVariantId as string)
+        variant = await this.retrieve(variantOrVariantId as string);
       } else if (!variant.id) {
         throw new MedusaError(
           MedusaError.Types.INVALID_DATA,
           `Variant id missing`
-        )
+        );
       }
 
-      const { prices, options, metadata, inventory_quantity, ...rest } = update
+      const { prices, options, metadata, inventory_quantity, ...rest } = update;
 
       if (prices) {
         for (const price of prices) {
@@ -282,9 +282,9 @@ class ProductVariantService extends BaseService {
               region_id: price.region_id,
               amount: price.amount,
               sale_amount: price.sale_amount || undefined,
-            })
+            });
           } else {
-            await this.setCurrencyPrice(variant.id, price)
+            await this.setCurrencyPrice(variant.id, price);
           }
         }
       }
@@ -295,23 +295,23 @@ class ProductVariantService extends BaseService {
             variant.id,
             option.option_id,
             option.value
-          )
+          );
         }
       }
 
       if (metadata) {
-        variant.metadata = this.setMetadata_(variant, metadata)
+        variant.metadata = this.setMetadata_(variant, metadata);
       }
 
       if (typeof inventory_quantity === "number") {
-        variant.inventory_quantity = inventory_quantity
+        variant.inventory_quantity = inventory_quantity;
       }
 
       for (const [key, value] of Object.entries(rest)) {
-        variant[key] = value
+        variant[key] = value;
       }
 
-      const result = await variantRepo.save(variant)
+      const result = await variantRepo.save(variant);
 
       await this.eventBus_
         .withTransaction(manager)
@@ -319,9 +319,9 @@ class ProductVariantService extends BaseService {
           id: result.id,
           product_id: result.product_id,
           fields: Object.keys(update),
-        })
-      return result
-    })
+        });
+      return result;
+    });
   }
 
   /**
@@ -337,7 +337,7 @@ class ProductVariantService extends BaseService {
     return this.atomicPhase_(async (manager: EntityManager) => {
       const moneyAmountRepo = manager.getCustomRepository(
         this.moneyAmountRepository_
-      )
+      );
 
       let moneyAmount = await moneyAmountRepo.findOne({
         where: {
@@ -345,21 +345,21 @@ class ProductVariantService extends BaseService {
           variant_id: variantId,
           region_id: IsNull(),
         },
-      })
+      });
 
       if (!moneyAmount) {
         moneyAmount = moneyAmountRepo.create({
           ...price,
           currency_code: price.currency_code?.toLowerCase(),
           variant_id: variantId,
-        })
+        });
       } else {
-        moneyAmount.amount = price.amount
-        moneyAmount.sale_amount = price.sale_amount
+        moneyAmount.amount = price.amount;
+        moneyAmount.sale_amount = price.sale_amount;
       }
 
-      return await moneyAmountRepo.save(moneyAmount)
-    })
+      return await moneyAmountRepo.save(moneyAmount);
+    });
   }
 
   /**
@@ -374,23 +374,23 @@ class ProductVariantService extends BaseService {
     return this.atomicPhase_(async (manager: EntityManager) => {
       const moneyAmountRepo = manager.getCustomRepository(
         this.moneyAmountRepository_
-      )
+      );
 
       const region = await this.regionService_
         .withTransaction(manager)
-        .retrieve(regionId)
+        .retrieve(regionId);
 
       // Find region price based on region id
       let moneyAmount = await moneyAmountRepo.findOne({
         where: { region_id: regionId, variant_id: variantId },
-      })
+      });
 
       // If no price could be find based on region id, we try to fetch
       // based on the region currency code
       if (!moneyAmount) {
         moneyAmount = await moneyAmountRepo.findOne({
           where: { variant_id: variantId, currency_code: region.currency_code },
-        })
+        });
       }
 
       // Still, if no price is found, we throw
@@ -398,16 +398,16 @@ class ProductVariantService extends BaseService {
         throw new MedusaError(
           MedusaError.Types.NOT_FOUND,
           `A price for region: ${region.name} could not be found`
-        )
+        );
       }
 
       // Always return sale price, if present
       if (moneyAmount.sale_amount) {
-        return moneyAmount.sale_amount
+        return moneyAmount.sale_amount;
       }
 
-      return moneyAmount.amount
-    })
+      return moneyAmount.amount;
+    });
   }
 
   /**
@@ -423,28 +423,28 @@ class ProductVariantService extends BaseService {
     return this.atomicPhase_(async (manager: EntityManager) => {
       const moneyAmountRepo = manager.getCustomRepository(
         this.moneyAmountRepository_
-      )
+      );
 
       let moneyAmount = await moneyAmountRepo.findOne({
         where: {
           variant_id: variantId,
           region_id: price.region_id,
         },
-      })
+      });
 
       if (!moneyAmount) {
         moneyAmount = moneyAmountRepo.create({
           ...price,
           variant_id: variantId,
-        })
+        });
       } else {
-        moneyAmount.amount = price.amount
-        moneyAmount.sale_amount = price.sale_amount
+        moneyAmount.amount = price.amount;
+        moneyAmount.sale_amount = price.sale_amount;
       }
 
-      const result = await moneyAmountRepo.save(moneyAmount)
-      return result
-    })
+      const result = await moneyAmountRepo.save(moneyAmount);
+      return result;
+    });
   }
 
   /**
@@ -463,23 +463,23 @@ class ProductVariantService extends BaseService {
     return this.atomicPhase_(async (manager: EntityManager) => {
       const productOptionValueRepo = manager.getCustomRepository(
         this.productOptionValueRepository_
-      )
+      );
 
       const productOptionValue = await productOptionValueRepo.findOne({
         where: { variant_id: variantId, option_id: optionId },
-      })
+      });
 
       if (!productOptionValue) {
         throw new MedusaError(
           MedusaError.Types.NOT_FOUND,
           `Product option value not found`
-        )
+        );
       }
 
-      productOptionValue.value = optionValue
+      productOptionValue.value = optionValue;
 
-      return await productOptionValueRepo.save(productOptionValue)
-    })
+      return await productOptionValueRepo.save(productOptionValue);
+    });
   }
 
   /**
@@ -501,16 +501,16 @@ class ProductVariantService extends BaseService {
     return this.atomicPhase_(async (manager: EntityManager) => {
       const productOptionValueRepo = manager.getCustomRepository(
         this.productOptionValueRepository_
-      )
+      );
 
       const productOptionValue = productOptionValueRepo.create({
         variant_id: variantId,
         option_id: optionId,
         value: optionValue,
-      })
+      });
 
-      return await productOptionValueRepo.save(productOptionValue)
-    })
+      return await productOptionValueRepo.save(productOptionValue);
+    });
   }
 
   /**
@@ -523,23 +523,23 @@ class ProductVariantService extends BaseService {
   async deleteOptionValue(variantId: string, optionId: string): Promise<void> {
     return this.atomicPhase_(async (manager: EntityManager) => {
       const productOptionValueRepo: ProductOptionValueRepository =
-        manager.getCustomRepository(this.productOptionValueRepository_)
+        manager.getCustomRepository(this.productOptionValueRepository_);
 
       const productOptionValue = await productOptionValueRepo.findOne({
         where: {
           variant_id: variantId,
           option_id: optionId,
         },
-      })
+      });
 
       if (!productOptionValue) {
-        return Promise.resolve()
+        return Promise.resolve();
       }
 
-      await productOptionValueRepo.softRemove(productOptionValue)
+      await productOptionValueRepo.softRemove(productOptionValue);
 
-      return Promise.resolve()
-    })
+      return Promise.resolve();
+    });
   }
 
   /**
@@ -553,39 +553,39 @@ class ProductVariantService extends BaseService {
   ): Promise<ProductVariant[]> {
     const productVariantRepo = this.manager_.getCustomRepository(
       this.productVariantRepository_
-    )
+    );
 
-    let q: string | undefined
+    let q: string | undefined;
     if ("q" in selector) {
-      q = selector.q
-      delete selector.q
+      q = selector.q;
+      delete selector.q;
     }
 
-    const query = this.buildQuery_(selector, config)
+    const query = this.buildQuery_(selector, config);
 
     if (q) {
-      const where = query.where
+      const where = query.where;
 
-      delete where.sku
-      delete where.title
+      delete where.sku;
+      delete where.title;
 
       query.join = {
         alias: "variant",
         innerJoin: {
           product: "variant.product",
         },
-      }
+      };
 
       query.where = (qb: SelectQueryBuilder<ProductVariant>): void => {
         qb.where(where).andWhere([
           { sku: ILike(`%${q}%`) },
           { title: ILike(`%${q}%`) },
           { product: { title: ILike(`%${q}%`) } },
-        ])
-      }
+        ]);
+      };
     }
 
-    return await productVariantRepo.find(query)
+    return await productVariantRepo.find(query);
   }
 
   /**
@@ -599,25 +599,25 @@ class ProductVariantService extends BaseService {
     return this.atomicPhase_(async (manager: EntityManager) => {
       const variantRepo = manager.getCustomRepository(
         this.productVariantRepository_
-      )
+      );
 
-      const variant = await variantRepo.findOne({ where: { id: variantId } })
+      const variant = await variantRepo.findOne({ where: { id: variantId } });
 
       if (!variant) {
-        return Promise.resolve()
+        return Promise.resolve();
       }
 
-      await variantRepo.softRemove(variant)
+      await variantRepo.softRemove(variant);
 
       await this.eventBus_
         .withTransaction(manager)
         .emit(ProductVariantService.Events.DELETED, {
           id: variant.id,
           product_id: variant.product_id,
-        })
+        });
 
-      return Promise.resolve()
-    })
+      return Promise.resolve();
+    });
   }
 
   /**
@@ -627,26 +627,24 @@ class ProductVariantService extends BaseService {
    * @return {Object} updated metadata object
    */
   setMetadata_(variant: ProductVariant, metadata: object): object {
-    const existing = variant.metadata || {}
-    const newData = {}
+    const existing = variant.metadata || {};
+    const newData = {};
     for (const [key, value] of Object.entries(metadata)) {
       if (typeof key !== "string") {
         throw new MedusaError(
           MedusaError.Types.INVALID_ARGUMENT,
           "Key type is invalid. Metadata keys must be strings"
-        )
+        );
       }
 
-      newData[key] = value
+      newData[key] = value;
     }
 
-    const updated = {
+    return {
       ...existing,
       ...newData,
-    }
-
-    return updated
+    };
   }
 }
 
-export default ProductVariantService
+export default ProductVariantService;

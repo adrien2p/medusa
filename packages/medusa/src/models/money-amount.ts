@@ -9,65 +9,65 @@ import {
   ManyToOne,
   PrimaryColumn,
   UpdateDateColumn,
-} from "typeorm"
-import { ulid } from "ulid"
-import { resolveDbType } from "../utils/db-aware-column"
-import { Currency } from "./currency"
-import { ProductVariant } from "./product-variant"
-import { Region } from "./region"
+} from "typeorm";
+import { ulid } from "ulid";
+import { resolveDbType } from "../utils/db-aware-column";
+import { Currency } from "./currency";
+import { ProductVariant } from "./product-variant";
+import { Region } from "./region";
 
 @Entity()
 export class MoneyAmount {
   @PrimaryColumn()
-  id: string
+  id: string;
 
   @Column()
-  currency_code: string
+  currency_code: string;
 
   @ManyToOne(() => Currency)
   @JoinColumn({ name: "currency_code", referencedColumnName: "code" })
-  currency: Currency
+  currency: Currency;
 
   @Column({ type: "int" })
-  amount: number
+  amount: number;
 
   @Column({ type: "int", nullable: true, default: null })
-  sale_amount?: number
+  sale_amount?: number;
 
   @Index()
   @Column({ nullable: true })
-  variant_id: string
+  variant_id: string;
 
   @ManyToOne(() => ProductVariant, (variant) => variant.prices, {
     onDelete: "CASCADE",
   })
   @JoinColumn({ name: "variant_id" })
-  variant: ProductVariant
+  variant: ProductVariant;
 
   @Index()
   @Column({ nullable: true })
-  region_id: string
+  region_id: string;
 
   @ManyToOne(() => Region)
   @JoinColumn({ name: "region_id" })
-  region: Region
+  region: Region;
 
   @CreateDateColumn({ type: resolveDbType("timestamptz") })
-  created_at: Date
+  created_at: Date;
 
   @UpdateDateColumn({ type: resolveDbType("timestamptz") })
-  updated_at: Date
+  updated_at: Date;
 
   @DeleteDateColumn({ type: resolveDbType("timestamptz") })
-  deleted_at: Date
+  deleted_at: Date;
 
   @BeforeInsert()
   private beforeInsert(): undefined | void {
     if (this.id) {
-      return
+      return;
     }
-    const id = ulid()
-    this.id = `ma_${id}`
+    const id = ulid();
+    this.id = `ma_${id}`;
   }
 }
 

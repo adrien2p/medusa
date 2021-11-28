@@ -14,35 +14,35 @@ import {
   ManyToMany,
   JoinColumn,
   JoinTable,
-} from "typeorm"
-import { ulid } from "ulid"
-import { DbAwareColumn } from "../utils/db-aware-column"
+} from "typeorm";
+import { ulid } from "ulid";
+import { DbAwareColumn } from "../utils/db-aware-column";
 
 @Entity()
 export class Oauth {
   @PrimaryColumn()
-  id: string
+  id: string;
 
   @Column()
-  display_name: string
+  display_name: string;
 
   @Index({ unique: true })
   @Column()
-  application_name: string
+  application_name: string;
 
   @Column({ nullable: true })
-  install_url: string
+  install_url: string;
 
   @Column({ nullable: true })
-  uninstall_url: string
+  uninstall_url: string;
 
   @DbAwareColumn({ type: "jsonb", nullable: true })
-  data: any
+  data: any;
 
   @BeforeInsert()
   private beforeInsert() {
-    if (this.id) return
-    const id = ulid()
-    this.id = `oauth_${id}`
+    if (this.id) return;
+    const id = ulid();
+    this.id = `oauth_${id}`;
   }
 }

@@ -1,14 +1,14 @@
-import ProductService from "../services/product"
-import { indexTypes } from "medusa-core-utils"
+import ProductService from "../services/product";
+import { indexTypes } from "medusa-core-utils";
 
 async function loadProductsIntoSearchEngine(container) {
-  const searchService = container.resolve("searchService")
-  const productService = container.resolve("productService")
+  const searchService = container.resolve("searchService");
+  const productService = container.resolve("productService");
 
-  const TAKE = 20
-  let hasMore = true
+  const TAKE = 20;
+  let hasMore = true;
 
-  let lastSeenId = ""
+  let lastSeenId = "";
 
   while (hasMore) {
     const products = await productService.list(
@@ -43,30 +43,30 @@ async function loadProductsIntoSearchEngine(container) {
         take: TAKE,
         order: { id: "ASC" },
       }
-    )
+    );
 
     if (products.length > 0) {
       await searchService.addDocuments(
         ProductService.IndexName,
         products,
         indexTypes.products
-      )
-      lastSeenId = products[products.length - 1].id
+      );
+      lastSeenId = products[products.length - 1].id;
     } else {
-      hasMore = false
+      hasMore = false;
     }
   }
 }
 
 export default async ({ container }) => {
-  const searchService = container.resolve("searchService")
-  const logger = container.resolve("logger")
+  const searchService = container.resolve("searchService");
+  const logger = container.resolve("logger");
   if (searchService.isDefault) {
     logger.warn(
       "No search engine provider was found: make sure to include a search plugin to enable searching"
-    )
-    return
+    );
+    return;
   }
 
-  await loadProductsIntoSearchEngine(container)
-}
+  await loadProductsIntoSearchEngine(container);
+};

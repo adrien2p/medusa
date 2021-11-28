@@ -1,53 +1,53 @@
-import { FulfillmentService } from "medusa-interfaces"
-import Webshipper from "../utils/webshipper"
+import { FulfillmentService } from "medusa-interfaces";
+import Webshipper from "../utils/webshipper";
 
 class WebshipperFulfillmentService extends FulfillmentService {
-  static identifier = "webshipper"
+  static identifier = "webshipper";
 
   constructor({ logger, claimService, swapService, orderService }, options) {
-    super()
+    super();
 
-    this.options_ = options
+    this.options_ = options;
 
     if (!options.coo_countries) {
-      this.options_.coo_countries = ["all"]
+      this.options_.coo_countries = ["all"];
     } else if (Array.isArray(options.coo_countries)) {
       this.options_.coo_countries = options.coo_countries.map((c) =>
         c.toLowerCase()
-      )
+      );
     } else if (typeof options.coo_countries === "string") {
-      this.options_.coo_countries = [options.coo_countries]
+      this.options_.coo_countries = [options.coo_countries];
     }
 
     /** @private @const {logger} */
-    this.logger_ = logger
+    this.logger_ = logger;
 
     /** @private @const {OrderService} */
-    this.orderService_ = orderService
+    this.orderService_ = orderService;
 
     /** @private @const {SwapService} */
-    this.swapService_ = swapService
+    this.swapService_ = swapService;
 
     /** @private @const {SwapService} */
-    this.claimService_ = claimService
+    this.claimService_ = claimService;
 
     /** @private @const {AxiosClient} */
     this.client_ = new Webshipper({
       account: this.options_.account,
       token: this.options_.api_token,
-    })
+    });
   }
 
   registerInvoiceGenerator(service) {
     if (typeof service.createInvoice === "function") {
-      this.invoiceGenerator_ = service
+      this.invoiceGenerator_ = service;
     }
   }
 
   async getFulfillmentOptions() {
     const rates = await this.client_.shippingRates.list({
       order_channel_id: this.options_.order_channel_id,
-    })
+    });
 
     return rates.data.map((r) => ({
       id: r.attributes.name,
@@ -56,13 +56,13 @@ class WebshipperFulfillmentService extends FulfillmentService {
       require_drop_point: r.attributes.require_drop_point,
       carrier_id: r.attributes.carrier_id,
       is_return: r.attributes.is_return,
-    }))
+    }));
   }
 
   async validateFulfillmentData(optionData, data, _) {
     if (optionData.require_drop_point) {
       if (!data.drop_point_id) {
-        throw new Error("Must have drop point id")
+        throw new Error("Must have drop point id");
       } else {
         // TODO: validate that the drop point exists
       }
@@ -71,19 +71,19 @@ class WebshipperFulfillmentService extends FulfillmentService {
     return {
       ...optionData,
       ...data,
-    }
+    };
   }
 
   async validateOption(data) {
     const rate = await this.client_.shippingRates
       .retrieve(data.webshipper_id)
-      .catch(() => undefined)
-    return !!rate
+      .catch(() => undefined);
+    return !!rate;
   }
 
   canCalculate() {
     // Return whether or not we are able to calculate dynamically
-    return false
+    return false;
   }
 
   calculatePrice() {
@@ -95,13 +95,13 @@ class WebshipperFulfillmentService extends FulfillmentService {
    * return lines.
    */
   async createReturn(returnOrder) {
-    let orderId
+    let orderId;
     if (returnOrder.order_id) {
-      orderId = returnOrder.order_id
+      orderId = returnOrder.order_id;
     } else if (returnOrder.swap) {
-      orderId = returnOrder.swap.order_id
+      orderId = returnOrder.swap.order_id;
     } else if (returnOrder.claim_order) {
-      orderId = returnOrder.claim_order.order_id
+      orderId = returnOrder.claim_order.order_id;
     }
 
     const fromOrder = await this.orderService_.retrieve(orderId, {
@@ -113,9 +113,9 @@ class WebshipperFulfillmentService extends FulfillmentService {
         "shipping_address",
         "returns",
       ],
-    })
+    });
 
-    const methodData = returnOrder.shipping_method.data
+    const methodData = returnOrder.shipping_method.data;
 
     const relationships = {
       shipping_rate: {
@@ -124,35 +124,35 @@ class WebshipperFulfillmentService extends FulfillmentService {
           id: methodData.webshipper_id,
         },
       },
-    }
+    };
 
     const existing =
-      fromOrder.metadata && fromOrder.metadata.webshipper_order_id
+      fromOrder.metadata && fromOrder.metadata.webshipper_order_id;
     if (existing) {
       relationships.order = {
         data: {
           type: "orders",
           id: existing,
         },
-      }
+      };
     }
 
-    let docs = []
+    let docs = [];
     if (this.invoiceGenerator_) {
       const base64Invoice = await this.invoiceGenerator_.createReturnInvoice(
         fromOrder,
         returnOrder.items
-      )
+      );
 
       docs.push({
         document_size: "A4",
         document_format: "PDF",
         base64: base64Invoice,
         document_type: "invoice",
-      })
+      });
     }
 
-    const { shipping_address } = fromOrder
+    const { shipping_address } = fromOrder;
     const returnShipment = {
       type: "shipments",
       attributes: {
@@ -184,7 +184,7 @@ class WebshipperFulfillmentService extends FulfillmentService {
                 unit_price: item.unit_price / 100,
                 vat_percent: fromOrder.tax_rate,
                 currency: fromOrder.currency_code.toUpperCase(),
-              }
+              };
             }),
           },
         ],
@@ -204,44 +204,44 @@ class WebshipperFulfillmentService extends FulfillmentService {
         delivery_address: this.options_.return_address,
       },
       relationships,
-    }
+    };
 
     return this.client_.shipments
       .create(returnShipment)
       .then((result) => {
-        return result.data
+        return result.data;
       })
       .catch((err) => {
-        this.logger_.warn(err.response)
-        throw err
-      })
+        this.logger_.warn(err.response);
+        throw err;
+      });
   }
 
   async getReturnDocuments(data) {
-    const shipment = await this.client_.shipments.retrieve(data.id)
+    const shipment = await this.client_.shipments.retrieve(data.id);
     const labels = await this.retrieveRelationship(
       shipment.data.relationships.labels
-    ).then((res) => res.data)
+    ).then((res) => res.data);
     const docs = await this.retrieveRelationship(
       shipment.data.relationships.documents
-    ).then((res) => res.data)
-    const toReturn = []
+    ).then((res) => res.data);
+    const toReturn = [];
     for (const d of labels) {
       toReturn.push({
         name: "Return label",
         base_64: d.attributes.base64,
         type: "pdf",
-      })
+      });
     }
     for (const d of docs) {
       toReturn.push({
         name: d.attributes.document_type,
         base_64: d.attributes.base64,
         type: "pdf",
-      })
+      });
     }
 
-    return toReturn
+    return toReturn;
   }
 
   async createFulfillment(
@@ -251,24 +251,24 @@ class WebshipperFulfillmentService extends FulfillmentService {
     fulfillment
   ) {
     const existing =
-      fromOrder.metadata && fromOrder.metadata.webshipper_order_id
+      fromOrder.metadata && fromOrder.metadata.webshipper_order_id;
 
-    let webshipperOrder
+    let webshipperOrder;
     if (existing) {
-      webshipperOrder = await this.client_.orders.retrieve(existing)
+      webshipperOrder = await this.client_.orders.retrieve(existing);
     }
 
-    const { shipping_address } = fromOrder
+    const { shipping_address } = fromOrder;
 
     if (!webshipperOrder) {
-      let invoice
-      let certificateOfOrigin
+      let invoice;
+      let certificateOfOrigin;
 
       if (this.invoiceGenerator_) {
         const base64Invoice = await this.invoiceGenerator_.createInvoice(
           fromOrder,
           fulfillmentItems
-        )
+        );
 
         invoice = await this.client_.documents
           .create({
@@ -281,10 +281,10 @@ class WebshipperFulfillmentService extends FulfillmentService {
             },
           })
           .catch((err) => {
-            throw err
-          })
+            throw err;
+          });
 
-        const cooCountries = this.options_.coo_countries
+        const cooCountries = this.options_.coo_countries;
         if (
           (cooCountries.includes("all") ||
             cooCountries.includes(
@@ -296,7 +296,7 @@ class WebshipperFulfillmentService extends FulfillmentService {
             await this.invoiceGenerator_.createCertificateOfOrigin(
               fromOrder,
               fulfillmentItems
-            )
+            );
 
           certificateOfOrigin = await this.client_.documents
             .create({
@@ -309,18 +309,18 @@ class WebshipperFulfillmentService extends FulfillmentService {
               },
             })
             .catch((err) => {
-              throw err
-            })
+              throw err;
+            });
         }
       }
 
-      let id = fulfillment.id
-      let visible_ref = `${fromOrder.display_id}-${id.substr(id.length - 4)}`
-      let ext_ref = `${fromOrder.id}.${fulfillment.id}`
+      let id = fulfillment.id;
+      let visible_ref = `${fromOrder.display_id}-${id.substr(id.length - 4)}`;
+      let ext_ref = `${fromOrder.id}.${fulfillment.id}`;
 
       if (fromOrder.is_swap) {
-        ext_ref = `${fromOrder.id}.${fulfillment.id}`
-        visible_ref = `S-${fromOrder.display_id}`
+        ext_ref = `${fromOrder.id}.${fulfillment.id}`;
+        visible_ref = `S-${fromOrder.display_id}`;
       }
 
       const newOrder = {
@@ -342,7 +342,7 @@ class WebshipperFulfillmentService extends FulfillmentService {
                 item.variant.hs_code || item.variant.product.hs_code,
               unit_price: item.unit_price / 100,
               vat_percent: fromOrder.tax_rate,
-            }
+            };
           }),
           delivery_address: {
             att_contact: `${shipping_address.first_name} ${shipping_address.last_name}`,
@@ -371,7 +371,7 @@ class WebshipperFulfillmentService extends FulfillmentService {
             },
           },
         },
-      }
+      };
 
       if (methodData.require_drop_point) {
         newOrder.attributes.drop_point = {
@@ -381,53 +381,53 @@ class WebshipperFulfillmentService extends FulfillmentService {
           address_1: methodData.drop_point_address_1,
           city: methodData.drop_point_city,
           country_code: methodData.drop_point_country_code.toUpperCase(),
-        }
+        };
       }
 
       if (invoice || certificateOfOrigin) {
-        const docData = []
+        const docData = [];
         if (invoice) {
           docData.push({
             id: invoice.data.id,
             type: invoice.data.type,
-          })
+          });
         }
 
         if (certificateOfOrigin) {
           docData.push({
             id: certificateOfOrigin.data.id,
             type: certificateOfOrigin.data.type,
-          })
+          });
         }
 
         newOrder.relationships.documents = {
           data: docData,
-        }
+        };
       }
 
       return this.client_.orders
         .create(newOrder)
         .then((result) => {
-          return result.data
+          return result.data;
         })
         .catch((err) => {
-          this.logger_.warn(err.response)
-          throw err
-        })
+          this.logger_.warn(err.response);
+          throw err;
+        });
     }
   }
 
   async handleWebhook(_, body) {
     const wsOrder = await this.retrieveRelationship(
       body.data.relationships.order
-    )
+    );
     if (wsOrder.data && wsOrder.data.attributes.ext_ref) {
       const trackingLinks = body.data.attributes.tracking_links.map((l) => ({
         url: l.url,
         tracking_number: l.number,
-      }))
+      }));
       const [orderId, fulfillmentIndex] =
-        wsOrder.data.attributes.ext_ref.split(".")
+        wsOrder.data.attributes.ext_ref.split(".");
 
       if (orderId.charAt(0).toLowerCase() === "s") {
         if (fulfillmentIndex.startsWith("ful")) {
@@ -435,43 +435,43 @@ class WebshipperFulfillmentService extends FulfillmentService {
             orderId,
             fulfillmentIndex,
             trackingLinks
-          )
+          );
         } else {
           const swap = await this.swapService_.retrieve(orderId.substring(1), {
             relations: ["fulfillments"],
-          })
-          const fulfillment = swap.fulfillments[fulfillmentIndex]
+          });
+          const fulfillment = swap.fulfillments[fulfillmentIndex];
           return this.swapService_.createShipment(
             swap.id,
             fulfillment.id,
             trackingLinks
-          )
+          );
         }
       } else if (orderId.charAt(0).toLowerCase() === "c") {
         return this.claimService_.createShipment(
           orderId,
           fulfillmentIndex,
           trackingLinks
-        )
+        );
       } else {
         if (fulfillmentIndex.startsWith("ful")) {
           return this.orderService_.createShipment(
             orderId,
             fulfillmentIndex,
             trackingLinks
-          )
+          );
         } else {
           const order = await this.orderService_.retrieve(orderId, {
             relations: ["fulfillments"],
-          })
+          });
 
-          const fulfillment = order.fulfillments[fulfillmentIndex]
+          const fulfillment = order.fulfillments[fulfillmentIndex];
           if (fulfillment) {
             return this.orderService_.createShipment(
               order.id,
               fulfillment.id,
               trackingLinks
-            )
+            );
           }
         }
       }
@@ -484,37 +484,37 @@ class WebshipperFulfillmentService extends FulfillmentService {
   async retrieveDocuments(fulfillmentData, documentType) {
     switch (documentType) {
       case "label":
-        const labelRelation = fulfillmentData?.relationships?.labels
+        const labelRelation = fulfillmentData?.relationships?.labels;
         if (labelRelation) {
           const docs = await this.retrieveRelationship(labelRelation)
             .then(({ data }) => data)
-            .catch((_) => [])
+            .catch((_) => []);
 
           return docs.map((d) => ({
             name: d.attributes.document_type,
             base_64: d.attributes.base64,
             type: "application/pdf",
-          }))
+          }));
         }
-        return []
+        return [];
 
       case "invoice":
-        const docRelation = fulfillmentData?.relationships?.documents
+        const docRelation = fulfillmentData?.relationships?.documents;
         if (docRelation) {
           const docs = await this.retrieveRelationship(docRelation)
             .then(({ data }) => data)
-            .catch((_) => [])
+            .catch((_) => []);
 
           return docs.map((d) => ({
             name: d.attributes.document_type,
             base_64: d.attributes.base64,
             type: "application/pdf",
-          }))
+          }));
         }
-        return []
+        return [];
 
       default:
-        return []
+        return [];
     }
   }
 
@@ -524,15 +524,15 @@ class WebshipperFulfillmentService extends FulfillmentService {
    *   database.
    */
   async getFulfillmentDocuments(data) {
-    const order = await this.client_.orders.retrieve(data.id)
+    const order = await this.client_.orders.retrieve(data.id);
     const docs = await this.retrieveRelationship(
       order.data.relationships.documents
-    ).then((res) => res.data)
+    ).then((res) => res.data);
     return docs.map((d) => ({
       name: d.attributes.document_type,
       base_64: d.attributes.base64,
       type: "pdf",
-    }))
+    }));
   }
 
   async retrieveDropPoints(id, zip, countryCode, address1) {
@@ -554,17 +554,17 @@ class WebshipperFulfillmentService extends FulfillmentService {
           },
         },
       })
-      .then(({ data }) => data)
+      .then(({ data }) => data);
 
-    return points.attributes.drop_points
+    return points.attributes.drop_points;
   }
 
   retrieveRelationship(relation) {
-    const link = relation.links.related
+    const link = relation.links.related;
     return this.client_.request({
       method: "GET",
       url: link,
-    })
+    });
   }
 
   /**
@@ -575,16 +575,16 @@ class WebshipperFulfillmentService extends FulfillmentService {
    */
   async cancelFulfillment(data) {
     if (Array.isArray(data)) {
-      data = data[0]
+      data = data[0];
     }
 
     const order = await this.client_.orders
       .retrieve(data.id)
-      .catch(() => undefined)
+      .catch(() => undefined);
 
     // if order does not exist, we resolve gracefully
     if (!order) {
-      return Promise.resolve()
+      return Promise.resolve();
     }
 
     if (order) {
@@ -593,14 +593,14 @@ class WebshipperFulfillmentService extends FulfillmentService {
         order.data.attributes.status !== "missing_rate"
       ) {
         if (order.data.attributes.status === "cancelled") {
-          return Promise.resolve(order)
+          return Promise.resolve(order);
         }
-        throw new Error("Cannot cancel order")
+        throw new Error("Cannot cancel order");
       }
     }
 
-    return this.client_.orders.delete(data.id)
+    return this.client_.orders.delete(data.id);
   }
 }
 
-export default WebshipperFulfillmentService
+export default WebshipperFulfillmentService;

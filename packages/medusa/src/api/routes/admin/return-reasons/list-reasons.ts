@@ -1,8 +1,8 @@
 import {
   defaultAdminReturnReasonsFields,
   defaultAdminReturnReasonsRelations,
-} from "."
-import { ReturnReasonService } from "../../../../services"
+} from ".";
+import { ReturnReasonService } from "../../../../services";
 
 /**
  * @oas [get] /return-reasons
@@ -27,13 +27,13 @@ import { ReturnReasonService } from "../../../../services"
 export default async (req, res) => {
   const returnReasonService: ReturnReasonService = req.scope.resolve(
     "returnReasonService"
-  )
+  );
 
-  const query = { parent_return_reason_id: null }
+  const query = { parent_return_reason_id: null };
   const data = await returnReasonService.list(query, {
     select: defaultAdminReturnReasonsFields,
     relations: defaultAdminReturnReasonsRelations,
-  })
+  });
 
-  res.status(200).json({ return_reasons: data })
-}
+  res.status(200).json({ return_reasons: data });
+};

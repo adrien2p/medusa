@@ -1,14 +1,14 @@
-import { IsInt, IsObject, IsOptional, IsString } from "class-validator"
-import { MedusaError } from "medusa-core-utils"
-import { EntityManager } from "typeorm"
+import { IsInt, IsObject, IsOptional, IsString } from "class-validator";
+import { MedusaError } from "medusa-core-utils";
+import { EntityManager } from "typeorm";
 import {
   defaultAdminDraftOrdersCartFields,
   defaultAdminDraftOrdersCartRelations,
   defaultAdminDraftOrdersFields,
-} from "."
-import { DraftOrder } from "../../../.."
-import { CartService, DraftOrderService } from "../../../../services"
-import { validator } from "../../../../utils/validator"
+} from ".";
+import { DraftOrder } from "../../../..";
+import { CartService, DraftOrderService } from "../../../../services";
+import { validator } from "../../../../utils/validator";
 /**
  * @oas [post] /draft-orders/{id}/line-items/{line_id}
  * operationId: "PostDraftOrdersDraftOrderLineItemsItem"
@@ -46,17 +46,17 @@ import { validator } from "../../../../utils/validator"
  */
 
 export default async (req, res) => {
-  const { id, line_id } = req.params
+  const { id, line_id } = req.params;
 
   const validated = await validator(
     AdminPostDraftOrdersDraftOrderLineItemsItemReq,
     req.body
-  )
+  );
 
   const draftOrderService: DraftOrderService =
-    req.scope.resolve("draftOrderService")
-  const cartService: CartService = req.scope.resolve("cartService")
-  const entityManager: EntityManager = req.scope.resolve("manager")
+    req.scope.resolve("draftOrderService");
+  const cartService: CartService = req.scope.resolve("cartService");
+  const entityManager: EntityManager = req.scope.resolve("manager");
 
   await entityManager.transaction(async (manager) => {
     const draftOrder: DraftOrder = await draftOrderService
@@ -64,41 +64,41 @@ export default async (req, res) => {
       .retrieve(id, {
         select: defaultAdminDraftOrdersFields,
         relations: ["cart", "cart.items"],
-      })
+      });
 
     if (draftOrder.status === "completed") {
       throw new MedusaError(
         MedusaError.Types.NOT_ALLOWED,
         "You are only allowed to update open draft orders"
-      )
+      );
     }
 
     if (validated.quantity === 0) {
       await cartService
         .withTransaction(manager)
-        .removeLineItem(draftOrder.cart.id, line_id)
+        .removeLineItem(draftOrder.cart.id, line_id);
     } else {
-      const existing = draftOrder.cart.items.find((i) => i.id === line_id)
+      const existing = draftOrder.cart.items.find((i) => i.id === line_id);
 
       if (!existing) {
         throw new MedusaError(
           MedusaError.Types.INVALID_DATA,
           "Could not find the line item"
-        )
+        );
       }
 
       const lineItemUpdate: LineItemUpdate = {
         ...validated,
         region_id: draftOrder.cart.region_id,
-      }
+      };
 
       if (existing.variant_id) {
-        lineItemUpdate.variant_id = existing.variant_id
+        lineItemUpdate.variant_id = existing.variant_id;
       }
 
       await cartService
         .withTransaction(manager)
-        .updateLineItem(draftOrder.cart_id, line_id, lineItemUpdate)
+        .updateLineItem(draftOrder.cart_id, line_id, lineItemUpdate);
     }
 
     draftOrder.cart = await cartService
@@ -106,35 +106,35 @@ export default async (req, res) => {
       .retrieve(draftOrder.cart_id, {
         relations: defaultAdminDraftOrdersCartRelations,
         select: defaultAdminDraftOrdersCartFields,
-      })
+      });
 
-    res.status(200).json({ draft_order: draftOrder })
-  })
-}
+    res.status(200).json({ draft_order: draftOrder });
+  });
+};
 
 class LineItemUpdate {
-  title?: string
-  unit_price?: number
-  quantity?: number
-  metadata?: object = {}
-  region_id?: string
-  variant_id?: string
+  title?: string;
+  unit_price?: number;
+  quantity?: number;
+  metadata?: object = {};
+  region_id?: string;
+  variant_id?: string;
 }
 
 export class AdminPostDraftOrdersDraftOrderLineItemsItemReq {
   @IsString()
   @IsOptional()
-  title?: string
+  title?: string;
 
   @IsInt()
   @IsOptional()
-  unit_price?: number
+  unit_price?: number;
 
   @IsInt()
   @IsOptional()
-  quantity?: number
+  quantity?: number;
 
   @IsObject()
   @IsOptional()
-  metadata?: object = {}
+  metadata?: object = {};
 }

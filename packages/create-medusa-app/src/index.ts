@@ -1,14 +1,14 @@
-import path from "path"
-import Commander from "commander"
-import chalk from "chalk"
+import path from "path";
+import Commander from "commander";
+import chalk from "chalk";
 
-import { prompt } from "enquirer"
-import { newStarter } from "./new-starter"
-import { track } from "./track"
+import { prompt } from "enquirer";
+import { newStarter } from "./new-starter";
+import { track } from "./track";
 
-import pkg from "../package.json"
+import pkg from "../package.json";
 
-let projectPath: string = ""
+let projectPath: string = "";
 
 const questions = {
   projectRoot: {
@@ -34,7 +34,7 @@ const questions = {
     message: "Which storefront starter would you like to install?",
     choices: ["Gatsby Starter", "Next.js Starter", "None"],
   },
-}
+};
 
 const program = new Commander.Command(pkg.name)
   .version(pkg.version)
@@ -49,67 +49,67 @@ const program = new Commander.Command(pkg.name)
     `If run with the no-seed flag the script will skip seeding the database upon setup`
   )
   .option(`-v --verbose`, `Show all installation output`)
-  .parse(process.argv)
+  .parse(process.argv);
 
 export const run = async (): Promise<void> => {
-  track("CREATE_CLI")
+  track("CREATE_CLI");
 
   if (typeof projectPath === "string") {
-    projectPath = projectPath.trim()
+    projectPath = projectPath.trim();
   }
 
   const { projectRoot } = (await prompt(questions.projectRoot)) as {
-    projectRoot: string
-  }
+    projectRoot: string;
+  };
   let { starter } = (await prompt(questions.starter)) as {
-    starter: string
-  }
+    starter: string;
+  };
 
   if (starter === "Other") {
     const { starterUrl } = (await prompt(questions.starterUrl)) as {
-      starterUrl: string
-    }
-    starter = starterUrl
+      starterUrl: string;
+    };
+    starter = starterUrl;
   } else {
-    starter = `medusajs/${starter}`
+    starter = `medusajs/${starter}`;
   }
-  track("STARTER_SELECTED", { starter })
+  track("STARTER_SELECTED", { starter });
 
-  const progOptions = program.opts()
+  const progOptions = program.opts();
 
-  const noSeed = progOptions.noSeed
-  track("SEED_SELECTED", { seed: !noSeed })
+  const noSeed = progOptions.noSeed;
+  track("SEED_SELECTED", { seed: !noSeed });
 
   const { storefront } = (await prompt(questions.storefront)) as {
-    storefront: string
-  }
-  track("STOREFRONT_SELECTED", { storefront })
+    storefront: string;
+  };
+  track("STOREFRONT_SELECTED", { storefront });
 
   await newStarter({
     starter,
     root: path.join(projectRoot, `backend`),
     seed: !noSeed,
     verbose: progOptions.verbose,
-  })
+  });
 
-  const hasStorefront = storefront.toLowerCase() !== "none"
+  const hasStorefront = storefront.toLowerCase() !== "none";
   if (hasStorefront) {
     const storefrontStarter =
       storefront.toLowerCase() === "gatsby starter"
         ? "https://github.com/medusajs/gatsby-starter-medusa"
-        : "https://github.com/medusajs/nextjs-starter-medusa"
+        : "https://github.com/medusajs/nextjs-starter-medusa";
     await newStarter({
       starter: storefrontStarter,
       root: path.join(projectRoot, `storefront`),
       verbose: progOptions.verbose,
-    })
+    });
   }
   await newStarter({
     starter: "https://github.com/medusajs/admin",
     root: path.join(projectRoot, `admin`),
     keepGit: true,
     verbose: progOptions.verbose,
-  })
+  });
 
   console.log(`
   Your project is ready 🚀. The available commands are:
@@ -121,13 +121,13 @@ export const run = async (): Promise<void> => {
     Admin
     cd ${projectRoot}/admin
     yarn start
-  `)
+  `);
 
   if (hasStorefront) {
     console.log(`
     Storefront
     cd ${projectRoot}/storefront
     yarn start
-    `)
+    `);
   }
-}
+};

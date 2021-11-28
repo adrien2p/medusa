@@ -1,6 +1,6 @@
-import { EntityManager } from "typeorm"
-import { defaultStoreCartFields, defaultStoreCartRelations } from "."
-import { CartService } from "../../../../services"
+import { EntityManager } from "typeorm";
+import { defaultStoreCartFields, defaultStoreCartRelations } from ".";
+import { CartService } from "../../../../services";
 
 /**
  * @oas [delete] /carts/{id}/line-items/{line_id}
@@ -23,29 +23,29 @@ import { CartService } from "../../../../services"
  *               $ref: "#/components/schemas/cart"
  */
 export default async (req, res) => {
-  const { id, line_id } = req.params
+  const { id, line_id } = req.params;
 
-  const manager: EntityManager = req.scope.resolve("manager")
-  const cartService: CartService = req.scope.resolve("cartService")
+  const manager: EntityManager = req.scope.resolve("manager");
+  const cartService: CartService = req.scope.resolve("cartService");
 
   await manager.transaction(async (m) => {
     // Remove the line item
-    await cartService.withTransaction(m).removeLineItem(id, line_id)
+    await cartService.withTransaction(m).removeLineItem(id, line_id);
 
     // If the cart has payment sessions update these
     const updated = await cartService.withTransaction(m).retrieve(id, {
       relations: ["payment_sessions"],
-    })
+    });
 
     if (updated.payment_sessions?.length) {
-      await cartService.withTransaction(m).setPaymentSessions(id)
+      await cartService.withTransaction(m).setPaymentSessions(id);
     }
-  })
+  });
 
   const cart = await cartService.retrieve(id, {
     select: defaultStoreCartFields,
     relations: defaultStoreCartRelations,
-  })
+  });
 
-  res.status(200).json({ cart })
-}
+  res.status(200).json({ cart });
+};

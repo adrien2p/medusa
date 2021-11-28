@@ -1,12 +1,12 @@
 export default async (req, res) => {
   // In Medusa, we store the cart id in merchant_data
-  const { shipping_address, merchant_data } = req.body
+  const { shipping_address, merchant_data } = req.body;
 
   try {
-    const manager = req.scope.resolve("manager")
-    const cartService = req.scope.resolve("cartService")
-    const klarnaProviderService = req.scope.resolve("pp_klarna")
-    const shippingProfileService = req.scope.resolve("shippingProfileService")
+    const manager = req.scope.resolve("manager");
+    const cartService = req.scope.resolve("cartService");
+    const klarnaProviderService = req.scope.resolve("pp_klarna");
+    const shippingProfileService = req.scope.resolve("shippingProfileService");
 
     const result = await manager.transaction("SERIALIZABLE", async (m) => {
       const cart = await cartService.retrieve(merchant_data, {
@@ -21,7 +21,7 @@ export default async (req, res) => {
           "items.variant",
           "items.variant.product",
         ],
-      })
+      });
 
       if (shipping_address) {
         const shippingAddress = {
@@ -33,7 +33,7 @@ export default async (req, res) => {
           country_code: shipping_address.country,
           postal_code: shipping_address.postal_code,
           phone: shipping_address.phone,
-        }
+        };
 
         let billingAddress = {
           first_name: shipping_address.given_name,
@@ -44,25 +44,25 @@ export default async (req, res) => {
           country_code: shipping_address.country,
           postal_code: shipping_address.postal_code,
           phone: shipping_address.phone,
-        }
+        };
 
         await cartService.update(cart.id, {
           shipping_address: shippingAddress,
           billing_address: billingAddress,
           email: shipping_address.email,
-        })
+        });
 
         const shippingOptions = await shippingProfileService.fetchCartOptions(
           cart
-        )
+        );
 
         if (shippingOptions?.length) {
           const option = shippingOptions.find(
             (o) => o.data && !o.data.require_drop_point
-          )
+          );
           await cartService
             .withTransaction(m)
-            .addShippingMethod(cart.id, option.id, option.data)
+            .addShippingMethod(cart.id, option.id, option.data);
         }
 
         // Fetch and return updated Klarna order
@@ -87,21 +87,21 @@ export default async (req, res) => {
               "items.variant",
               "items.variant.product",
             ],
-          })
-        return klarnaProviderService.cartToKlarnaOrder(updatedCart)
+          });
+        return klarnaProviderService.cartToKlarnaOrder(updatedCart);
       } else {
-        return null
+        return null;
       }
-    })
+    });
 
     if (result) {
-      res.json(result)
-      return
+      res.json(result);
+      return;
     } else {
-      res.sendStatus(400)
-      return
+      res.sendStatus(400);
+      return;
     }
   } catch (error) {
-    throw error
+    throw error;
   }
-}
+};

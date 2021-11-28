@@ -9,27 +9,27 @@ class OrderSubscriber {
     draftOrderService,
     regionService,
   }) {
-    this.manager_ = manager
-    this.totalsService_ = totalsService
+    this.manager_ = manager;
+    this.totalsService_ = totalsService;
 
-    this.discountService_ = discountService
+    this.discountService_ = discountService;
 
-    this.giftCardService_ = giftCardService
+    this.giftCardService_ = giftCardService;
 
-    this.orderService_ = orderService
+    this.orderService_ = orderService;
 
-    this.draftOrderService_ = draftOrderService
+    this.draftOrderService_ = draftOrderService;
 
-    this.regionService_ = regionService
+    this.regionService_ = regionService;
 
-    this.eventBus_ = eventBusService
+    this.eventBus_ = eventBusService;
 
-    this.eventBus_.subscribe("order.placed", this.handleOrderPlaced)
+    this.eventBus_.subscribe("order.placed", this.handleOrderPlaced);
 
-    this.eventBus_.subscribe("order.placed", this.updateDraftOrder)
+    this.eventBus_.subscribe("order.placed", this.updateDraftOrder);
   }
 
-  handleOrderPlaced = async data => {
+  handleOrderPlaced = async (data) => {
     const order = await this.orderService_.retrieve(data.id, {
       select: ["subtotal"],
       relations: [
@@ -39,10 +39,10 @@ class OrderSubscriber {
         "items",
         "gift_cards",
       ],
-    })
+    });
 
     await Promise.all(
-      order.items.map(async i => {
+      order.items.map(async (i) => {
         if (i.is_giftcard) {
           for (let qty = 0; qty < i.quantity; qty++) {
             await this.giftCardService_.create({
@@ -51,35 +51,35 @@ class OrderSubscriber {
               value: i.unit_price,
               balance: i.unit_price,
               metadata: i.metadata,
-            })
+            });
           }
         }
       })
-    )
+    );
 
     await Promise.all(
-      order.discounts.map(async d => {
-        const usageCount = d?.usage_count || 0
+      order.discounts.map(async (d) => {
+        const usageCount = d?.usage_count || 0;
         return this.discountService_.update(d.id, {
           usage_count: usageCount + 1,
-        })
+        });
       })
-    )
-  }
+    );
+  };
 
-  updateDraftOrder = async data => {
-    const order = await this.orderService_.retrieve(data.id)
+  updateDraftOrder = async (data) => {
+    const order = await this.orderService_.retrieve(data.id);
     const draftOrder = await this.draftOrderService_
       .retrieveByCartId(order.cart_id)
-      .catch(_ => null)
+      .catch((_) => null);
 
     if (draftOrder) {
       await this.draftOrderService_.registerCartCompletion(
         draftOrder.id,
         order.id
-      )
+      );
     }
-  }
+  };
 }
 
-export default OrderSubscriber
+export default OrderSubscriber;

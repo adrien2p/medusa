@@ -1,4 +1,4 @@
-import RegionService from "../../../../services/region"
+import RegionService from "../../../../services/region";
 
 /**
  * @oas [delete] /regions/{id}
@@ -27,15 +27,15 @@ import RegionService from "../../../../services/region"
  *               type: boolean
  */
 export default async (req, res) => {
-  const { region_id } = req.params
+  const { region_id } = req.params;
 
-  const regionService: RegionService = req.scope.resolve("regionService")
+  const regionService: RegionService = req.scope.resolve("regionService");
 
-  await regionService.delete(region_id)
+  await regionService.delete(region_id);
 
   res.status(200).json({
     id: region_id,
     object: "region",
     deleted: true,
-  })
-}
+  });
+};

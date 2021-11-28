@@ -1,6 +1,6 @@
-import { flatten, groupBy, map, merge } from "lodash"
-import { EntityRepository, Repository, FindManyOptions } from "typeorm"
-import { Order } from "../models/order"
+import { flatten, groupBy, map, merge } from "lodash";
+import { EntityRepository, Repository, FindManyOptions } from "typeorm";
+import { Order } from "../models/order";
 
 @EntityRepository(Order)
 export class OrderRepository extends Repository<Order> {
@@ -8,16 +8,16 @@ export class OrderRepository extends Repository<Order> {
     relations: Array<keyof Order> = [],
     optionsWithoutRelations: Omit<FindManyOptions<Order>, "relations"> = {}
   ): Promise<Order[]> {
-    const entities = await this.find(optionsWithoutRelations)
-    const entitiesIds = entities.map(({ id }) => id)
+    const entities = await this.find(optionsWithoutRelations);
+    const entitiesIds = entities.map(({ id }) => id);
 
-    const groupedRelations = {}
+    const groupedRelations = {};
     for (const rel of relations) {
-      const [topLevel] = rel.split(".")
+      const [topLevel] = rel.split(".");
       if (groupedRelations[topLevel]) {
-        groupedRelations[topLevel].push(rel)
+        groupedRelations[topLevel].push(rel);
       } else {
-        groupedRelations[topLevel] = [rel]
+        groupedRelations[topLevel] = [rel];
       }
     }
 
@@ -26,15 +26,15 @@ export class OrderRepository extends Repository<Order> {
         return this.findByIds(entitiesIds, {
           select: ["id"],
           relations: rels as string[],
-        })
+        });
       })
-    ).then(flatten)
+    ).then(flatten);
 
-    const entitiesAndRelations = entitiesIdsWithRelations.concat(entities)
+    const entitiesAndRelations = entitiesIdsWithRelations.concat(entities);
 
-    const entitiesAndRelationsById = groupBy(entitiesAndRelations, "id")
+    const entitiesAndRelationsById = groupBy(entitiesAndRelations, "id");
 
-    return map(entities, (e) => merge({}, ...entitiesAndRelationsById[e.id]))
+    return map(entities, (e) => merge({}, ...entitiesAndRelationsById[e.id]));
   }
 
   public async findOneWithRelations(
@@ -42,12 +42,12 @@ export class OrderRepository extends Repository<Order> {
     optionsWithoutRelations: Omit<FindManyOptions<Order>, "relations"> = {}
   ): Promise<Order> {
     // Limit 1
-    optionsWithoutRelations.take = 1
+    optionsWithoutRelations.take = 1;
 
     const result = await this.findWithRelations(
       relations,
       optionsWithoutRelations
-    )
-    return result[0]
+    );
+    return result[0];
   }
 }

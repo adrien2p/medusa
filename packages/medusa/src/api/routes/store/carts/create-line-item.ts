@@ -1,8 +1,8 @@
-import { IsInt, IsOptional, IsString } from "class-validator"
-import { EntityManager } from "typeorm"
-import { defaultStoreCartFields, defaultStoreCartRelations } from "."
-import { CartService, LineItemService } from "../../../../services"
-import { validator } from "../../../../utils/validator"
+import { IsInt, IsObject, IsOptional, IsString } from "class-validator";
+import { EntityManager } from "typeorm";
+import { defaultStoreCartFields, defaultStoreCartRelations } from ".";
+import { CartService, LineItemService } from "../../../../services";
+import { validator } from "../../../../utils/validator";
 
 /**
  * @oas [post] /carts/{id}/line-items
@@ -28,49 +28,50 @@ import { validator } from "../../../../utils/validator"
  *               $ref: "#/components/schemas/cart"
  */
 export default async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params;
 
-  const validated = await validator(StorePostCartsCartLineItemsReq, req.body)
+  const validated = await validator(StorePostCartsCartLineItemsReq, req.body);
 
-  const manager: EntityManager = req.scope.resolve("manager")
-  const lineItemService: LineItemService = req.scope.resolve("lineItemService")
-  const cartService: CartService = req.scope.resolve("cartService")
+  const manager: EntityManager = req.scope.resolve("manager");
+  const lineItemService: LineItemService = req.scope.resolve("lineItemService");
+  const cartService: CartService = req.scope.resolve("cartService");
 
   await manager.transaction(async (m) => {
-    const txCartService = cartService.withTransaction(m)
-    const cart = await txCartService.retrieve(id)
+    const txCartService = cartService.withTransaction(m);
+    const cart = await txCartService.retrieve(id);
 
     const line = await lineItemService
       .withTransaction(m)
       .generate(validated.variant_id, cart.region_id, validated.quantity, {
         metadata: validated.metadata,
-      })
-    await txCartService.addLineItem(id, line)
+      });
+    await txCartService.addLineItem(id, line);
 
     const updated = await txCartService.retrieve(id, {
       relations: ["payment_sessions"],
-    })
+    });
 
     if (updated.payment_sessions?.length) {
-      await txCartService.setPaymentSessions(id)
+      await txCartService.setPaymentSessions(id);
     }
-  })
+  });
 
   const cart = await cartService.retrieve(id, {
     select: defaultStoreCartFields,
     relations: defaultStoreCartRelations,
-  })
+  });
 
-  res.status(200).json({ cart })
-}
+  res.status(200).json({ cart });
+};
 
 export class StorePostCartsCartLineItemsReq {
   @IsString()
-  variant_id: string
+  variant_id: string;
 
   @IsInt()
-  quantity: number
+  quantity: number;
 
+  @IsObject()
   @IsOptional()
-  metadata?: object
+  metadata?: object = {};
 }

@@ -1,18 +1,18 @@
-import { MedusaError } from "medusa-core-utils"
-import { BaseService } from "medusa-interfaces"
-import { Brackets } from "typeorm"
+import { MedusaError } from "medusa-core-utils";
+import { BaseService } from "medusa-interfaces";
+import { Brackets } from "typeorm";
 
 /**
  * Provides layer to manipulate products.
  * @extends BaseService
  */
 class ProductService extends BaseService {
-  static IndexName = `products`
+  static IndexName = `products`;
   static Events = {
     UPDATED: "product.updated",
     CREATED: "product.created",
     DELETED: "product.deleted",
-  }
+  };
 
   constructor({
     manager,
@@ -27,45 +27,45 @@ class ProductService extends BaseService {
     imageRepository,
     searchService,
   }) {
-    super()
+    super();
 
     /** @private @const {EntityManager} */
-    this.manager_ = manager
+    this.manager_ = manager;
 
     /** @private @const {ProductOption} */
-    this.productOptionRepository_ = productOptionRepository
+    this.productOptionRepository_ = productOptionRepository;
 
     /** @private @const {Product} */
-    this.productRepository_ = productRepository
+    this.productRepository_ = productRepository;
 
     /** @private @const {ProductVariant} */
-    this.productVariantRepository_ = productVariantRepository
+    this.productVariantRepository_ = productVariantRepository;
 
     /** @private @const {EventBus} */
-    this.eventBus_ = eventBusService
+    this.eventBus_ = eventBusService;
 
     /** @private @const {ProductVariantService} */
-    this.productVariantService_ = productVariantService
+    this.productVariantService_ = productVariantService;
 
     /** @private @const {ProductCollectionService} */
-    this.productCollectionService_ = productCollectionService
+    this.productCollectionService_ = productCollectionService;
 
     /** @private @const {ProductCollectionService} */
-    this.productTypeRepository_ = productTypeRepository
+    this.productTypeRepository_ = productTypeRepository;
 
     /** @private @const {ProductCollectionService} */
-    this.productTagRepository_ = productTagRepository
+    this.productTagRepository_ = productTagRepository;
 
     /** @private @const {ImageRepository} */
-    this.imageRepository_ = imageRepository
+    this.imageRepository_ = imageRepository;
 
     /** @private @const {SearchService} */
-    this.searchService_ = searchService
+    this.searchService_ = searchService;
   }
 
   withTransaction(transactionManager) {
     if (!transactionManager) {
-      return this
+      return this;
     }
 
     const cloned = new ProductService({
@@ -79,11 +79,11 @@ class ProductService extends BaseService {
       productTagRepository: this.productTagRepository_,
       productTypeRepository: this.productTypeRepository_,
       imageRepository: this.imageRepository_,
-    })
+    });
 
-    cloned.transactionManager_ = transactionManager
+    cloned.transactionManager_ = transactionManager;
 
-    return cloned
+    return cloned;
   }
 
   /**
@@ -97,21 +97,21 @@ class ProductService extends BaseService {
   async list(selector = {}, config = { relations: [], skip: 0, take: 20 }) {
     const productRepo = this.manager_.getCustomRepository(
       this.productRepository_
-    )
+    );
 
-    const { q, query, relations } = this.prepareListQuery_(selector, config)
+    const { q, query, relations } = this.prepareListQuery_(selector, config);
 
     if (q) {
-      const qb = this.getFreeTextQueryBuilder_(productRepo, query, q)
-      const raw = await qb.getMany()
+      const qb = this.getFreeTextQueryBuilder_(productRepo, query, q);
+      const raw = await qb.getMany();
       return productRepo.findWithRelations(
         relations,
         raw.map((i) => i.id),
         query.withDeleted ?? false
-      )
+      );
     }
 
-    return productRepo.findWithRelations(relations, query)
+    return productRepo.findWithRelations(relations, query);
   }
 
   /**
@@ -131,23 +131,23 @@ class ProductService extends BaseService {
   ) {
     const productRepo = this.manager_.getCustomRepository(
       this.productRepository_
-    )
+    );
 
-    const { q, query, relations } = this.prepareListQuery_(selector, config)
+    const { q, query, relations } = this.prepareListQuery_(selector, config);
 
     if (q) {
-      const qb = this.getFreeTextQueryBuilder_(productRepo, query, q)
-      const [raw, count] = await qb.getManyAndCount()
+      const qb = this.getFreeTextQueryBuilder_(productRepo, query, q);
+      const [raw, count] = await qb.getManyAndCount();
 
       const products = await productRepo.findWithRelations(
         relations,
         raw.map((i) => i.id),
         query.withDeleted ?? false
-      )
-      return [products, count]
+      );
+      return [products, count];
     }
 
-    return await productRepo.findWithRelationsAndCount(relations, query)
+    return await productRepo.findWithRelationsAndCount(relations, query);
   }
 
   /**
@@ -158,9 +158,9 @@ class ProductService extends BaseService {
   count(selector = {}) {
     const productRepo = this.manager_.getCustomRepository(
       this.productRepository_
-    )
-    const query = this.buildQuery_(selector)
-    return productRepo.count(query)
+    );
+    const query = this.buildQuery_(selector);
+    return productRepo.count(query);
   }
 
   /**
@@ -174,31 +174,31 @@ class ProductService extends BaseService {
   async retrieve(productId, config = {}) {
     const productRepo = this.manager_.getCustomRepository(
       this.productRepository_
-    )
-    const validatedId = this.validateId_(productId)
+    );
+    const validatedId = this.validateId_(productId);
 
-    const query = { where: { id: validatedId } }
+    const query = { where: { id: validatedId } };
 
     if (config.relations && config.relations.length > 0) {
-      query.relations = config.relations
+      query.relations = config.relations;
     }
 
     if (config.select && config.select.length > 0) {
-      query.select = config.select
+      query.select = config.select;
     }
 
-    const rels = query.relations
-    delete query.relations
-    const product = await productRepo.findOneWithRelations(rels, query)
+    const rels = query.relations;
+    delete query.relations;
+    const product = await productRepo.findOneWithRelations(rels, query);
 
     if (!product) {
       throw new MedusaError(
         MedusaError.Types.NOT_FOUND,
         `Product with id: ${productId} was not found`
-      )
+      );
     }
 
-    return product
+    return product;
   }
 
   /**
@@ -207,16 +207,16 @@ class ProductService extends BaseService {
    * @return {Promise} an array of variants
    */
   async retrieveVariants(productId) {
-    const product = await this.retrieve(productId, { relations: ["variants"] })
-    return product.variants
+    const product = await this.retrieve(productId, { relations: ["variants"] });
+    return product.variants;
   }
 
   async listTypes() {
     const productTypeRepository = this.manager_.getCustomRepository(
       this.productTypeRepository_
-    )
+    );
 
-    return await productTypeRepository.find({})
+    return await productTypeRepository.find({});
   }
 
   async listTagsByUsage(count = 10) {
@@ -232,55 +232,55 @@ class ProductService extends BaseService {
       ORDER BY O.USAGE_COUNT DESC
       LIMIT $1`,
       [count]
-    )
+    );
 
-    return tags
+    return tags;
   }
 
   async upsertProductType_(type) {
     const productTypeRepository = this.manager_.getCustomRepository(
       this.productTypeRepository_
-    )
+    );
 
     if (type === null) {
-      return null
+      return null;
     }
 
     const existing = await productTypeRepository.findOne({
       where: { value: type.value },
-    })
+    });
 
     if (existing) {
-      return existing.id
+      return existing.id;
     }
 
-    const created = productTypeRepository.create(type)
-    const result = await productTypeRepository.save(created)
+    const created = productTypeRepository.create(type);
+    const result = await productTypeRepository.save(created);
 
-    return result.id
+    return result.id;
   }
 
   async upsertProductTags_(tags) {
     const productTagRepository = this.manager_.getCustomRepository(
       this.productTagRepository_
-    )
+    );
 
-    const newTags = []
+    const newTags = [];
     for (const tag of tags) {
       const existing = await productTagRepository.findOne({
         where: { value: tag.value },
-      })
+      });
 
       if (existing) {
-        newTags.push(existing)
+        newTags.push(existing);
       } else {
-        const created = productTagRepository.create(tag)
-        const result = await productTagRepository.save(created)
-        newTags.push(result)
+        const created = productTagRepository.create(tag);
+        const result = await productTagRepository.save(created);
+        newTags.push(result);
       }
     }
 
-    return newTags
+    return newTags;
   }
 
   /**
@@ -290,77 +290,79 @@ class ProductService extends BaseService {
    */
   async create(productObject) {
     return this.atomicPhase_(async (manager) => {
-      const productRepo = manager.getCustomRepository(this.productRepository_)
+      const productRepo = manager.getCustomRepository(this.productRepository_);
       const optionRepo = manager.getCustomRepository(
         this.productOptionRepository_
-      )
+      );
 
-      const { options, tags, type, images, ...rest } = productObject
+      const { options, tags, type, images, ...rest } = productObject;
 
       if (!rest.thumbnail && images && images.length) {
-        rest.thumbnail = images[0]
+        rest.thumbnail = images[0];
       }
 
       // if product is a giftcard, we should disallow discounts
       if (rest.is_giftcard) {
-        rest.discountable = false
+        rest.discountable = false;
       }
 
-      let product = productRepo.create(rest)
+      let product = productRepo.create(rest);
 
       if (images) {
-        product.images = await this.upsertImages_(images)
+        product.images = await this.upsertImages_(images);
       }
 
       if (tags) {
-        product.tags = await this.upsertProductTags_(tags)
+        product.tags = await this.upsertProductTags_(tags);
       }
 
       if (typeof type !== `undefined`) {
-        product.type_id = await this.upsertProductType_(type)
+        product.type_id = await this.upsertProductType_(type);
       }
 
-      product = await productRepo.save(product)
+      product = await productRepo.save(product);
 
       product.options = await Promise.all(
         options.map(async (o) => {
-          const res = optionRepo.create({ ...o, product_id: product.id })
-          await optionRepo.save(res)
-          return res
+          const res = optionRepo.create({ ...o, product_id: product.id });
+          await optionRepo.save(res);
+          return res;
         })
-      )
+      );
 
-      const result = await this.retrieve(product.id, { relations: ["options"] })
+      const result = await this.retrieve(product.id, {
+        relations: ["options"],
+      });
 
       await this.eventBus_
         .withTransaction(manager)
         .emit(ProductService.Events.CREATED, {
           id: result.id,
-        })
-      return result
-    })
+        });
+      return result;
+    });
   }
 
   async upsertImages_(images) {
     const imageRepository = this.manager_.getCustomRepository(
       this.imageRepository_
-    )
+    );
 
-    const productImages = []
+    const productImages = [];
     for (const img of images) {
       const existing = await imageRepository.findOne({
         where: { url: img },
-      })
+      });
 
       if (existing) {
-        productImages.push(existing)
+        productImages.push(existing);
       } else {
-        const created = imageRepository.create({ url: img })
-        productImages.push(created)
+        const created = imageRepository.create({ url: img });
+        productImages.push(created);
       }
     }
 
-    return productImages
+    return productImages;
   }
 
   /**
@@ -374,94 +376,96 @@ class ProductService extends BaseService {
    */
   async update(productId, update) {
     return this.atomicPhase_(async (manager) => {
-      const productRepo = manager.getCustomRepository(this.productRepository_)
+      const productRepo = manager.getCustomRepository(this.productRepository_);
       const productVariantRepo = manager.getCustomRepository(
         this.productVariantRepository_
-      )
+      );
 
       const product = await this.retrieve(productId, {
         relations: ["variants", "tags", "images"],
-      })
+      });
 
-      const { variants, metadata, images, tags, type, ...rest } = update
+      const { variants, metadata, images, tags, type, ...rest } = update;
 
       if (!product.thumbnail && !update.thumbnail && images?.length) {
-        product.thumbnail = images[0]
+        product.thumbnail = images[0];
       }
 
       if (images) {
-        product.images = await this.upsertImages_(images)
+        product.images = await this.upsertImages_(images);
       }
 
       if (metadata) {
-        product.metadata = this.setMetadata_(product, metadata)
+        product.metadata = this.setMetadata_(product, metadata);
       }
 
       if (typeof type !== `undefined`) {
-        product.type_id = await this.upsertProductType_(type)
+        product.type_id = await this.upsertProductType_(type);
       }
 
       if (tags) {
-        product.tags = await this.upsertProductTags_(tags)
+        product.tags = await this.upsertProductTags_(tags);
       }
 
       if (variants) {
         // Iterate product variants and update their properties accordingly
         for (const variant of product.variants) {
-          const exists = variants.find((v) => v.id && variant.id === v.id)
+          const exists = variants.find((v) => v.id && variant.id === v.id);
           if (!exists) {
-            await productVariantRepo.remove(variant)
+            await productVariantRepo.remove(variant);
           }
         }
 
-        const newVariants = []
+        const newVariants = [];
         for (const [i, newVariant] of variants.entries()) {
-          newVariant.variant_rank = i
+          newVariant.variant_rank = i;
 
           if (newVariant.id) {
-            const variant = product.variants.find((v) => v.id === newVariant.id)
+            const variant = product.variants.find(
+              (v) => v.id === newVariant.id
+            );
 
             if (!variant) {
               throw new MedusaError(
                 MedusaError.Types.NOT_FOUND,
                 `Variant with id: ${newVariant.id} is not associated with this product`
-              )
+              );
             }
 
             const saved = await this.productVariantService_
               .withTransaction(manager)
-              .update(variant, newVariant)
+              .update(variant, newVariant);
 
-            newVariants.push(saved)
+            newVariants.push(saved);
           } else {
             // If the provided variant does not have an id, we assume that it
             // should be created
             const created = await this.productVariantService_
               .withTransaction(manager)
-              .create(product.id, newVariant)
+              .create(product.id, newVariant);
 
-            newVariants.push(created)
+            newVariants.push(created);
           }
         }
 
-        product.variants = newVariants
+        product.variants = newVariants;
       }
 
       for (const [key, value] of Object.entries(rest)) {
         if (typeof value !== `undefined`) {
-          product[key] = value
+          product[key] = value;
         }
       }
 
-      const result = await productRepo.save(product)
+      const result = await productRepo.save(product);
       await this.eventBus_
         .withTransaction(manager)
         .emit(ProductService.Events.UPDATED, {
           id: result.id,
           fields: Object.keys(update),
-        })
-      return result
-    })
+        });
+      return result;
+    });
   }
 
   /**
@@ -473,28 +477,28 @@ class ProductService extends BaseService {
    */
   async delete(productId) {
     return this.atomicPhase_(async (manager) => {
-      const productRepo = manager.getCustomRepository(this.productRepository_)
+      const productRepo = manager.getCustomRepository(this.productRepository_);
 
       // Should not fail, if product does not exist, since delete is idempotent
       const product = await productRepo.findOne(
         { id: productId },
         { relations: ["variants"] }
-      )
+      );
 
       if (!product) {
-        return Promise.resolve()
+        return Promise.resolve();
       }
 
-      await productRepo.softRemove(product)
+      await productRepo.softRemove(product);
 
       await this.eventBus_
         .withTransaction(manager)
         .emit(ProductService.Events.DELETED, {
           id: productId,
-        })
+        });
 
-      return Promise.resolve()
-    })
+      return Promise.resolve();
+    });
   }
 
   /**
@@ -509,74 +513,74 @@ class ProductService extends BaseService {
     return this.atomicPhase_(async (manager) => {
       const productOptionRepo = manager.getCustomRepository(
         this.productOptionRepository_
-      )
+      );
 
       const product = await this.retrieve(productId, {
         relations: ["options", "variants"],
-      })
+      });
 
       if (product.options.find((o) => o.title === optionTitle)) {
         throw new MedusaError(
           MedusaError.Types.DUPLICATE_ERROR,
           `An option with the title: ${optionTitle} already exists`
-        )
+        );
       }
 
       const option = await productOptionRepo.create({
         title: optionTitle,
         product_id: productId,
-      })
+      });
 
-      await productOptionRepo.save(option)
+      await productOptionRepo.save(option);
 
       for (const variant of product.variants) {
         this.productVariantService_
           .withTransaction(manager)
-          .addOptionValue(variant.id, option.id, "Default Value")
+          .addOptionValue(variant.id, option.id, "Default Value");
       }
 
-      const result = await this.retrieve(productId)
+      const result = await this.retrieve(productId);
 
       await this.eventBus_
         .withTransaction(manager)
-        .emit(ProductService.Events.UPDATED, result)
-      return result
-    })
+        .emit(ProductService.Events.UPDATED, result);
+      return result;
+    });
   }
 
   async reorderVariants(productId, variantOrder) {
     return this.atomicPhase_(async (manager) => {
-      const productRepo = manager.getCustomRepository(this.productRepository_)
+      const productRepo = manager.getCustomRepository(this.productRepository_);
 
       const product = await this.retrieve(productId, {
         relations: ["variants"],
-      })
+      });
 
       if (product.variants.length !== variantOrder.length) {
         throw new MedusaError(
           MedusaError.Types.INVALID_DATA,
           `Product variants and new variant order differ in length.`
-        )
+        );
       }
 
       product.variants = variantOrder.map((vId) => {
-        const variant = product.variants.find((v) => v.id === vId)
+        const variant = product.variants.find((v) => v.id === vId);
         if (!variant) {
           throw new MedusaError(
             MedusaError.Types.INVALID_DATA,
             `Product has no variant with id: ${vId}`
-          )
+          );
         }
 
-        return variant
-      })
+        return variant;
+      });
 
-      const result = productRepo.save(product)
+      const result = productRepo.save(product);
       await this.eventBus_
         .withTransaction(manager)
-        .emit(ProductService.Events.UPDATED, result)
-      return result
-    })
+        .emit(ProductService.Events.UPDATED, result);
+      return result;
+    });
   }
 
   /**
@@ -590,35 +594,37 @@ class ProductService extends BaseService {
    */
   async reorderOptions(productId, optionOrder) {
     return this.atomicPhase_(async (manager) => {
-      const productRepo = manager.getCustomRepository(this.productRepository_)
+      const productRepo = manager.getCustomRepository(this.productRepository_);
 
-      const product = await this.retrieve(productId, { relations: ["options"] })
+      const product = await this.retrieve(productId, {
+        relations: ["options"],
+      });
 
       if (product.options.length !== optionOrder.length) {
         throw new MedusaError(
           MedusaError.Types.INVALID_DATA,
           `Product options and new options order differ in length.`
-        )
+        );
       }
 
       product.options = optionOrder.map((oId) => {
-        const option = product.options.find((o) => o.id === oId)
+        const option = product.options.find((o) => o.id === oId);
         if (!option) {
           throw new MedusaError(
             MedusaError.Types.INVALID_DATA,
             `Product has no option with id: ${oId}`
-          )
+          );
         }
 
-        return option
-      })
+        return option;
+      });
 
-      const result = productRepo.save(product)
+      const result = productRepo.save(product);
       await this.eventBus_
         .withTransaction(manager)
-        .emit(ProductService.Events.UPDATED, result)
-      return result
-    })
+        .emit(ProductService.Events.UPDATED, result);
+      return result;
+    });
   }
 
   /**
@@ -633,44 +639,46 @@ class ProductService extends BaseService {
     return this.atomicPhase_(async (manager) => {
       const productOptionRepo = manager.getCustomRepository(
         this.productOptionRepository_
-      )
+      );
 
-      const product = await this.retrieve(productId, { relations: ["options"] })
+      const product = await this.retrieve(productId, {
+        relations: ["options"],
+      });
 
-      const { title, values } = data
+      const { title, values } = data;
 
       const optionExists = product.options.some(
         (o) =>
           o.title.toUpperCase() === title.toUpperCase() && o.id !== optionId
-      )
+      );
       if (optionExists) {
         throw new MedusaError(
           MedusaError.Types.NOT_FOUND,
           `An option with title ${title} already exists`
-        )
+        );
       }
 
       const productOption = await productOptionRepo.findOne({
         where: { id: optionId },
-      })
+      });
 
       if (!productOption) {
         throw new MedusaError(
           MedusaError.Types.NOT_FOUND,
           `Option with id: ${optionId} does not exists`
-        )
+        );
       }
 
-      productOption.title = title
-      productOption.values = values
+      productOption.title = title;
+      productOption.values = values;
 
-      await productOptionRepo.save(productOption)
+      await productOptionRepo.save(productOption);
 
       await this.eventBus_
         .withTransaction(manager)
-        .emit(ProductService.Events.UPDATED, product)
-      return product
-    })
+        .emit(ProductService.Events.UPDATED, product);
+      return product;
+    });
   }
 
   /**
@@ -683,18 +691,18 @@ class ProductService extends BaseService {
     return this.atomicPhase_(async (manager) => {
       const productOptionRepo = manager.getCustomRepository(
         this.productOptionRepository_
-      )
+      );
 
       const product = await this.retrieve(productId, {
         relations: ["variants", "variants.options"],
-      })
+      });
 
       const productOption = await productOptionRepo.findOne({
         where: { id: optionId, product_id: productId },
-      })
+      });
 
       if (!productOption) {
-        return Promise.resolve()
+        return Promise.resolve();
       }
 
       // For the option we want to delete, make sure that all variants have the
@@ -705,34 +713,34 @@ class ProductService extends BaseService {
       // we would end up with four variants: (black), (black), (blue), (blue).
       // We now have two duplicate variants. To ensure that this does not
       // happen, we will force the user to select which variants to keep.
-      const firstVariant = product.variants[0]
+      const firstVariant = product.variants[0];
 
       const valueToMatch = firstVariant.options.find(
         (o) => o.option_id === optionId
-      ).value
+      ).value;
 
       const equalsFirst = await Promise.all(
         product.variants.map(async (v) => {
-          const option = v.options.find((o) => o.option_id === optionId)
-          return option.value === valueToMatch
+          const option = v.options.find((o) => o.option_id === optionId);
+          return option.value === valueToMatch;
         })
-      )
+      );
 
       if (!equalsFirst.every((v) => v)) {
         throw new MedusaError(
           MedusaError.Types.INVALID_DATA,
           `To delete an option, first delete all variants, such that when option is deleted, no duplicate variants will exist.`
-        )
+        );
       }
 
       // If we reach this point, we can safely delete the product option
-      await productOptionRepo.softRemove(productOption)
+      await productOptionRepo.softRemove(productOption);
 
       await this.eventBus_
         .withTransaction(manager)
-        .emit(ProductService.Events.UPDATED, product)
-      return product
-    })
+        .emit(ProductService.Events.UPDATED, product);
+      return product;
+    });
   }
 
   /**
@@ -743,17 +751,17 @@ class ProductService extends BaseService {
    * @return {Product} return the decorated product.
    */
   async decorate(productId, fields = [], expandFields = []) {
-    const requiredFields = ["id", "metadata"]
+    const requiredFields = ["id", "metadata"];
 
-    fields = fields.concat(requiredFields)
+    fields = fields.concat(requiredFields);
 
     const product = await this.retrieve(productId, {
       select: fields,
       relations: expandFields,
-    })
+    });
 
     // const final = await this.runDecorators_(decorated)
-    return product
+    return product;
   }
 
   /**
@@ -764,30 +772,30 @@ class ProductService extends BaseService {
    *   search param.
    */
   prepareListQuery_(selector, config) {
-    let q
+    let q;
     if ("q" in selector) {
-      q = selector.q
-      delete selector.q
+      q = selector.q;
+      delete selector.q;
     }
 
-    const query = this.buildQuery_(selector, config)
+    const query = this.buildQuery_(selector, config);
 
     if (config.relations && config.relations.length > 0) {
-      query.relations = config.relations
+      query.relations = config.relations;
     }
 
     if (config.select && config.select.length > 0) {
-      query.select = config.select
+      query.select = config.select;
     }
 
-    const rels = query.relations
-    delete query.relations
+    const rels = query.relations;
+    delete query.relations;
 
     return {
       query,
       relations: rels,
       q,
-    }
+    };
   }
 
   /**
@@ -798,10 +806,10 @@ class ProductService extends BaseService {
    * @return {QueryBuilder<Product>} a query builder that can fetch products
    */
   getFreeTextQueryBuilder_(productRepo, query, q) {
-    const where = query.where
+    const where = query.where;
 
-    delete where.description
-    delete where.title
+    delete where.description;
+    delete where.title;
 
     let qb = productRepo
       .createQueryBuilder("product")
@@ -815,16 +823,16 @@ class ProductService extends BaseService {
             .orWhere(`product.title ILIKE :q`, { q: `%${q}%` })
             .orWhere(`variant.title ILIKE :q`, { q: `%${q}%` })
             .orWhere(`variant.sku ILIKE :q`, { q: `%${q}%` })
-            .orWhere(`collection.title ILIKE :q`, { q: `%${q}%` })
+            .orWhere(`collection.title ILIKE :q`, { q: `%${q}%` });
         })
-      )
+      );
 
     if (query.withDeleted) {
-      qb = qb.withDeleted()
+      qb = qb.withDeleted();
     }
 
-    return qb
+    return qb;
   }
 }
 
-export default ProductService
+export default ProductService;

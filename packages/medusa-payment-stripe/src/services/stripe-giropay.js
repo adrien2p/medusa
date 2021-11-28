@@ -1,15 +1,15 @@
-import _ from "lodash"
-import Stripe from "stripe"
-import { PaymentService } from "medusa-interfaces"
+import _ from "lodash";
+import Stripe from "stripe";
+import { PaymentService } from "medusa-interfaces";
 
 class GiropayProviderService extends PaymentService {
-  static identifier = "stripe-giropay"
+  static identifier = "stripe-giropay";
 
   constructor(
     { stripeProviderService, customerService, totalsService, regionService },
     options
   ) {
-    super()
+    super();
 
     /**
      * Required Stripe options:
@@ -20,22 +20,22 @@ class GiropayProviderService extends PaymentService {
      *    capture: true
      *  }
      */
-    this.options_ = options
+    this.options_ = options;
 
     /** @private @const {Stripe} */
-    this.stripe_ = Stripe(options.api_key)
+    this.stripe_ = Stripe(options.api_key);
 
     /** @private @const {CustomerService} */
-    this.stripeProviderService_ = stripeProviderService
+    this.stripeProviderService_ = stripeProviderService;
 
     /** @private @const {CustomerService} */
-    this.customerService_ = customerService
+    this.customerService_ = customerService;
 
     /** @private @const {RegionService} */
-    this.regionService_ = regionService
+    this.regionService_ = regionService;
 
     /** @private @const {TotalsService} */
-    this.totalsService_ = totalsService
+    this.totalsService_ = totalsService;
   }
 
   /**
@@ -45,7 +45,7 @@ class GiropayProviderService extends PaymentService {
    * @returns {string} the status of the payment intent
    */
   async getStatus(paymentData) {
-    return await this.stripeProviderService_.getStatus(paymentData)
+    return await this.stripeProviderService_.getStatus(paymentData);
   }
 
   /**
@@ -54,7 +54,7 @@ class GiropayProviderService extends PaymentService {
    * @returns {Promise<Array<object>>} saved payments methods
    */
   async retrieveSavedMethods(customer) {
-    return Promise.resolve([])
+    return Promise.resolve([]);
   }
 
   /**
@@ -63,7 +63,7 @@ class GiropayProviderService extends PaymentService {
    * @returns {Promise<object>} Stripe customer
    */
   async retrieveCustomer(customerId) {
-    return await this.stripeProviderService_.retrieveCustomer(customerId)
+    return await this.stripeProviderService_.retrieveCustomer(customerId);
   }
 
   /**
@@ -72,7 +72,7 @@ class GiropayProviderService extends PaymentService {
    * @returns {Promise<object>} Stripe customer
    */
   async createCustomer(customer) {
-    return await this.stripeProviderService_.createCustomer(customer)
+    return await this.stripeProviderService_.createCustomer(customer);
   }
 
   /**
@@ -82,11 +82,11 @@ class GiropayProviderService extends PaymentService {
    * @returns {object} Stripe payment intent
    */
   async createPayment(cart) {
-    const { customer_id, region_id, email } = cart
-    const region = await this.regionService_.retrieve(region_id)
-    const { currency_code } = region
+    const { customer_id, region_id, email } = cart;
+    const region = await this.regionService_.retrieve(region_id);
+    const { currency_code } = region;
 
-    const amount = await this.totalsService_.getTotal(cart)
+    const amount = await this.totalsService_.getTotal(cart);
 
     const intentRequest = {
       amount: Math.round(amount),
@@ -94,34 +94,34 @@ class GiropayProviderService extends PaymentService {
       payment_method_types: ["giropay"],
       capture_method: "automatic",
       metadata: { cart_id: `${cart.id}` },
-    }
+    };
 
     if (customer_id) {
-      const customer = await this.customerService_.retrieve(customer_id)
+      const customer = await this.customerService_.retrieve(customer_id);
 
       if (customer.metadata?.stripe_id) {
-        intentRequest.customer = customer.metadata.stripe_id
+        intentRequest.customer = customer.metadata.stripe_id;
       } else {
         const stripeCustomer = await this.createCustomer({
           email,
           id: customer_id,
-        })
+        });
 
-        intentRequest.customer = stripeCustomer.id
+        intentRequest.customer = stripeCustomer.id;
       }
     } else {
       const stripeCustomer = await this.createCustomer({
         email,
-      })
+      });
 
-      intentRequest.customer = stripeCustomer.id
+      intentRequest.customer = stripeCustomer.id;
     }
 
     const paymentIntent = await this.stripe_.paymentIntents.create(
       intentRequest
-    )
+    );
 
-    return paymentIntent
+    return paymentIntent;
   }
 
   /**
@@ -130,7 +130,7 @@ class GiropayProviderService extends PaymentService {
    * @returns {Promise<object>} Stripe payment intent
    */
   async retrievePayment(data) {
-    return await this.stripeProviderService_.retrievePayment(data)
+    return await this.stripeProviderService_.retrievePayment(data);
   }
 
   /**
@@ -139,7 +139,7 @@ class GiropayProviderService extends PaymentService {
    * @returns {Promise<object>} Stripe payment intent
    */
   async getPaymentData(sessionData) {
-    return await this.stripeProviderService_.getPaymentData(sessionData)
+    return await this.stripeProviderService_.getPaymentData(sessionData);
   }
 
   /**
@@ -153,14 +153,14 @@ class GiropayProviderService extends PaymentService {
     return await this.stripeProviderService_.authorizePayment(
       sessionData,
       context
-    )
+    );
   }
 
   async updatePaymentData(sessionData, update) {
     return await this.stripeProviderService_.updatePaymentData(
       sessionData,
       update
-    )
+    );
   }
 
   /**
@@ -171,26 +171,26 @@ class GiropayProviderService extends PaymentService {
    */
   async updatePayment(sessionData, cart) {
     try {
-      const stripeId = cart.customer?.metadata?.stripe_id || undefined
+      const stripeId = cart.customer?.metadata?.stripe_id || undefined;
 
       if (stripeId !== sessionData.customer) {
-        return this.createPayment(cart)
+        return this.createPayment(cart);
       } else {
         if (cart.total && sessionData.amount === Math.round(cart.total)) {
-          return sessionData
+          return sessionData;
         }
 
         return this.stripe_.paymentIntents.update(sessionData.id, {
           amount: Math.round(cart.total),
-        })
+        });
       }
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
   async deletePayment(payment) {
-    return await this.stripeProviderService_.deletePayment(payment)
+    return await this.stripeProviderService_.deletePayment(payment);
   }
 
   /**
@@ -203,7 +203,7 @@ class GiropayProviderService extends PaymentService {
     return await this.stripeProviderService_.updatePaymentIntentCustomer(
       paymentIntentId,
       customerId
-    )
+    );
   }
 
   /**
@@ -212,7 +212,7 @@ class GiropayProviderService extends PaymentService {
    * @returns {object} Stripe payment intent
    */
   async capturePayment(payment) {
-    return await this.stripeProviderService_.capturePayment(payment)
+    return await this.stripeProviderService_.capturePayment(payment);
   }
 
   /**
@@ -225,7 +225,7 @@ class GiropayProviderService extends PaymentService {
     return await this.stripeProviderService_.refundPayment(
       payment,
       amountToRefund
-    )
+    );
   }
 
   /**
@@ -234,8 +234,8 @@ class GiropayProviderService extends PaymentService {
    * @returns {object} canceled payment intent
    */
   async cancelPayment(payment) {
-    return await this.stripeProviderService_.cancelPayment(payment)
+    return await this.stripeProviderService_.cancelPayment(payment);
   }
 }
 
-export default GiropayProviderService
+export default GiropayProviderService;

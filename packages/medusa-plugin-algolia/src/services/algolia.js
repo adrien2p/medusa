@@ -1,24 +1,24 @@
-import algoliasearch from "algoliasearch"
-import { indexTypes } from "medusa-core-utils"
-import { SearchService } from "medusa-interfaces"
-import { transformProduct } from "../utils/transform-product"
+import algoliasearch from "algoliasearch";
+import { indexTypes } from "medusa-core-utils";
+import { SearchService } from "medusa-interfaces";
+import { transformProduct } from "../utils/transform-product";
 
 class AlgoliaService extends SearchService {
   constructor(container, options) {
-    super()
+    super();
 
-    this.options_ = options
-    const { application_id, admin_api_key } = this.options_
+    this.options_ = options;
+    const { application_id, admin_api_key } = this.options_;
 
     if (!application_id) {
-      throw new Error("Please provide a valid Application ID")
+      throw new Error("Please provide a valid Application ID");
     }
 
     if (!admin_api_key) {
-      throw new Error("Please provide a valid Admin Api Key")
+      throw new Error("Please provide a valid Admin Api Key");
     }
 
-    this.client_ = algoliasearch(application_id, admin_api_key)
+    this.client_ = algoliasearch(application_id, admin_api_key);
   }
 
   /**
@@ -28,7 +28,7 @@ class AlgoliaService extends SearchService {
    * @return {*}
    */
   createIndex(indexName, options = {}) {
-    return this.client_.initIndex(indexName)
+    return this.client_.initIndex(indexName);
   }
 
   /**
@@ -37,16 +37,16 @@ class AlgoliaService extends SearchService {
    * @return {Promise<{object}>} - returns response from search engine provider
    */
   getIndex(indexName) {
-    let hits = []
+    let hits = [];
     return this.client_
       .initIndex(indexName)
       .browseObjects({
         query: indexName,
         batch: (batch) => {
-          hits = hits.concat(batch)
+          hits = hits.concat(batch);
         },
       })
-      .then(() => hits)
+      .then(() => hits);
   }
 
   /**
@@ -57,8 +57,8 @@ class AlgoliaService extends SearchService {
    * @return {*}
    */
   addDocuments(indexName, documents, type) {
-    const transformedDocuments = this.getTransformedDocuments(type, documents)
-    return this.client_.initIndex(indexName).saveObjects(transformedDocuments)
+    const transformedDocuments = this.getTransformedDocuments(type, documents);
+    return this.client_.initIndex(indexName).saveObjects(transformedDocuments);
   }
 
   /**
@@ -69,10 +69,10 @@ class AlgoliaService extends SearchService {
    * @return {Promise<{object}>} - returns response from search engine provider
    */
   replaceDocuments(indexName, documents, type) {
-    const transformedDocuments = this.getTransformedDocuments(type, documents)
+    const transformedDocuments = this.getTransformedDocuments(type, documents);
     return this.client_
       .initIndex(indexName)
-      .replaceAllObjects(transformedDocuments)
+      .replaceAllObjects(transformedDocuments);
   }
 
   /**
@@ -82,7 +82,7 @@ class AlgoliaService extends SearchService {
    * @return {Promise<{object}>} - returns response from search engine provider
    */
   deleteDocument(indexName, document_id) {
-    return this.client_.initIndex(indexName).deleteObject(document_id)
+    return this.client_.initIndex(indexName).deleteObject(document_id);
   }
 
   /**
@@ -91,7 +91,7 @@ class AlgoliaService extends SearchService {
    * @return {Promise<{object}>} - returns response from search engine provider
    */
   deleteAllDocuments(indexName) {
-    return this.client_.initIndex(indexName).delete()
+    return this.client_.initIndex(indexName).delete();
   }
 
   /**
@@ -104,17 +104,17 @@ class AlgoliaService extends SearchService {
    * @return {*} - returns response from search engine provider
    */
   search(indexName, query, options) {
-    const { paginationOptions, filter, additionalOptions } = options
+    const { paginationOptions, filter, additionalOptions } = options;
     if ("limit" in paginationOptions) {
-      paginationOptions["length"] = paginationOptions.limit
-      delete paginationOptions.limit
+      paginationOptions["length"] = paginationOptions.limit;
+      delete paginationOptions.limit;
     }
 
     return this.client_.initIndex(indexName).search(query, {
       filters: filter,
       ...paginationOptions,
       ...additionalOptions,
-    })
+    });
   }
 
   /**
@@ -124,24 +124,24 @@ class AlgoliaService extends SearchService {
    * @return {Promise<{object}>} - returns response from search engine provider
    */
   updateSettings(indexName, settings) {
-    return this.client_.initIndex(indexName).setSettings(settings)
+    return this.client_.initIndex(indexName).setSettings(settings);
   }
 
   getTransformedDocuments(type, documents) {
     switch (type) {
       case indexTypes.products:
-        return this.transformProducts(documents)
+        return this.transformProducts(documents);
       default:
-        return documents
+        return documents;
     }
   }
 
   transformProducts(products) {
     if (!products) {
-      return []
+      return [];
     }
-    return products.map(transformProduct)
+    return products.map(transformProduct);
   }
 }
 
-export default AlgoliaService
+export default AlgoliaService;

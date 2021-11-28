@@ -1,4 +1,4 @@
-import { ProductService } from "../../../../services"
+import { ProductService } from "../../../../services";
 
 /**
  * @oas [get] /products/{id}/variants
@@ -23,10 +23,10 @@ import { ProductService } from "../../../../services"
  *                 $ref: "#/components/schemas/product_variant"
  */
 export default async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params;
 
-  const productService: ProductService = req.scope.resolve("productService")
-  const variants = await productService.retrieveVariants(id)
+  const productService: ProductService = req.scope.resolve("productService");
+  const variants = await productService.retrieveVariants(id);
 
-  res.json({ variants })
-}
+  res.json({ variants });
+};

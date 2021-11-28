@@ -1,32 +1,32 @@
 export default async (req, res) => {
-  const signature = req.headers["stripe-signature"]
+  const signature = req.headers["stripe-signature"];
 
-  let event
+  let event;
   try {
-    const stripeProviderService = req.scope.resolve("pp_stripe")
-    event = stripeProviderService.constructWebhookEvent(req.body, signature)
+    const stripeProviderService = req.scope.resolve("pp_stripe");
+    event = stripeProviderService.constructWebhookEvent(req.body, signature);
   } catch (err) {
-    res.status(400).send(`Webhook Error: ${err.message}`)
-    return
+    res.status(400).send(`Webhook Error: ${err.message}`);
+    return;
   }
 
-  const paymentIntent = event.data.object
+  const paymentIntent = event.data.object;
 
-  const cartService = req.scope.resolve("cartService")
-  const orderService = req.scope.resolve("orderService")
+  const cartService = req.scope.resolve("cartService");
+  const orderService = req.scope.resolve("orderService");
 
-  const cartId = paymentIntent.metadata.cart_id
+  const cartId = paymentIntent.metadata.cart_id;
   const order = await orderService
     .retrieveByCartId(cartId)
-    .catch(() => undefined)
+    .catch(() => undefined);
 
   // handle payment intent events
   switch (event.type) {
     case "payment_intent.succeeded":
       if (order && order.payment_status !== "captured") {
-        await orderService.capturePayment(order.id)
+        await orderService.capturePayment(order.id);
       }
-      break
+      break;
     //case "payment_intent.canceled":
     //  if (order) {
     //    await orderService.update(order._id, {
@@ -36,18 +36,18 @@ export default async (req, res) => {
     //  break
     case "payment_intent.payment_failed":
       // TODO: Not implemented yet
-      break
+      break;
     case "payment_intent.amount_capturable_updated":
       if (!order) {
-        await cartService.setPaymentSession(cartId, "stripe")
-        await cartService.authorizePayment(cartId)
-        await orderService.createFromCart(cartId)
+        await cartService.setPaymentSession(cartId, "stripe");
+        await cartService.authorizePayment(cartId);
+        await orderService.createFromCart(cartId);
       }
-      break
+      break;
     default:
-      res.sendStatus(204)
-      return
+      res.sendStatus(204);
+      return;
   }
 
-  res.sendStatus(200)
-}
+  res.sendStatus(200);
+};

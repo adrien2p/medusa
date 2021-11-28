@@ -1,4 +1,4 @@
-import BaseService from "./base-service"
+import BaseService from "./base-service";
 
 /**
  * The interface that all search services must implement.
@@ -6,7 +6,7 @@ import BaseService from "./base-service"
  */
 class SearchService extends BaseService {
   constructor() {
-    super()
+    super();
   }
 
   /**
@@ -16,7 +16,7 @@ class SearchService extends BaseService {
    * @return {Promise<{object}>} - returns response from search engine provider
    */
   createIndex(indexName, options) {
-    throw Error("createIndex must be overridden by a child class")
+    throw Error("createIndex must be overridden by a child class");
   }
 
   /**
@@ -25,7 +25,7 @@ class SearchService extends BaseService {
    * @return {Promise<{object}>} - returns response from search engine provider
    */
   getIndex(indexName) {
-    throw Error("getIndex must be overridden by a child class")
+    throw Error("getIndex must be overridden by a child class");
   }
 
   /**
@@ -36,7 +36,7 @@ class SearchService extends BaseService {
    * @return {Promise<{object}>} - returns response from search engine provider
    */
   addDocuments(indexName, documents, type) {
-    throw Error("addDocuments must be overridden by a child class")
+    throw Error("addDocuments must be overridden by a child class");
   }
 
   /**
@@ -47,7 +47,7 @@ class SearchService extends BaseService {
    * @return {Promise<{object}>} - returns response from search engine provider
    */
   replaceDocuments(indexName, documents, type) {
-    throw Error("updateDocument must be overridden by a child class")
+    throw Error("updateDocument must be overridden by a child class");
   }
 
   /**
@@ -57,7 +57,7 @@ class SearchService extends BaseService {
    * @return {Promise<{object}>} - returns response from search engine provider
    */
   deleteDocument(indexName, document_id) {
-    throw Error("deleteDocument must be overridden by a child class")
+    throw Error("deleteDocument must be overridden by a child class");
   }
 
   /**
@@ -66,7 +66,7 @@ class SearchService extends BaseService {
    * @return {Promise<{object}>} - returns response from search engine provider
    */
   deleteAllDocuments(indexName) {
-    throw Error("deleteAllDocuments must be overridden by a child class")
+    throw Error("deleteAllDocuments must be overridden by a child class");
   }
 
   /**
@@ -79,7 +79,7 @@ class SearchService extends BaseService {
    * @return {Promise<{ hits: any[]; [k: string]: any; }>} returns response from search engine provider
    */
   search(indexName, query, options) {
-    throw Error("search must be overridden by a child class")
+    throw Error("search must be overridden by a child class");
   }
 
   /**
@@ -89,8 +89,8 @@ class SearchService extends BaseService {
    * @return {Promise<{object}>} - returns response from search engine provider
    */
   updateSettings(indexName, settings) {
-    throw Error("updateSettings must be overridden by a child class")
+    throw Error("updateSettings must be overridden by a child class");
   }
 }
 
-export default SearchService
+export default SearchService;

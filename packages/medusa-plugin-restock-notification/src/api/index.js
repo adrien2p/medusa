@@ -1,11 +1,11 @@
-import { Router } from "express"
+import { Router } from "express";
 
-import routes from "./routes"
+import routes from "./routes";
 
 export default (rootDirectory) => {
-  const app = Router()
+  const app = Router();
 
-  routes(app, rootDirectory)
+  routes(app, rootDirectory);
 
-  return app
-}
+  return app;
+};

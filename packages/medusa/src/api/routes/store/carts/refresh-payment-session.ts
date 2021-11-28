@@ -1,4 +1,4 @@
-import { CartService } from "../../../../services"
+import { CartService } from "../../../../services";
 
 /**
  * @oas [post] /carts/{id}/payment-sessions/{provider_id}
@@ -21,11 +21,11 @@ import { CartService } from "../../../../services"
  *               $ref: "#/components/schemas/cart"
  */
 export default async (req, res) => {
-  const { id, provider_id } = req.params
+  const { id, provider_id } = req.params;
 
-  const cartService: CartService = req.scope.resolve("cartService")
+  const cartService: CartService = req.scope.resolve("cartService");
 
-  await cartService.refreshPaymentSession(id, provider_id)
+  await cartService.refreshPaymentSession(id, provider_id);
   const cart = await cartService.retrieve(id, {
     select: [
       "subtotal",
@@ -42,7 +42,7 @@ export default async (req, res) => {
       "payment_sessions",
       "shipping_methods.shipping_option",
     ],
-  })
+  });
 
-  res.status(200).json({ cart })
-}
+  res.status(200).json({ cart });
+};

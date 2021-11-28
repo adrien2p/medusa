@@ -1,6 +1,6 @@
-import Configstore from "configstore"
+import Configstore from "configstore";
 
-let config: Configstore
+let config: Configstore;
 
 export const getConfigStore = (): Configstore => {
   if (!config) {
@@ -10,8 +10,8 @@ export const getConfigStore = (): Configstore => {
       {
         globalConfigPath: true,
       }
-    )
+    );
   }
 
-  return config
-}
+  return config;
+};

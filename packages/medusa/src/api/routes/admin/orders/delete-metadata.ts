@@ -1,4 +1,4 @@
-import { OrderService } from "../../../../services"
+import { OrderService } from "../../../../services";
 
 /**
  * @oas [delete] /order/{id}/metadata/{key}
@@ -22,15 +22,15 @@ import { OrderService } from "../../../../services"
  *               $ref: "#/components/schemas/order"
  */
 export default async (req, res) => {
-  const { id, key } = req.params
+  const { id, key } = req.params;
 
-  const orderService: OrderService = req.scope.resolve("orderService")
+  const orderService: OrderService = req.scope.resolve("orderService");
 
-  await orderService.deleteMetadata(id, key)
+  await orderService.deleteMetadata(id, key);
 
   const order = await orderService.retrieve(id, {
     relations: ["region", "customer", "swaps"],
-  })
+  });
 
-  res.status(200).json({ order })
-}
+  res.status(200).json({ order });
+};

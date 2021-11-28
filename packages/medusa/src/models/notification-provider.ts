@@ -1,12 +1,12 @@
-import { Entity, Column, PrimaryColumn } from "typeorm"
+import { Entity, Column, PrimaryColumn } from "typeorm";
 
 @Entity()
 export class NotificationProvider {
   @PrimaryColumn()
-  id: string
+  id: string;
 
   @Column({ default: true })
-  is_installed: boolean
+  is_installed: boolean;
 }
 
 /**

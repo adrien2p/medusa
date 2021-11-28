@@ -1,5 +1,5 @@
-import { MedusaError } from "medusa-core-utils"
-import { BaseService } from "medusa-interfaces"
+import { MedusaError } from "medusa-core-utils";
+import { BaseService } from "medusa-interfaces";
 
 /**
  * Restock notifications can be used to keep track of customers who wish to be
@@ -16,22 +16,22 @@ class RestockNotificationService extends BaseService {
     },
     options
   ) {
-    super()
+    super();
 
-    this.manager_ = manager
+    this.manager_ = manager;
 
-    this.options_ = options
+    this.options_ = options;
 
-    this.productVariantService_ = productVariantService
+    this.productVariantService_ = productVariantService;
 
-    this.restockNotificationModel_ = restockNotificationModel
+    this.restockNotificationModel_ = restockNotificationModel;
 
-    this.eventBus_ = eventBusService
+    this.eventBus_ = eventBusService;
   }
 
   withTransaction(transactionManager) {
     if (!transactionManager) {
-      return this
+      return this;
     }
 
     const cloned = new RestockNotificationService(
@@ -43,11 +43,11 @@ class RestockNotificationService extends BaseService {
         restockNotificationModel: this.restockNotificationModel_,
       },
       this.options_
-    )
+    );
 
-    cloned.transactionManager_ = transactionManager
+    cloned.transactionManager_ = transactionManager;
 
-    return cloned
+    return cloned;
   }
 
   /**
@@ -59,8 +59,8 @@ class RestockNotificationService extends BaseService {
   async retrieve(variantId) {
     const restockRepo = this.manager_.getRepository(
       this.restockNotificationModel_
-    )
-    return await restockRepo.findOne({ where: { variant_id: variantId } })
+    );
+    return await restockRepo.findOne({ where: { variant_id: variantId } });
   }
 
   /**
@@ -72,35 +72,35 @@ class RestockNotificationService extends BaseService {
    */
   async addEmail(variantId, email) {
     return this.atomicPhase_(async (manager) => {
-      const restockRepo = manager.getRepository(this.restockNotificationModel_)
-      const existing = await this.retrieve(variantId)
+      const restockRepo = manager.getRepository(this.restockNotificationModel_);
+      const existing = await this.retrieve(variantId);
 
       if (existing) {
         // Converting to a set handles duplicates for us
-        const emailSet = new Set(existing.emails)
-        emailSet.add(email)
+        const emailSet = new Set(existing.emails);
+        emailSet.add(email);
 
-        existing.emails = Array.from(emailSet)
+        existing.emails = Array.from(emailSet);
 
-        return await restockRepo.save(existing)
+        return await restockRepo.save(existing);
       } else {
-        const variant = await this.productVariantService_.retrieve(variantId)
+        const variant = await this.productVariantService_.retrieve(variantId);
 
         if (variant.inventory_quantity > 0) {
           throw new MedusaError(
             MedusaError.Types.NOT_ALLOWED,
             "You cannot sign up for restock notifications on a product that is not sold out"
-          )
+          );
         }
 
         const created = restockRepo.create({
           variant_id: variant.id,
           emails: [email],
-        })
+        });
 
-        return await restockRepo.save(created)
+        return await restockRepo.save(created);
       }
-    })
+    });
   }
 
   /**
@@ -111,20 +111,20 @@ class RestockNotificationService extends BaseService {
    * @return The resulting restock notification
    */
   triggerRestock(variantId) {
-    const delay = this.options_?.trigger_delay ?? 0
-    setTimeout(() => this.restockExecute_(variantId), delay)
+    const delay = this.options_?.trigger_delay ?? 0;
+    setTimeout(() => this.restockExecute_(variantId), delay);
   }
 
   async restockExecute_(variantId) {
     return await this.atomicPhase_(async (manager) => {
-      const restockRepo = manager.getRepository(this.restockNotificationModel_)
+      const restockRepo = manager.getRepository(this.restockNotificationModel_);
 
-      const existing = await this.retrieve(variantId)
+      const existing = await this.retrieve(variantId);
       if (!existing) {
-        return
+        return;
       }
 
-      const variant = await this.productVariantService_.retrieve(variantId)
+      const variant = await this.productVariantService_.retrieve(variantId);
 
       if (
         variant.inventory_quantity > (this.options_?.inventory_required ?? 0)
@@ -134,11 +134,11 @@ class RestockNotificationService extends BaseService {
           .emit("restock-notification.restocked", {
             variant_id: variantId,
             emails: existing.emails,
-          })
-        await restockRepo.delete(variantId)
+          });
+        await restockRepo.delete(variantId);
       }
-    })
+    });
   }
 }
 
-export default RestockNotificationService
+export default RestockNotificationService;

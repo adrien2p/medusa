@@ -1,6 +1,6 @@
-import { IsEmail } from "class-validator"
-import CustomerService from "../../../../services/customer"
-import { validator } from "../../../../utils/validator"
+import { IsEmail } from "class-validator";
+import CustomerService from "../../../../services/customer";
+import { validator } from "../../../../utils/validator";
 
 /**
  * @oas [post] /customers/password-token
@@ -19,21 +19,21 @@ export default async (req, res) => {
   const validated = await validator(
     StorePostCustomersCustomerPasswordTokenReq,
     req.body
-  )
+  );
 
   const customerService: CustomerService = req.scope.resolve(
     "customerService"
-  ) as CustomerService
+  ) as CustomerService;
 
-  const customer = await customerService.retrieveByEmail(validated.email)
+  const customer = await customerService.retrieveByEmail(validated.email);
 
   // Will generate a token and send it to the customer via an email provider
-  await customerService.generateResetPasswordToken(customer.id)
+  await customerService.generateResetPasswordToken(customer.id);
 
-  res.sendStatus(204)
-}
+  res.sendStatus(204);
+};
 
 export class StorePostCustomersCustomerPasswordTokenReq {
   @IsEmail()
-  email: string
+  email: string;
 }

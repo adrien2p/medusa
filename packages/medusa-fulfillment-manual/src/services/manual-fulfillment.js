@@ -1,10 +1,10 @@
-import { FulfillmentService } from "medusa-interfaces"
+import { FulfillmentService } from "medusa-interfaces";
 
 class ManualFulfillmentService extends FulfillmentService {
-  static identifier = "manual"
+  static identifier = "manual";
 
   constructor() {
-    super()
+    super();
   }
 
   getFulfillmentOptions() {
@@ -16,43 +16,43 @@ class ManualFulfillmentService extends FulfillmentService {
         id: "manual-fulfillment-return",
         is_return: true,
       },
-    ]
+    ];
   }
 
   validateFulfillmentData(data, cart) {
-    return data
+    return data;
   }
 
   validateOption(data) {
-    return true
+    return true;
   }
 
   canCalculate() {
-    return false
+    return false;
   }
 
   calculatePrice() {
-    throw Error("Manual Fulfillment service cannot calculatePrice")
+    throw Error("Manual Fulfillment service cannot calculatePrice");
   }
 
   createOrder() {
     // No data is being sent anywhere
-    return Promise.resolve({})
+    return Promise.resolve({});
   }
 
   createReturn() {
     // No data is being sent anywhere
-    return Promise.resolve({})
+    return Promise.resolve({});
   }
 
   createFulfillment() {
     // No data is being sent anywhere
-    return Promise.resolve({})
+    return Promise.resolve({});
   }
 
   cancelFulfillment() {
-    return Promise.resolve({})
+    return Promise.resolve({});
   }
 }
 
-export default ManualFulfillmentService
+export default ManualFulfillmentService;

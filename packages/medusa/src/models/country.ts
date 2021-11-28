@@ -5,41 +5,38 @@ import {
   JoinColumn,
   Index,
   PrimaryGeneratedColumn,
-} from "typeorm"
+} from "typeorm";
 
-import { Region } from "./region"
+import { Region } from "./region";
 
 @Entity()
 export class Country {
   @PrimaryGeneratedColumn()
-  id: number
+  id: number;
 
   @Index({ unique: true })
   @Column()
-  iso_2: string
+  iso_2: string;
 
   @Column()
-  iso_3: string
+  iso_3: string;
 
   @Column()
-  num_code: number
+  num_code: number;
 
   @Column()
-  name: string
+  name: string;
 
   @Column()
-  display_name: string
+  display_name: string;
 
   @Index()
   @Column({ nullable: true })
-  region_id: string
+  region_id: string;
 
-  @ManyToOne(
-    () => Region,
-    r => r.countries
-  )
+  @ManyToOne(() => Region, (r) => r.countries)
   @JoinColumn({ name: "region_id" })
-  region: Region
+  region: Region;
 }
 
 /**

@@ -4,10 +4,10 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
-} from "class-validator"
-import { defaultAdminOrdersFields, defaultAdminOrdersRelations } from "."
-import { OrderService, SwapService } from "../../../../services"
-import { validator } from "../../../../utils/validator"
+} from "class-validator";
+import { defaultAdminOrdersFields, defaultAdminOrdersRelations } from ".";
+import { OrderService, SwapService } from "../../../../services";
+import { validator } from "../../../../utils/validator";
 /**
  * @oas [post] /orders/{id}/swaps/{swap_id}/shipments
  * operationId: "PostOrdersOrderSwapsSwapShipments"
@@ -48,42 +48,42 @@ import { validator } from "../../../../utils/validator"
  *               $ref: "#/components/schemas/order"
  */
 export default async (req, res) => {
-  const { id, swap_id } = req.params
+  const { id, swap_id } = req.params;
 
   const validated = await validator(
     AdminPostOrdersOrderSwapsSwapShipmentsReq,
     req.body
-  )
+  );
 
-  const orderService: OrderService = req.scope.resolve("orderService")
-  const swapService: SwapService = req.scope.resolve("swapService")
+  const orderService: OrderService = req.scope.resolve("orderService");
+  const swapService: SwapService = req.scope.resolve("swapService");
 
   await swapService.createShipment(
     swap_id,
     validated.fulfillment_id,
     validated.tracking_numbers?.map((n) => ({ tracking_number: n })),
     { no_notification: validated.no_notification }
-  )
+  );
 
   const order = await orderService.retrieve(id, {
     select: defaultAdminOrdersFields,
     relations: defaultAdminOrdersRelations,
-  })
+  });
 
-  res.json({ order })
-}
+  res.json({ order });
+};
 
 export class AdminPostOrdersOrderSwapsSwapShipmentsReq {
   @IsString()
   @IsNotEmpty()
-  fulfillment_id: string
+  fulfillment_id: string;
 
   @IsArray()
   @IsOptional()
   @IsString({ each: true })
-  tracking_numbers?: string[]
+  tracking_numbers?: string[] = [];
 
   @IsBoolean()
   @IsOptional()
-  no_notification?: boolean
+  no_notification?: boolean;
 }

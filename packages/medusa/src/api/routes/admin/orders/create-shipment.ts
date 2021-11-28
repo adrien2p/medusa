@@ -4,10 +4,10 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
-} from "class-validator"
-import { defaultAdminOrdersRelations, defaultAdminOrdersFields } from "."
-import { OrderService } from "../../../../services"
-import { validator } from "../../../../utils/validator"
+} from "class-validator";
+import { defaultAdminOrdersRelations, defaultAdminOrdersFields } from ".";
+import { OrderService } from "../../../../services";
+import { validator } from "../../../../utils/validator";
 /**
  * @oas [post] /orders/{id}/shipment
  * operationId: "PostOrdersOrderShipment"
@@ -47,38 +47,38 @@ import { validator } from "../../../../utils/validator"
  *               $ref: "#/components/schemas/order"
  */
 export default async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params;
 
-  const validated = await validator(AdminPostOrdersOrderShipmentReq, req.body)
+  const validated = await validator(AdminPostOrdersOrderShipmentReq, req.body);
 
-  const orderService: OrderService = req.scope.resolve("orderService")
+  const orderService: OrderService = req.scope.resolve("orderService");
 
   await orderService.createShipment(
     id,
     validated.fulfillment_id,
     validated.tracking_numbers?.map((n) => ({ tracking_number: n })),
     { no_notification: validated.no_notification }
-  )
+  );
 
   const order = await orderService.retrieve(id, {
     select: defaultAdminOrdersFields,
     relations: defaultAdminOrdersRelations,
-  })
+  });
 
-  res.json({ order })
-}
+  res.json({ order });
+};
 
 export class AdminPostOrdersOrderShipmentReq {
   @IsString()
   @IsNotEmpty()
-  fulfillment_id: string
+  fulfillment_id: string;
 
   @IsArray()
   @IsOptional()
   @IsString({ each: true })
-  tracking_numbers?: string[]
+  tracking_numbers?: string[] = [];
 
   @IsBoolean()
   @IsOptional()
-  no_notification?: boolean
+  no_notification?: boolean;
 }

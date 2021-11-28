@@ -1,4 +1,4 @@
-import UserService from "../../../../services/user"
+import UserService from "../../../../services/user";
 
 /**
  * @oas [delete] /users/{user_id}
@@ -27,14 +27,14 @@ import UserService from "../../../../services/user"
  *               type: boolean
  */
 export default async (req, res) => {
-  const { user_id } = req.params
+  const { user_id } = req.params;
 
-  const userService: UserService = req.scope.resolve("userService")
-  await userService.delete(user_id)
+  const userService: UserService = req.scope.resolve("userService");
+  await userService.delete(user_id);
 
   res.status(200).send({
     id: user_id,
     object: "user",
     deleted: true,
-  })
-}
+  });
+};

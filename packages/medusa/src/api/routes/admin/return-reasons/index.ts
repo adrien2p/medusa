@@ -1,39 +1,39 @@
-import { Router } from "express"
-import { ReturnReason } from "../../../.."
-import middlewares from "../../../middlewares"
+import { Router } from "express";
+import { ReturnReason } from "../../../..";
+import middlewares from "../../../middlewares";
 
-const route = Router()
+const route = Router();
 
 export default (app) => {
-  app.use("/return-reasons", route)
+  app.use("/return-reasons", route);
 
   /**
    * List reasons
    */
-  route.get("/", middlewares.wrap(require("./list-reasons").default))
+  route.get("/", middlewares.wrap(require("./list-reasons").default));
 
   /**
    * Retrieve reason
    */
-  route.get("/:id", middlewares.wrap(require("./get-reason").default))
+  route.get("/:id", middlewares.wrap(require("./get-reason").default));
 
   /**
    * Create a reason
    */
-  route.post("/", middlewares.wrap(require("./create-reason").default))
+  route.post("/", middlewares.wrap(require("./create-reason").default));
 
   /**
    * Update a reason
    */
-  route.post("/:id", middlewares.wrap(require("./update-reason").default))
+  route.post("/:id", middlewares.wrap(require("./update-reason").default));
 
   /**
    * Delete a reason
    */
-  route.delete("/:id", middlewares.wrap(require("./delete-reason").default))
+  route.delete("/:id", middlewares.wrap(require("./delete-reason").default));
 
-  return app
-}
+  return app;
+};
 
 export const defaultAdminReturnReasonsFields = [
   "id",
@@ -44,19 +44,19 @@ export const defaultAdminReturnReasonsFields = [
   "created_at",
   "updated_at",
   "deleted_at",
-]
+];
 
 export const defaultAdminReturnReasonsRelations = [
   "parent_return_reason",
   "return_reason_children",
-]
+];
 
 export type AdminReturnReasonRes = {
-  return_reasons: ReturnReason
-}
+  return_reasons: ReturnReason;
+};
 
 export type AdminReturnReasonsListRes = {
-  return_reasons: ReturnReason[]
-}
+  return_reasons: ReturnReason[];
+};
 
-export * from "./create-reason"
+export * from "./create-reason";

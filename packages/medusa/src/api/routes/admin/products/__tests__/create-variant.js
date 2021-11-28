@@ -1,10 +1,10 @@
-import { IdMap } from "medusa-test-utils"
-import { request } from "../../../../../helpers/test-request"
-import { ProductVariantServiceMock } from "../../../../../services/__mocks__/product-variant"
+import { IdMap } from "medusa-test-utils";
+import { request } from "../../../../../helpers/test-request";
+import { ProductVariantServiceMock } from "../../../../../services/__mocks__/product-variant";
 
 describe("POST /admin/products/:id/variants", () => {
   describe("successful add variant", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
       subject = await request(
@@ -26,15 +26,15 @@ describe("POST /admin/products/:id/variants", () => {
             },
           },
         }
-      )
-    })
+      );
+    });
 
     it("returns 200", () => {
-      expect(subject.status).toEqual(200)
-    })
+      expect(subject.status).toEqual(200);
+    });
 
     it("calls service addVariant", () => {
-      expect(ProductVariantServiceMock.create).toHaveBeenCalledTimes(1)
+      expect(ProductVariantServiceMock.create).toHaveBeenCalledTimes(1);
       expect(ProductVariantServiceMock.create).toHaveBeenCalledWith(
         IdMap.getId("productWithOptions"),
         {
@@ -48,11 +48,13 @@ describe("POST /admin/products/:id/variants", () => {
             },
           ],
         }
-      )
-    })
+      );
+    });
 
     it("returns the updated product decorated", () => {
-      expect(subject.body.product.id).toEqual(IdMap.getId("productWithOptions"))
-    })
-  })
-})
+      expect(subject.body.product.id).toEqual(
+        IdMap.getId("productWithOptions")
+      );
+    });
+  });
+});

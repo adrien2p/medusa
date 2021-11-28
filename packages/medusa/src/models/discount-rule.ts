@@ -9,11 +9,11 @@ import {
   PrimaryColumn,
   ManyToMany,
   JoinTable,
-} from "typeorm"
-import { ulid } from "ulid"
-import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column"
+} from "typeorm";
+import { ulid } from "ulid";
+import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column";
 
-import { Product } from "./product"
+import { Product } from "./product";
 
 export enum DiscountRuleType {
   FIXED = "fixed",
@@ -29,26 +29,26 @@ export enum AllocationType {
 @Entity()
 export class DiscountRule {
   @PrimaryColumn()
-  id: string
+  id: string;
 
   @Column({ nullable: true })
-  description: string
+  description: string;
 
   @DbAwareColumn({
     type: "enum",
     enum: DiscountRuleType,
   })
-  type: DiscountRuleType
+  type: DiscountRuleType;
 
   @Column()
-  value: number
+  value: number;
 
   @DbAwareColumn({
     type: "enum",
     enum: AllocationType,
     nullable: true,
   })
-  allocation: AllocationType
+  allocation: AllocationType;
 
   @ManyToMany(() => Product, { cascade: true })
   @JoinTable({
@@ -62,24 +62,24 @@ export class DiscountRule {
       referencedColumnName: "id",
     },
   })
-  valid_for: Product[]
+  valid_for: Product[];
 
   @CreateDateColumn({ type: resolveDbType("timestamptz") })
-  created_at: Date
+  created_at: Date;
 
   @UpdateDateColumn({ type: resolveDbType("timestamptz") })
-  updated_at: Date
+  updated_at: Date;
 
   @DeleteDateColumn({ type: resolveDbType("timestamptz") })
-  deleted_at: Date
+  deleted_at: Date;
 
   @DbAwareColumn({ type: "jsonb", nullable: true })
-  metadata: any
+  metadata: any;
 
   @BeforeInsert()
   private beforeInsert() {
-    const id = ulid()
-    this.id = `dru_${id}`
+    const id = ulid();
+    this.id = `dru_${id}`;
   }
 }
 

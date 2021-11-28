@@ -1,4 +1,4 @@
-import { IdMap } from "medusa-test-utils"
+import { IdMap } from "medusa-test-utils";
 
 export const discounts = {
   dynamic: {
@@ -119,54 +119,54 @@ export const discounts = {
     },
     regions: [IdMap.getId("fr-cart")],
   },
-}
+};
 
 export const DiscountServiceMock = {
-  withTransaction: function() {
-    return this
+  withTransaction: function () {
+    return this;
   },
-  create: jest.fn().mockImplementation(data => {
-    return Promise.resolve(data)
+  create: jest.fn().mockImplementation((data) => {
+    return Promise.resolve(data);
   }),
-  retrieveByCode: jest.fn().mockImplementation(data => {
+  retrieveByCode: jest.fn().mockImplementation((data) => {
     if (data === "10%OFF") {
-      return Promise.resolve(discounts.total10Percent)
+      return Promise.resolve(discounts.total10Percent);
     }
     if (data === "FREESHIPPING") {
-      return Promise.resolve(discounts.freeShipping)
+      return Promise.resolve(discounts.freeShipping);
     }
     if (data === "US10") {
-      return Promise.resolve(discounts.USDiscount)
+      return Promise.resolve(discounts.USDiscount);
     }
-    return Promise.resolve(undefined)
+    return Promise.resolve(undefined);
   }),
-  retrieve: jest.fn().mockImplementation(data => {
+  retrieve: jest.fn().mockImplementation((data) => {
     if (data === IdMap.getId("total10")) {
-      return Promise.resolve(discounts.total10Percent)
+      return Promise.resolve(discounts.total10Percent);
     }
     if (data === IdMap.getId("item10Percent")) {
-      return Promise.resolve(discounts.item10Percent)
+      return Promise.resolve(discounts.item10Percent);
     }
     if (data === IdMap.getId("freeshipping")) {
-      return Promise.resolve(discounts.freeShipping)
+      return Promise.resolve(discounts.freeShipping);
     }
-    return Promise.resolve(undefined)
+    return Promise.resolve(undefined);
   }),
-  update: jest.fn().mockImplementation(data => {
-    return Promise.resolve()
+  update: jest.fn().mockImplementation((data) => {
+    return Promise.resolve();
   }),
-  delete: jest.fn().mockImplementation(data => {
+  delete: jest.fn().mockImplementation((data) => {
     return Promise.resolve({
       id: IdMap.getId("total10"),
       object: "discount",
       deleted: true,
-    })
+    });
   }),
-  list: jest.fn().mockImplementation(data => {
-    return Promise.resolve([{}])
+  list: jest.fn().mockImplementation((data) => {
+    return Promise.resolve([{}]);
   }),
-  listAndCount: jest.fn().mockImplementation(data => {
-    return Promise.resolve([{}])
+  listAndCount: jest.fn().mockImplementation((data) => {
+    return Promise.resolve([{}]);
   }),
   addRegion: jest.fn().mockReturnValue(Promise.resolve()),
   removeRegion: jest.fn().mockReturnValue(Promise.resolve()),
@@ -177,10 +177,10 @@ export const DiscountServiceMock = {
       id: IdMap.getId("gift_card_id"),
     })
   ),
-}
+};
 
 const mock = jest.fn().mockImplementation(() => {
-  return DiscountServiceMock
-})
+  return DiscountServiceMock;
+});
 
-export default mock
+export default mock;

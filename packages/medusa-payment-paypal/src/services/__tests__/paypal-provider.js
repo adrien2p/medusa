@@ -1,12 +1,12 @@
-import PayPalProviderService from "../paypal-provider"
+import PayPalProviderService from "../paypal-provider";
 import {
   PayPalMock,
   PayPalClientMock,
-} from "../../__mocks__/@paypal/checkout-server-sdk"
+} from "../../__mocks__/@paypal/checkout-server-sdk";
 
 const TotalsServiceMock = {
   getTotal: jest.fn().mockImplementation((c) => c.total),
-}
+};
 
 const RegionServiceMock = {
   retrieve: jest.fn().mockImplementation((id) =>
@@ -14,11 +14,11 @@ const RegionServiceMock = {
       currency_code: "eur",
     })
   ),
-}
+};
 
 describe("PaypalProviderService", () => {
   describe("createPayment", () => {
-    let result
+    let result;
     const paypalProviderService = new PayPalProviderService(
       {
         regionService: RegionServiceMock,
@@ -27,21 +27,21 @@ describe("PaypalProviderService", () => {
       {
         api_key: "test",
       }
-    )
+    );
 
     beforeEach(async () => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     it("creates paypal order", async () => {
       result = await paypalProviderService.createPayment({
         id: "test_cart",
         region_id: "fr",
         total: 1000,
-      })
+      });
 
-      expect(PayPalMock.orders.OrdersCreateRequest).toHaveBeenCalledTimes(1)
-      expect(PayPalClientMock.execute).toHaveBeenCalledTimes(1)
+      expect(PayPalMock.orders.OrdersCreateRequest).toHaveBeenCalledTimes(1);
+      expect(PayPalClientMock.execute).toHaveBeenCalledTimes(1);
       expect(PayPalClientMock.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           order: true,
@@ -61,14 +61,14 @@ describe("PaypalProviderService", () => {
             ],
           },
         })
-      )
+      );
 
-      expect(result.id).toEqual("test")
-    })
-  })
+      expect(result.id).toEqual("test");
+    });
+  });
 
   describe("retrievePayment", () => {
-    let result
+    let result;
     const paypalProviderService = new PayPalProviderService(
       {
         regionService: RegionServiceMock,
@@ -77,24 +77,26 @@ describe("PaypalProviderService", () => {
       {
         api_key: "test",
       }
-    )
+    );
 
     beforeEach(async () => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     it("retrieves paypal order", async () => {
-      result = await paypalProviderService.retrievePayment({ id: "test" })
-      expect(PayPalMock.orders.OrdersGetRequest).toHaveBeenCalledTimes(1)
-      expect(PayPalMock.orders.OrdersGetRequest).toHaveBeenCalledWith("test")
-      expect(PayPalClientMock.execute).toHaveBeenCalledTimes(1)
+      result = await paypalProviderService.retrievePayment({
+        id: "test",
+      });
+      expect(PayPalMock.orders.OrdersGetRequest).toHaveBeenCalledTimes(1);
+      expect(PayPalMock.orders.OrdersGetRequest).toHaveBeenCalledWith("test");
+      expect(PayPalClientMock.execute).toHaveBeenCalledTimes(1);
 
-      expect(result.id).toEqual("test")
-    })
-  })
+      expect(result.id).toEqual("test");
+    });
+  });
 
   describe("updatePayment", () => {
-    let result
+    let result;
     const paypalProviderService = new PayPalProviderService(
       {
         regionService: RegionServiceMock,
@@ -103,11 +105,11 @@ describe("PaypalProviderService", () => {
       {
         api_key: "test",
       }
-    )
+    );
 
     beforeEach(async () => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     it("updates paypal order", async () => {
       result = await paypalProviderService.updatePayment(
@@ -117,11 +119,11 @@ describe("PaypalProviderService", () => {
           region_id: "fr",
           total: 1000,
         }
-      )
+      );
 
-      expect(PayPalMock.orders.OrdersPatchRequest).toHaveBeenCalledTimes(1)
-      expect(PayPalMock.orders.OrdersPatchRequest).toHaveBeenCalledWith("test")
-      expect(PayPalClientMock.execute).toHaveBeenCalledTimes(1)
+      expect(PayPalMock.orders.OrdersPatchRequest).toHaveBeenCalledTimes(1);
+      expect(PayPalMock.orders.OrdersPatchRequest).toHaveBeenCalledWith("test");
+      expect(PayPalClientMock.execute).toHaveBeenCalledTimes(1);
       expect(PayPalClientMock.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           order: true,
@@ -138,14 +140,14 @@ describe("PaypalProviderService", () => {
             },
           ],
         })
-      )
+      );
 
-      expect(result.id).toEqual("test")
-    })
-  })
+      expect(result.id).toEqual("test");
+    });
+  });
 
   describe("capturePayment", () => {
-    let result
+    let result;
     const paypalProviderService = new PayPalProviderService(
       {
         regionService: RegionServiceMock,
@@ -154,11 +156,11 @@ describe("PaypalProviderService", () => {
       {
         api_key: "test",
       }
-    )
+    );
 
     beforeEach(async () => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     it("updates paypal order", async () => {
       result = await paypalProviderService.capturePayment({
@@ -176,23 +178,23 @@ describe("PaypalProviderService", () => {
             },
           ],
         },
-      })
+      });
 
       expect(
         PayPalMock.payments.AuthorizationsCaptureRequest
-      ).toHaveBeenCalledTimes(1)
+      ).toHaveBeenCalledTimes(1);
       expect(
         PayPalMock.payments.AuthorizationsCaptureRequest
-      ).toHaveBeenCalledWith("test_auth")
-      expect(PayPalMock.orders.OrdersGetRequest).toHaveBeenCalledWith("test")
-      expect(PayPalClientMock.execute).toHaveBeenCalledTimes(2)
+      ).toHaveBeenCalledWith("test_auth");
+      expect(PayPalMock.orders.OrdersGetRequest).toHaveBeenCalledWith("test");
+      expect(PayPalClientMock.execute).toHaveBeenCalledTimes(2);
 
-      expect(result.id).toEqual("test")
-    })
-  })
+      expect(result.id).toEqual("test");
+    });
+  });
 
   describe("refundPayment", () => {
-    let result
+    let result;
     const paypalProviderService = new PayPalProviderService(
       {
         regionService: RegionServiceMock,
@@ -201,11 +203,11 @@ describe("PaypalProviderService", () => {
       {
         api_key: "test",
       }
-    )
+    );
 
     beforeEach(async () => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     it("refunds payment", async () => {
       result = await paypalProviderService.refundPayment(
@@ -227,13 +229,13 @@ describe("PaypalProviderService", () => {
           },
         },
         2000
-      )
+      );
 
       expect(PayPalMock.payments.CapturesRefundRequest).toHaveBeenCalledWith(
         "test_cap"
-      )
-      expect(PayPalMock.orders.OrdersGetRequest).toHaveBeenCalledWith("test")
-      expect(PayPalClientMock.execute).toHaveBeenCalledTimes(2)
+      );
+      expect(PayPalMock.orders.OrdersGetRequest).toHaveBeenCalledWith("test");
+      expect(PayPalClientMock.execute).toHaveBeenCalledTimes(2);
       expect(PayPalClientMock.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           body: {
@@ -243,10 +245,10 @@ describe("PaypalProviderService", () => {
             },
           },
         })
-      )
+      );
 
-      expect(result.id).toEqual("test")
-    })
+      expect(result.id).toEqual("test");
+    });
 
     it("doesn't refund without captures", async () => {
       await expect(
@@ -266,12 +268,12 @@ describe("PaypalProviderService", () => {
           },
           2000
         )
-      ).rejects.toThrow("Order not yet captured")
-    })
-  })
+      ).rejects.toThrow("Order not yet captured");
+    });
+  });
 
   describe("cancelPayment", () => {
-    let result
+    let result;
     const paypalProviderService = new PayPalProviderService(
       {
         regionService: RegionServiceMock,
@@ -280,11 +282,11 @@ describe("PaypalProviderService", () => {
       {
         api_key: "test",
       }
-    )
+    );
 
     beforeEach(async () => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     it("refunds if captured", async () => {
       result = await paypalProviderService.cancelPayment({
@@ -304,16 +306,16 @@ describe("PaypalProviderService", () => {
             },
           ],
         },
-      })
+      });
 
       expect(PayPalMock.payments.CapturesRefundRequest).toHaveBeenCalledWith(
         "test_cap"
-      )
-      expect(PayPalMock.orders.OrdersGetRequest).toHaveBeenCalledWith("test")
-      expect(PayPalClientMock.execute).toHaveBeenCalledTimes(2)
+      );
+      expect(PayPalMock.orders.OrdersGetRequest).toHaveBeenCalledWith("test");
+      expect(PayPalClientMock.execute).toHaveBeenCalledTimes(2);
 
-      expect(result.id).toEqual("test")
-    })
+      expect(result.id).toEqual("test");
+    });
 
     it("voids if not captured", async () => {
       result = await paypalProviderService.cancelPayment({
@@ -332,15 +334,15 @@ describe("PaypalProviderService", () => {
             },
           ],
         },
-      })
+      });
 
       expect(
         PayPalMock.payments.AuthorizationsVoidRequest
-      ).toHaveBeenCalledWith("test_auth")
-      expect(PayPalMock.orders.OrdersGetRequest).toHaveBeenCalledWith("test")
-      expect(PayPalClientMock.execute).toHaveBeenCalledTimes(2)
+      ).toHaveBeenCalledWith("test_auth");
+      expect(PayPalMock.orders.OrdersGetRequest).toHaveBeenCalledWith("test");
+      expect(PayPalClientMock.execute).toHaveBeenCalledTimes(2);
 
-      expect(result.id).toEqual("test")
-    })
-  })
-})
+      expect(result.id).toEqual("test");
+    });
+  });
+});

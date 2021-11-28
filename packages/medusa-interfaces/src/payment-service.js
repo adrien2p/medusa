@@ -1,4 +1,4 @@
-import BaseService from "./base-service"
+import BaseService from "./base-service";
 
 /**
  * The interface that all payment services must inherit from. The intercace
@@ -8,11 +8,11 @@ import BaseService from "./base-service"
  */
 class BasePaymentService extends BaseService {
   constructor() {
-    super()
+    super();
   }
 
   getIdentifier() {
-    return this.constructor.identifier
+    return this.constructor.identifier;
   }
 
   /**
@@ -23,7 +23,7 @@ class BasePaymentService extends BaseService {
    * use.
    */
   createPayment(cart) {
-    throw Error("createPayment must be overridden by the child class")
+    throw Error("createPayment must be overridden by the child class");
   }
 
   /**
@@ -33,7 +33,7 @@ class BasePaymentService extends BaseService {
    * payment object as stored with the provider.
    */
   retrievePayment(cart) {
-    throw Error("getPayment must be overridden by the child class")
+    throw Error("getPayment must be overridden by the child class");
   }
 
   /**
@@ -43,27 +43,27 @@ class BasePaymentService extends BaseService {
    * payment object as stored with the provider.
    */
   updatePayment(cart) {
-    throw Error("updatePayment must be overridden by the child class")
+    throw Error("updatePayment must be overridden by the child class");
   }
 
   getStatus() {
-    throw Error("getStatus must be overridden by the child class")
+    throw Error("getStatus must be overridden by the child class");
   }
 
   authorizePayment() {
-    throw Error("authorizePayment must be overridden by the child class")
+    throw Error("authorizePayment must be overridden by the child class");
   }
 
   capturePayment() {
-    throw Error("capturePayment must be overridden by the child class")
+    throw Error("capturePayment must be overridden by the child class");
   }
 
   refundPayment() {
-    throw Error("refundPayment must be overridden by the child class")
+    throw Error("refundPayment must be overridden by the child class");
   }
 
   deletePayment() {
-    throw Error("deletePayment must be overridden by the child class")
+    throw Error("deletePayment must be overridden by the child class");
   }
 
   /**
@@ -71,8 +71,8 @@ class BasePaymentService extends BaseService {
    * retrieve them.
    */
   retrieveSavedMethods(customer) {
-    return Promise.resolve([])
+    return Promise.resolve([]);
   }
 }
 
-export default BasePaymentService
+export default BasePaymentService;

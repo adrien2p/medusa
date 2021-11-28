@@ -1,10 +1,10 @@
-import { IdMap } from "medusa-test-utils"
-import { request } from "../../../../../helpers/test-request"
-import { ShippingOptionServiceMock } from "../../../../../services/__mocks__/shipping-option"
+import { IdMap } from "medusa-test-utils";
+import { request } from "../../../../../helpers/test-request";
+import { ShippingOptionServiceMock } from "../../../../../services/__mocks__/shipping-option";
 
 describe("POST /admin/shipping-options", () => {
   describe("successful creation", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
       subject = await request(
@@ -28,15 +28,15 @@ describe("POST /admin/shipping-options", () => {
             },
           },
         }
-      )
-    })
+      );
+    });
 
     it("returns 200", () => {
-      expect(subject.status).toEqual(200)
-    })
+      expect(subject.status).toEqual(200);
+    });
 
     it("calls service method", () => {
-      expect(ShippingOptionServiceMock.update).toHaveBeenCalledTimes(1)
+      expect(ShippingOptionServiceMock.update).toHaveBeenCalledTimes(1);
       expect(ShippingOptionServiceMock.update).toHaveBeenCalledWith(
         IdMap.getId("validId"),
         {
@@ -50,7 +50,7 @@ describe("POST /admin/shipping-options", () => {
             },
           ],
         }
-      )
-    })
-  })
-})
+      );
+    });
+  });
+});

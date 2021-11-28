@@ -1,20 +1,20 @@
-import { Swap } from "./../../../../"
-import { Router } from "express"
-import middlewares from "../../../middlewares"
+import { Swap } from "./../../../../";
+import { Router } from "express";
+import middlewares from "../../../middlewares";
 
-const route = Router()
+const route = Router();
 
 export default (app) => {
-  app.use("/swaps", route)
+  app.use("/swaps", route);
 
   route.get(
     "/:cart_id",
     middlewares.wrap(require("./get-swap-by-cart").default)
-  )
-  route.post("/", middlewares.wrap(require("./create-swap").default))
+  );
+  route.post("/", middlewares.wrap(require("./create-swap").default));
 
-  return app
-}
+  return app;
+};
 
 export const defaultStoreSwapRelations = [
   "order",
@@ -26,7 +26,7 @@ export const defaultStoreSwapRelations = [
   "shipping_address",
   "shipping_methods",
   "cart",
-]
+];
 export const defaultStoreSwapFields = [
   "id",
   "fulfillment_status",
@@ -41,11 +41,11 @@ export const defaultStoreSwapFields = [
   "deleted_at",
   "metadata",
   "idempotency_key",
-]
+];
 
 export type StoreSwapsRes = {
-  swap: Swap
-}
+  swap: Swap;
+};
 
-export * from "./create-swap"
-export * from "./get-swap-by-cart"
+export * from "./create-swap";
+export * from "./get-swap-by-cart";

@@ -3,9 +3,9 @@ import {
   StoreCartsDeleteRes,
   StorePostCartsCartLineItemsItemReq,
   StorePostCartsCartLineItemsReq,
-} from "@medusajs/medusa"
-import { AxiosPromise } from "axios"
-import BaseResource from "./base"
+} from "@medusajs/medusa";
+import { AxiosPromise } from "axios";
+import BaseResource from "./base";
 
 class LineItemsResource extends BaseResource {
   /**
@@ -18,8 +18,8 @@ class LineItemsResource extends BaseResource {
     cart_id: string,
     payload: StorePostCartsCartLineItemsReq
   ): AxiosPromise<StoreCartsRes> {
-    const path = `/store/carts/${cart_id}/line-items`
-    return this.client.request("POST", path, payload)
+    const path = `/store/carts/${cart_id}/line-items`;
+    return this.client.request("POST", path, payload);
   }
 
   /**
@@ -35,8 +35,8 @@ class LineItemsResource extends BaseResource {
     line_id: string,
     payload: StorePostCartsCartLineItemsItemReq
   ): AxiosPromise<StoreCartsRes> {
-    const path = `/store/carts/${cart_id}/line-items/${line_id}`
-    return this.client.request("POST", path, payload)
+    const path = `/store/carts/${cart_id}/line-items/${line_id}`;
+    return this.client.request("POST", path, payload);
   }
 
   /**
@@ -46,9 +46,9 @@ class LineItemsResource extends BaseResource {
    * @return {AxiosPromise<StoreCartsDeleteRes>}
    */
   delete(cart_id: string, line_id: string): AxiosPromise<StoreCartsDeleteRes> {
-    const path = `/store/carts/${cart_id}/line-items/${line_id}`
-    return this.client.request("DELETE", path)
+    const path = `/store/carts/${cart_id}/line-items/${line_id}`;
+    return this.client.request("DELETE", path);
   }
 }
 
-export default LineItemsResource
+export default LineItemsResource;

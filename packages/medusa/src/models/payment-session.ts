@@ -9,10 +9,10 @@ import {
   ManyToOne,
   JoinColumn,
   Unique,
-} from "typeorm"
-import { ulid } from "ulid"
-import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column"
-import { Cart } from "./cart"
+} from "typeorm";
+import { ulid } from "ulid";
+import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column";
+import { Cart } from "./cart";
 
 export enum PaymentSessionStatus {
   AUTHORIZED = "authorized",
@@ -26,46 +26,43 @@ export enum PaymentSessionStatus {
 @Entity()
 export class PaymentSession {
   @PrimaryColumn()
-  id: string
+  id: string;
 
   @Index()
   @Column()
-  cart_id: string
+  cart_id: string;
 
-  @ManyToOne(
-    () => Cart,
-    cart => cart.payment_sessions
-  )
+  @ManyToOne(() => Cart, (cart) => cart.payment_sessions)
   @JoinColumn({ name: "cart_id" })
-  cart: Cart
+  cart: Cart;
 
   @Index()
   @Column()
-  provider_id: string
+  provider_id: string;
 
   @Column({ nullable: true })
-  is_selected: boolean
+  is_selected: boolean;
 
   @DbAwareColumn({ type: "enum", enum: PaymentSessionStatus })
-  status: string
+  status: string;
 
   @DbAwareColumn({ type: "jsonb" })
-  data: any
+  data: any;
 
   @CreateDateColumn({ type: resolveDbType("timestamptz") })
-  created_at: Date
+  created_at: Date;
 
   @UpdateDateColumn({ type: resolveDbType("timestamptz") })
-  updated_at: Date
+  updated_at: Date;
 
   @Column({ nullable: true })
-  idempotency_key: string
+  idempotency_key: string;
 
   @BeforeInsert()
   private beforeInsert() {
-    if (this.id) return
-    const id = ulid()
-    this.id = `ps_${id}`
+    if (this.id) return;
+    const id = ulid();
+    this.id = `ps_${id}`;
   }
 }
 

@@ -1,10 +1,10 @@
-import { IsEmail, IsOptional, IsString } from "class-validator"
-import jwt from "jsonwebtoken"
-import { defaultStoreCustomersFields, defaultStoreCustomersRelations } from "."
-import { Customer } from "../../../.."
-import config from "../../../../config"
-import CustomerService from "../../../../services/customer"
-import { validator } from "../../../../utils/validator"
+import { IsEmail, IsOptional, IsString } from "class-validator";
+import jwt from "jsonwebtoken";
+import { defaultStoreCustomersFields, defaultStoreCustomersRelations } from ".";
+import { Customer } from "../../../..";
+import config from "../../../../config";
+import CustomerService from "../../../../services/customer";
+import { validator } from "../../../../utils/validator";
 
 /**
  * @oas [post] /customers
@@ -30,38 +30,38 @@ import { validator } from "../../../../utils/validator"
  *               $ref: "#/components/schemas/customer"
  */
 export default async (req, res) => {
-  const validated = await validator(StorePostCustomersReq, req.body)
+  const validated = await validator(StorePostCustomersReq, req.body);
 
-  const customerService: CustomerService = req.scope.resolve("customerService")
-  let customer: Customer = await customerService.create(validated)
+  const customerService: CustomerService = req.scope.resolve("customerService");
+  let customer: Customer = await customerService.create(validated);
 
   // Add JWT to cookie
   req.session.jwt = jwt.sign({ customer_id: customer.id }, config.jwtSecret!, {
     expiresIn: "30d",
-  })
+  });
 
   customer = await customerService.retrieve(customer.id, {
     relations: defaultStoreCustomersRelations,
     select: defaultStoreCustomersFields,
-  })
+  });
 
-  res.status(200).json({ customer })
-}
+  res.status(200).json({ customer });
+};
 
 export class StorePostCustomersReq {
   @IsString()
-  first_name: string
+  first_name: string;
 
   @IsString()
-  last_name: string
+  last_name: string;
 
   @IsEmail()
-  email: string
+  email: string;
 
   @IsString()
-  password: string
+  password: string;
 
   @IsOptional()
   @IsString()
-  phone?: string
+  phone?: string;
 }

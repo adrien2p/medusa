@@ -2,9 +2,9 @@ import {
   StoreCustomersRes,
   StorePostCustomersCustomerAddressesAddressReq,
   StorePostCustomersCustomerAddressesReq,
-} from "@medusajs/medusa"
-import { AxiosPromise } from "axios"
-import BaseResource from "./base"
+} from "@medusajs/medusa";
+import { AxiosPromise } from "axios";
+import BaseResource from "./base";
 
 class AddressesResource extends BaseResource {
   /**
@@ -15,8 +15,8 @@ class AddressesResource extends BaseResource {
   addAddress(
     payload: StorePostCustomersCustomerAddressesReq
   ): AxiosPromise<StoreCustomersRes> {
-    const path = `/store/customers/me/addresses`
-    return this.client.request("POST", path, payload)
+    const path = `/store/customers/me/addresses`;
+    return this.client.request("POST", path, payload);
   }
 
   /**
@@ -25,8 +25,8 @@ class AddressesResource extends BaseResource {
    * @return {AxiosPromise<StoreCustomersResponse>}
    */
   deleteAddress(address_id: string): AxiosPromise<StoreCustomersRes> {
-    const path = `/store/customers/me/addresses/${address_id}`
-    return this.client.request("DELETE", path)
+    const path = `/store/customers/me/addresses/${address_id}`;
+    return this.client.request("DELETE", path);
   }
 
   /**
@@ -39,9 +39,9 @@ class AddressesResource extends BaseResource {
     address_id: string,
     payload: StorePostCustomersCustomerAddressesAddressReq
   ): AxiosPromise<StoreCustomersRes> {
-    const path = `/store/customers/me/addresses/${address_id}`
-    return this.client.request("POST", path, payload)
+    const path = `/store/customers/me/addresses/${address_id}`;
+    return this.client.request("POST", path, payload);
   }
 }
 
-export default AddressesResource
+export default AddressesResource;

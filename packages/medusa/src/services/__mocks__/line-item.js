@@ -1,21 +1,21 @@
-import { IdMap } from "medusa-test-utils"
-import { MedusaError } from "medusa-core-utils"
+import { IdMap } from "medusa-test-utils";
+import { MedusaError } from "medusa-core-utils";
 
 export const LineItemServiceMock = {
-  withTransaction: function() {
-    return this
+  withTransaction: function () {
+    return this;
   },
-  create: jest.fn().mockImplementation(data => {
-    return Promise.resolve({ ...data })
+  create: jest.fn().mockImplementation((data) => {
+    return Promise.resolve({ ...data });
   }),
-  update: jest.fn().mockImplementation(data => {
-    return Promise.resolve({ ...data })
+  update: jest.fn().mockImplementation((data) => {
+    return Promise.resolve({ ...data });
   }),
-  validate: jest.fn().mockImplementation(data => {
+  validate: jest.fn().mockImplementation((data) => {
     if (data.title === "invalid lineitem") {
-      throw new Error(`"content" is required`)
+      throw new Error(`"content" is required`);
     }
-    return data
+    return data;
   }),
   isEqual: jest.fn().mockImplementation((line, match) => {
     if (Array.isArray(line.content)) {
@@ -27,16 +27,16 @@ export const LineItemServiceMock = {
           (c, index) =>
             c.variant.id === match[index].variant.id &&
             c.quantity === match[index].quantity
-        )
+        );
       }
     } else if (!Array.isArray(match.content)) {
       return (
         line.content.variant.id === match.content.variant.id &&
         line.content.quantity === match.content.quantity
-      )
+      );
     }
 
-    return false
+    return false;
   }),
   generate: jest
     .fn()
@@ -45,7 +45,7 @@ export const LineItemServiceMock = {
         variantId === IdMap.getId("fail") ||
         regionId === IdMap.getId("fail")
       ) {
-        throw new MedusaError(MedusaError.Types.INVALID_DATA, "Doesn't exist")
+        throw new MedusaError(MedusaError.Types.INVALID_DATA, "Doesn't exist");
       }
 
       return Promise.resolve({
@@ -53,12 +53,12 @@ export const LineItemServiceMock = {
         unit_price: 100,
         quantity,
         metadata,
-      })
+      });
     }),
-}
+};
 
 const mock = jest.fn().mockImplementation(() => {
-  return LineItemServiceMock
-})
+  return LineItemServiceMock;
+});
 
-export default mock
+export default mock;

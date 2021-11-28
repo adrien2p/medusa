@@ -1,4 +1,4 @@
-import { DraftOrderService } from "../../../../services"
+import { DraftOrderService } from "../../../../services";
 /**
  * @oas [delete] /draft-orders/{id}
  * operationId: DeleteDraftOrdersDraftOrder
@@ -26,15 +26,15 @@ import { DraftOrderService } from "../../../../services"
  *               type: boolean
  */
 export default async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params;
 
   const draftOrderService: DraftOrderService =
-    req.scope.resolve("draftOrderService")
-  await draftOrderService.delete(id)
+    req.scope.resolve("draftOrderService");
+  await draftOrderService.delete(id);
 
   res.json({
     id,
     object: "draft-order",
     deleted: true,
-  })
-}
+  });
+};

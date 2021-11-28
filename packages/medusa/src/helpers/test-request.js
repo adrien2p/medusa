@@ -1,67 +1,67 @@
-import { asValue, createContainer } from "awilix"
-import express from "express"
-import jwt from "jsonwebtoken"
-import { MockManager } from "medusa-test-utils"
-import "reflect-metadata"
-import supertest from "supertest"
-import config from "../config"
-import apiLoader from "../loaders/api"
-import passportLoader from "../loaders/passport"
-import servicesLoader from "../loaders/services"
+import { asValue, createContainer } from "awilix";
+import express from "express";
+import jwt from "jsonwebtoken";
+import { MockManager } from "medusa-test-utils";
+import "reflect-metadata";
+import supertest from "supertest";
+import config from "../config";
+import apiLoader from "../loaders/api";
+import passportLoader from "../loaders/passport";
+import servicesLoader from "../loaders/services";
 
 const adminSessionOpts = {
   cookieName: "session",
   secret: "test",
-}
-export { adminSessionOpts }
-export { clientSessionOpts }
+};
+export { adminSessionOpts };
+export { clientSessionOpts };
 
 const clientSessionOpts = {
   cookieName: "session",
   secret: "test",
-}
+};
 
-const testApp = express()
+const testApp = express();
 
-const container = createContainer()
+const container = createContainer();
 container.register({
   logger: asValue({
     error: () => {},
   }),
   manager: asValue(MockManager),
-})
+});
 
-testApp.set("trust proxy", 1)
+testApp.set("trust proxy", 1);
 testApp.use((req, res, next) => {
-  req.session = {}
-  const data = req.get("Cookie")
+  req.session = {};
+  const data = req.get("Cookie");
   if (data) {
     req.session = {
       ...req.session,
       ...JSON.parse(data),
-    }
+    };
   }
-  next()
-})
+  next();
+});
 
-servicesLoader({ container })
-passportLoader({ app: testApp, container })
+servicesLoader({ container });
+passportLoader({ app: testApp, container });
 
 testApp.use((req, res, next) => {
-  req.scope = container.createScope()
-  next()
-})
+  req.scope = container.createScope();
+  next();
+});
 
-apiLoader({ container, rootDirectory: ".", app: testApp })
+apiLoader({ container, rootDirectory: ".", app: testApp });
 
-const supertestRequest = supertest(testApp)
+const supertestRequest = supertest(testApp);
 
 export async function request(method, url, opts = {}) {
-  let { payload, headers } = opts
+  let { payload, headers } = opts;
 
-  const req = supertestRequest[method.toLowerCase()](url)
-  headers = headers || {}
-  headers.Cookie = headers.Cookie || ""
+  const req = supertestRequest[method.toLowerCase()](url);
+  headers = headers || {};
+  headers.Cookie = headers.Cookie || "";
   if (opts.adminSession) {
     if (opts.adminSession.jwt) {
       opts.adminSession.jwt = jwt.sign(
@@ -70,9 +70,9 @@ export async function request(method, url, opts = {}) {
         {
           expiresIn: "30m",
         }
-      )
+      );
     }
-    headers.Cookie = JSON.stringify(opts.adminSession) || ""
+    headers.Cookie = JSON.stringify(opts.adminSession) || "";
   }
   if (opts.clientSession) {
     if (opts.clientSession.jwt) {
@@ -82,34 +82,34 @@ export async function request(method, url, opts = {}) {
         {
           expiresIn: "30d",
         }
-      )
+      );
     }
 
-    headers.Cookie = JSON.stringify(opts.clientSession) || ""
+    headers.Cookie = JSON.stringify(opts.clientSession) || "";
   }
 
   for (const name in headers) {
-    req.set(name, headers[name])
+    req.set(name, headers[name]);
   }
 
   if (payload && !req.get("content-type")) {
-    req.set("Content-Type", "application/json")
+    req.set("Content-Type", "application/json");
   }
 
   if (!req.get("accept")) {
-    req.set("Accept", "application/json")
+    req.set("Accept", "application/json");
   }
 
-  req.set("Host", "localhost")
+  req.set("Host", "localhost");
 
-  let res
+  let res;
   try {
-    res = await req.send(JSON.stringify(payload))
+    res = await req.send(JSON.stringify(payload));
   } catch (e) {
     if (e.response) {
-      res = e.response
+      res = e.response;
     } else {
-      throw e
+      throw e;
     }
   }
 
@@ -126,5 +126,5 @@ export async function request(method, url, opts = {}) {
   //  sessions.util.decode(clientSessionOpts, c[clientSessionOpts.cookieName])
   //    .content
 
-  return res
+  return res;
 }

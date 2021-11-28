@@ -15,14 +15,14 @@ import {
   ManyToMany,
   JoinColumn,
   JoinTable,
-} from "typeorm"
-import { ulid } from "ulid"
-import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column"
+} from "typeorm";
+import { ulid } from "ulid";
+import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column";
 
-import { ShippingProfile } from "./shipping-profile"
-import { Region } from "./region"
-import { FulfillmentProvider } from "./fulfillment-provider"
-import { ShippingOptionRequirement } from "./shipping-option-requirement"
+import { ShippingProfile } from "./shipping-profile";
+import { Region } from "./region";
+import { FulfillmentProvider } from "./fulfillment-provider";
+import { ShippingOptionRequirement } from "./shipping-option-requirement";
 
 export enum ShippingOptionPriceType {
   FLAT_RATE = "flat_rate",
@@ -33,74 +33,72 @@ export enum ShippingOptionPriceType {
 @Entity()
 export class ShippingOption {
   @PrimaryColumn()
-  id: string
+  id: string;
 
   @Column()
-  name: string
+  name: string;
 
   @Index()
   @Column()
-  region_id: string
+  region_id: string;
 
   @ManyToOne(() => Region)
   @JoinColumn({ name: "region_id" })
-  region: Region
+  region: Region;
 
   @Index()
   @Column()
-  profile_id: string
+  profile_id: string;
 
   @ManyToOne(() => ShippingProfile)
   @JoinColumn({ name: "profile_id" })
-  profile: ShippingProfile
+  profile: ShippingProfile;
 
   @Index()
   @Column()
-  provider_id: string
+  provider_id: string;
 
   @ManyToOne(() => FulfillmentProvider)
   @JoinColumn({ name: "provider_id" })
-  provider: FulfillmentProvider
+  provider: FulfillmentProvider;
 
   @DbAwareColumn({ type: "enum", enum: ShippingOptionPriceType })
-  price_type: ShippingOptionPriceType
+  price_type: ShippingOptionPriceType;
 
   @Column({ type: "int", nullable: true })
-  amount: number
+  amount: number;
 
   @Column({ default: false })
-  is_return: boolean
+  is_return: boolean;
 
   @Column({ default: false })
-  admin_only: boolean
+  admin_only: boolean;
 
-  @OneToMany(
-    () => ShippingOptionRequirement,
-    req => req.shipping_option,
-    { cascade: ["insert"] }
-  )
-  requirements: ShippingOptionRequirement[]
+  @OneToMany(() => ShippingOptionRequirement, (req) => req.shipping_option, {
+    cascade: ["insert"],
+  })
+  requirements: ShippingOptionRequirement[];
 
   @DbAwareColumn({ type: "jsonb" })
-  data: any
+  data: any;
 
   @CreateDateColumn({ type: resolveDbType("timestamptz") })
-  created_at: Date
+  created_at: Date;
 
   @UpdateDateColumn({ type: resolveDbType("timestamptz") })
-  updated_at: Date
+  updated_at: Date;
 
   @DeleteDateColumn({ type: resolveDbType("timestamptz") })
-  deleted_at: Date
+  deleted_at: Date;
 
   @DbAwareColumn({ type: "jsonb", nullable: true })
-  metadata: any
+  metadata: any;
 
   @BeforeInsert()
   private beforeInsert() {
-    if (this.id) return
-    const id = ulid()
-    this.id = `so_${id}`
+    if (this.id) return;
+    const id = ulid();
+    this.id = `so_${id}`;
   }
 }
 

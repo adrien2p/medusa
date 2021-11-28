@@ -1,8 +1,14 @@
-import { Type } from "class-transformer"
-import { IsBoolean, IsDate, IsInt, IsOptional, IsString } from "class-validator"
-import { defaultAdminGiftCardFields, defaultAdminGiftCardRelations } from "."
-import { GiftCardService } from "../../../../services"
-import { validator } from "../../../../utils/validator"
+import { Type } from "class-transformer";
+import {
+  IsBoolean,
+  IsDate,
+  IsInt,
+  IsOptional,
+  IsString,
+} from "class-validator";
+import { defaultAdminGiftCardFields, defaultAdminGiftCardRelations } from ".";
+import { GiftCardService } from "../../../../services";
+import { validator } from "../../../../utils/validator";
 
 /**
  * @oas [post] /gift-cards/{id}
@@ -48,40 +54,40 @@ import { validator } from "../../../../utils/validator"
  *               $ref: "#/components/schemas/gift_card"
  */
 export default async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params;
 
-  const validated = await validator(AdminPostGiftCardsGiftCardReq, req.body)
+  const validated = await validator(AdminPostGiftCardsGiftCardReq, req.body);
 
-  const giftCardService: GiftCardService = req.scope.resolve("giftCardService")
+  const giftCardService: GiftCardService = req.scope.resolve("giftCardService");
 
-  await giftCardService.update(id, validated)
+  await giftCardService.update(id, validated);
 
   const giftCard = await giftCardService.retrieve(id, {
     select: defaultAdminGiftCardFields,
     relations: defaultAdminGiftCardRelations,
-  })
+  });
 
-  res.status(200).json({ gift_card: giftCard })
-}
+  res.status(200).json({ gift_card: giftCard });
+};
 
 export class AdminPostGiftCardsGiftCardReq {
   @IsOptional()
   @IsInt()
-  balance?: number
+  balance?: number;
 
   @IsOptional()
   @IsBoolean()
-  is_disabled?: boolean
+  is_disabled?: boolean;
 
   @IsOptional()
   @IsDate()
   @Type(() => Date)
-  ends_at?: Date
+  ends_at?: Date;
 
   @IsOptional()
   @IsString()
-  region_id?: string
+  region_id?: string;
 
   @IsOptional()
-  metadata?: object
+  metadata?: object;
 }

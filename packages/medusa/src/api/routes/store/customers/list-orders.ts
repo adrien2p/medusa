@@ -1,11 +1,11 @@
-import { Type } from "class-transformer"
-import { IsNumber, IsOptional, IsString } from "class-validator"
-import OrderService from "../../../../services/order"
-import { validator } from "../../../../utils/validator"
+import { Type } from "class-transformer";
+import { IsNumber, IsOptional, IsString } from "class-validator";
+import OrderService from "../../../../services/order";
+import { validator } from "../../../../utils/validator";
 import {
   allowedStoreOrdersFields,
   allowedStoreOrdersRelations,
-} from "../orders"
+} from "../orders";
 
 /**
  * @oas [get] /customers/me/orders
@@ -42,33 +42,33 @@ import {
  *                 $ref: "#/components/schemas/orders"
  */
 export default async (req, res) => {
-  const id: string = req.user.customer_id
+  const id: string = req.user.customer_id;
 
-  const orderService: OrderService = req.scope.resolve("orderService")
+  const orderService: OrderService = req.scope.resolve("orderService");
 
   const selector = {
     customer_id: id,
-  }
+  };
 
   const validated = await validator(
     StoreGetCustomersCustomerOrdersParams,
     req.query
-  )
+  );
 
-  let includeFields: string[] = []
+  let includeFields: string[] = [];
   if (validated.fields) {
-    includeFields = validated.fields.split(",")
+    includeFields = validated.fields.split(",");
     includeFields = includeFields.filter((f) =>
       allowedStoreOrdersFields.includes(f)
-    )
+    );
   }
 
-  let expandFields: string[] = []
+  let expandFields: string[] = [];
   if (validated.expand) {
-    expandFields = validated.expand.split(",")
+    expandFields = validated.expand.split(",");
     expandFields = expandFields.filter((f) =>
       allowedStoreOrdersRelations.includes(f)
-    )
+    );
   }
 
   const listConfig = {
@@ -77,29 +77,29 @@ export default async (req, res) => {
     skip: validated.offset,
     take: validated.limit,
     order: { created_at: "DESC" },
-  }
+  };
 
-  const [orders, count] = await orderService.listAndCount(selector, listConfig)
+  const [orders, count] = await orderService.listAndCount(selector, listConfig);
 
-  res.json({ orders, count, offset: validated.offset, limit: validated.limit })
-}
+  res.json({ orders, count, offset: validated.offset, limit: validated.limit });
+};
 
 export class StoreGetCustomersCustomerOrdersParams {
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  limit = 10
+  limit = 10;
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  offset = 0
+  offset = 0;
 
   @IsOptional()
   @IsString()
-  fields?: string
+  fields?: string;
 
   @IsOptional()
   @IsString()
-  expand?: string
+  expand?: string;
 }

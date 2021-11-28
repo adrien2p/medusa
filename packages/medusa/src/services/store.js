@@ -1,7 +1,7 @@
-import { MedusaError } from "medusa-core-utils"
-import { BaseService } from "medusa-interfaces"
+import { MedusaError } from "medusa-core-utils";
+import { BaseService } from "medusa-interfaces";
 
-import { currencies } from "../utils/currencies"
+import { currencies } from "../utils/currencies";
 
 /**
  * Provides layer to manipulate store settings.
@@ -14,24 +14,24 @@ class StoreService extends BaseService {
     currencyRepository,
     eventBusService,
   }) {
-    super()
+    super();
 
     /** @private @const {EntityManager} */
-    this.manager_ = manager
+    this.manager_ = manager;
 
     /** @private @const {StoreRepository} */
-    this.storeRepository_ = storeRepository
+    this.storeRepository_ = storeRepository;
 
     /** @private @const {CurrencyRepository} */
-    this.currencyRepository_ = currencyRepository
+    this.currencyRepository_ = currencyRepository;
 
     /** @private @const {EventBus} */
-    this.eventBus_ = eventBusService
+    this.eventBus_ = eventBusService;
   }
 
   withTransaction(transactionManager) {
     if (!transactionManager) {
-      return this
+      return this;
     }
 
     const cloned = new StoreService({
@@ -39,11 +39,11 @@ class StoreService extends BaseService {
       storeRepository: this.storeRepository_,
       currencyRepository: this.currencyRepository_,
       eventBusService: this.eventBus_,
-    })
+    });
 
-    cloned.transactionManager_ = transactionManager
+    cloned.transactionManager_ = transactionManager;
 
-    return cloned
+    return cloned;
   }
 
   /**
@@ -52,17 +52,19 @@ class StoreService extends BaseService {
    */
   async create() {
     return this.atomicPhase_(async (manager) => {
-      const storeRepository = manager.getCustomRepository(this.storeRepository_)
+      const storeRepository = manager.getCustomRepository(
+        this.storeRepository_
+      );
 
-      let store = await this.retrieve()
+      let store = await this.retrieve();
 
       if (!store) {
-        const s = await storeRepository.create()
-        store = await storeRepository.save(s)
+        const s = await storeRepository.create();
+        store = await storeRepository.save(s);
       }
 
-      return store
-    })
+      return store;
+    });
   }
 
   /**
@@ -71,22 +73,22 @@ class StoreService extends BaseService {
    * @return {Promise<Store>} the store
    */
   async retrieve(relations = []) {
-    const storeRepo = this.manager_.getCustomRepository(this.storeRepository_)
+    const storeRepo = this.manager_.getCustomRepository(this.storeRepository_);
 
-    const store = await storeRepo.findOne({ relations })
+    const store = await storeRepo.findOne({ relations });
 
-    return store
+    return store;
   }
 
   getDefaultCurrency_(code) {
-    const currencyObject = currencies[code.toUpperCase()]
+    const currencyObject = currencies[code.toUpperCase()];
 
     return {
       code: currencyObject.code.toLowerCase(),
       symbol: currencyObject.symbol,
       symbol_native: currencyObject.symbol_native,
       name: currencyObject.name,
-    }
+    };
   }
 
   /**
@@ -96,38 +98,40 @@ class StoreService extends BaseService {
    */
   async update(update) {
     return this.atomicPhase_(async (manager) => {
-      const storeRepository = manager.getCustomRepository(this.storeRepository_)
+      const storeRepository = manager.getCustomRepository(
+        this.storeRepository_
+      );
       const currencyRepository = manager.getCustomRepository(
         this.currencyRepository_
-      )
+      );
 
-      const store = await this.retrieve()
+      const store = await this.retrieve();
 
       const {
         metadata,
         default_currency_code,
         currencies: storeCurrencies,
         ...rest
-      } = update
+      } = update;
 
       if (metadata) {
-        store.metadata = this.setMetadata_(store.id, metadata)
+        store.metadata = this.setMetadata_(store.id, metadata);
       }
 
       if (default_currency_code) {
         const curr = await currencyRepository.findOne({
           code: default_currency_code.toLowerCase(),
-        })
+        });
 
         if (!curr) {
           throw new MedusaError(
             MedusaError.Types.INVALID_DATA,
             `Currency ${default_currency_code} not found`
-          )
+          );
         }
 
-        store.default_currency = curr
-        store.default_currency_code = curr.code
+        store.default_currency = curr;
+        store.default_currency_code = curr.code;
       }
 
       if (storeCurrencies) {
@@ -135,27 +139,27 @@ class StoreService extends BaseService {
           storeCurrencies.map(async (curr) => {
             const currency = await currencyRepository.findOne({
               where: { code: curr.toLowerCase() },
-            })
+            });
 
             if (!currency) {
               throw new MedusaError(
                 MedusaError.Types.INVALID_DATA,
                 `Invalid currency ${curr}`
-              )
+              );
             }
 
-            return currency
+            return currency;
           })
-        )
+        );
       }
 
       for (const [key, value] of Object.entries(rest)) {
-        store[key] = value
+        store[key] = value;
       }
 
-      const result = await storeRepository.save(store)
-      return result
-    })
+      const result = await storeRepository.save(store);
+      return result;
+    });
   }
 
   /**
@@ -165,21 +169,21 @@ class StoreService extends BaseService {
    */
   async addCurrency(code) {
     return this.atomicPhase_(async (manager) => {
-      const storeRepo = manager.getCustomRepository(this.storeRepository_)
+      const storeRepo = manager.getCustomRepository(this.storeRepository_);
       const currencyRepository = manager.getCustomRepository(
         this.currencyRepository_
-      )
-      const store = await this.retrieve(["currencies"])
+      );
+      const store = await this.retrieve(["currencies"]);
 
       const curr = await currencyRepository.findOne({
         where: { code: code.toLowerCase() },
-      })
+      });
 
       if (!curr) {
         throw new MedusaError(
           MedusaError.Types.INVALID_DATA,
           `Currency ${code} not found`
-        )
+        );
       }
 
       if (
@@ -188,13 +192,13 @@ class StoreService extends BaseService {
         throw new MedusaError(
           MedusaError.Types.DUPLICATE_ERROR,
           `Currency already added`
-        )
+        );
       }
 
-      store.currencies = [...store.currencies, curr]
-      const updated = await storeRepo.save(store)
-      return updated
-    })
+      store.currencies = [...store.currencies, curr];
+      const updated = await storeRepo.save(store);
+      return updated;
+    });
   }
 
   /**
@@ -204,19 +208,21 @@ class StoreService extends BaseService {
    */
   async removeCurrency(code) {
     return this.atomicPhase_(async (manager) => {
-      const storeRepo = manager.getCustomRepository(this.storeRepository_)
-      const store = await this.retrieve(["currencies"])
+      const storeRepo = manager.getCustomRepository(this.storeRepository_);
+      const store = await this.retrieve(["currencies"]);
 
-      const exists = store.currencies.find((c) => c.code === code.toLowerCase())
+      const exists = store.currencies.find(
+        (c) => c.code === code.toLowerCase()
+      );
       // If currency does not exist, return early
       if (!exists) {
-        return store
+        return store;
       }
 
-      store.currencies = store.currencies.filter((c) => c.code !== code)
-      const updated = await storeRepo.save(store)
-      return updated
-    })
+      store.currencies = store.currencies.filter((c) => c.code !== code);
+      const updated = await storeRepo.save(store);
+      return updated;
+    });
   }
 
   /**
@@ -227,8 +233,8 @@ class StoreService extends BaseService {
    * @return {Store} return the decorated Store.
    */
   async decorate(store, fields, expandFields = []) {
-    return store
+    return store;
   }
 }
 
-export default StoreService
+export default StoreService;

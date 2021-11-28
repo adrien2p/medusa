@@ -1,12 +1,12 @@
-import _ from "lodash"
-import { BaseService } from "medusa-interfaces"
-import { Validator, MedusaError } from "medusa-core-utils"
+import _ from "lodash";
+import { BaseService } from "medusa-interfaces";
+import { Validator, MedusaError } from "medusa-core-utils";
 
 class AddOnService extends BaseService {
   static Events = {
     UPDATED: "add_on.updated",
     CREATED: "add_on.created",
-  }
+  };
 
   constructor(
     {
@@ -18,19 +18,19 @@ class AddOnService extends BaseService {
     },
     options
   ) {
-    super()
+    super();
 
-    this.addOnModel_ = addOnModel
+    this.addOnModel_ = addOnModel;
 
-    this.productService_ = productService
+    this.productService_ = productService;
 
-    this.productVariantService_ = productVariantService
+    this.productVariantService_ = productVariantService;
 
-    this.regionService_ = regionService
+    this.regionService_ = regionService;
 
-    this.eventBus_ = eventBusService
+    this.eventBus_ = eventBusService;
 
-    this.options_ = options
+    this.options_ = options;
   }
 
   /**
@@ -39,7 +39,7 @@ class AddOnService extends BaseService {
    * @return {string} the validated id
    */
   validateId_(rawId) {
-    return rawId
+    return rawId;
   }
 
   /**
@@ -47,7 +47,7 @@ class AddOnService extends BaseService {
    * @return {Promise} the result of the find operation
    */
   list(selector, offset, limit) {
-    return this.addOnModel_.find(selector, {}, offset, limit)
+    return this.addOnModel_.find(selector, {}, offset, limit);
   }
 
   /**
@@ -56,20 +56,20 @@ class AddOnService extends BaseService {
    * @return {Promise<AddOn>} the add-on document.
    */
   async retrieve(addOnId) {
-    const validatedId = this.validateId_(addOnId)
+    const validatedId = this.validateId_(addOnId);
     const addOn = await this.addOnModel_
       .findOne({ _id: validatedId })
       .catch((err) => {
-        throw new MedusaError(MedusaError.Types.DB_ERROR, err.message)
-      })
+        throw new MedusaError(MedusaError.Types.DB_ERROR, err.message);
+      });
 
     if (!addOn) {
       throw new MedusaError(
         MedusaError.Types.NOT_FOUND,
         `Add-on with ${addOnId} was not found`
-      )
+      );
     }
-    return addOn
+    return addOn;
   }
 
   /**
@@ -80,19 +80,19 @@ class AddOnService extends BaseService {
   async create(addOn) {
     await Promise.all(
       addOn.valid_for.map((prodId) => {
-        this.productService_.retrieve(prodId)
+        this.productService_.retrieve(prodId);
       })
-    )
+    );
 
     return this.addOnModel_
       .create(addOn)
       .then((result) => {
-        this.eventBus_.emit(AddOnService.Events.CREATED, result)
-        return result
+        this.eventBus_.emit(AddOnService.Events.CREATED, result);
+        return result;
       })
       .catch((err) => {
-        throw new MedusaError(MedusaError.Types.DB_ERROR, err.message)
-      })
+        throw new MedusaError(MedusaError.Types.DB_ERROR, err.message);
+      });
   }
 
   /**
@@ -101,8 +101,8 @@ class AddOnService extends BaseService {
    * @return {Promise} resolves to the deletion result.
    */
   async delete(addOnId) {
-    const addOn = await this.retrieve(addOnId)
-    return this.addOnModel_.deleteOne({ _id: addOn._id })
+    const addOn = await this.retrieve(addOnId);
+    return this.addOnModel_.deleteOne({ _id: addOn._id });
   }
 
   /**
@@ -111,8 +111,8 @@ class AddOnService extends BaseService {
    * @return {Promise} returns a promise containing all add-ons for the product
    */
   async retrieveByProduct(productId) {
-    const product = await this.productService_.retrieve(productId)
-    return this.addOnModel_.find({ valid_for: product._id })
+    const product = await this.productService_.retrieve(productId);
+    return this.addOnModel_.find({ valid_for: product._id });
   }
 
   /**
@@ -125,19 +125,19 @@ class AddOnService extends BaseService {
    * @return {Promise} resolves to the update result.
    */
   async update(addOnId, update) {
-    const validatedId = this.validateId_(addOnId)
+    const validatedId = this.validateId_(addOnId);
 
     await Promise.all(
       update.valid_for.map((prodId) => {
-        this.productService_.retrieve(prodId)
+        this.productService_.retrieve(prodId);
       })
-    )
+    );
 
     if (update.metadata) {
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
         "Use setMetadata to update metadata fields"
-      )
+      );
     }
 
     return this.addOnModel_
@@ -147,8 +147,8 @@ class AddOnService extends BaseService {
         { runValidators: true }
       )
       .catch((err) => {
-        throw new MedusaError(MedusaError.Types.DB_ERROR, err.message)
-      })
+        throw new MedusaError(MedusaError.Types.DB_ERROR, err.message);
+      });
   }
 
   /**
@@ -160,33 +160,33 @@ class AddOnService extends BaseService {
    * @return {number} the price specific to the region
    */
   async getRegionPrice(addOnId, regionId) {
-    const addOn = await this.retrieve(addOnId)
-    const region = await this.regionService_.retrieve(regionId)
+    const addOn = await this.retrieve(addOnId);
+    const region = await this.regionService_.retrieve(regionId);
 
-    let price
+    let price;
     addOn.prices.forEach(({ amount, currency_code }) => {
       if (!price && currency_code === region.currency_code) {
         // If we haven't yet found a price and the current money amount is
         // the default money amount for the currency of the region we have found
         // a possible price match
-        price = amount
+        price = amount;
       } else if (region_id === region._id) {
         // If the region matches directly with the money amount this is the best
         // price
-        price = amount
+        price = amount;
       }
-    })
+    });
 
     // Return the price if we found a suitable match
     if (price !== undefined) {
-      return price
+      return price;
     }
 
     // If we got this far no price could be found for the region
     throw new MedusaError(
       MedusaError.Types.NOT_FOUND,
       `A price for region: ${region.name} could not be found`
-    )
+    );
   }
 
   /**
@@ -197,16 +197,16 @@ class AddOnService extends BaseService {
    * @return {AddOn} return the decorated add-on.
    */
   async decorate(addOn, fields, expandFields = []) {
-    const requiredFields = ["_id", "metadata"]
-    const decorated = _.pick(addOn, fields.concat(requiredFields))
+    const requiredFields = ["_id", "metadata"];
+    const decorated = _.pick(addOn, fields.concat(requiredFields));
     if (expandFields.includes("valid_for")) {
       decorated.valid_for = await Promise.all(
         decorated.valid_for.map(
           async (p) => await this.productService_.retrieve(p)
         )
-      )
+      );
     }
-    return decorated
+    return decorated;
   }
 
   /**
@@ -219,26 +219,26 @@ class AddOnService extends BaseService {
    * @return {Promise} resolves to the updated result.
    */
   async setMetadata(addOnId, key, value) {
-    const validatedId = this.validateId_(addOnId)
+    const validatedId = this.validateId_(addOnId);
 
     if (typeof key !== "string") {
       throw new MedusaError(
         MedusaError.Types.INVALID_ARGUMENT,
         "Key type is invalid. Metadata keys must be strings"
-      )
+      );
     }
 
-    const keyPath = `metadata.${key}`
+    const keyPath = `metadata.${key}`;
     return this.addOnModel_
       .updateOne({ _id: validatedId }, { $set: { [keyPath]: value } })
       .then((result) => {
-        this.eventBus_.emit(AddOnService.Events.UPDATED, result)
-        return result
+        this.eventBus_.emit(AddOnService.Events.UPDATED, result);
+        return result;
       })
       .catch((err) => {
-        throw new MedusaError(MedusaError.Types.DB_ERROR, err.message)
-      })
+        throw new MedusaError(MedusaError.Types.DB_ERROR, err.message);
+      });
   }
 }
 
-export default AddOnService
+export default AddOnService;

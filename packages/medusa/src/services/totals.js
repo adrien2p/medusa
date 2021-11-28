@@ -1,6 +1,6 @@
-import _ from "lodash"
-import { BaseService } from "medusa-interfaces"
-import { MedusaError } from "medusa-core-utils"
+import _ from "lodash";
+import { BaseService } from "medusa-interfaces";
+import { MedusaError } from "medusa-core-utils";
 
 /**
  * A service that calculates total and subtotals for orders, carts etc..
@@ -8,7 +8,7 @@ import { MedusaError } from "medusa-core-utils"
  */
 class TotalsService extends BaseService {
   constructor() {
-    super()
+    super();
   }
 
   /**
@@ -17,33 +17,33 @@ class TotalsService extends BaseService {
    * @return {int} the calculated subtotal
    */
   getTotal(object) {
-    const subtotal = this.getSubtotal(object)
-    const taxTotal = this.getTaxTotal(object)
-    const discountTotal = this.getDiscountTotal(object)
-    const giftCardTotal = this.getGiftCardTotal(object)
-    const shippingTotal = this.getShippingTotal(object)
+    const subtotal = this.getSubtotal(object);
+    const taxTotal = this.getTaxTotal(object);
+    const discountTotal = this.getDiscountTotal(object);
+    const giftCardTotal = this.getGiftCardTotal(object);
+    const shippingTotal = this.getShippingTotal(object);
 
-    return subtotal + taxTotal + shippingTotal - discountTotal - giftCardTotal
+    return subtotal + taxTotal + shippingTotal - discountTotal - giftCardTotal;
   }
 
   getPaidTotal(order) {
     const total = order.payments?.reduce((acc, next) => {
-      acc += next.amount
-      return acc
-    }, 0)
+      acc += next.amount;
+      return acc;
+    }, 0);
 
-    return total
+    return total;
   }
 
   getSwapTotal(order) {
-    let swapTotal = 0
+    let swapTotal = 0;
     if (order.swaps && order.swaps.length) {
       for (const s of order.swaps) {
-        swapTotal = swapTotal + s.difference_due
+        swapTotal = swapTotal + s.difference_due;
       }
     }
 
-    return swapTotal
+    return swapTotal;
   }
 
   /**
@@ -53,22 +53,22 @@ class TotalsService extends BaseService {
    * @return {int} the calculated subtotal
    */
   getSubtotal(object, opts = {}) {
-    let subtotal = 0
+    let subtotal = 0;
     if (!object.items) {
-      return subtotal
+      return subtotal;
     }
 
     object.items.map((item) => {
       if (opts.excludeNonDiscounts) {
         if (item.allow_discounts) {
-          subtotal += item.unit_price * item.quantity
+          subtotal += item.unit_price * item.quantity;
         }
       } else {
-        subtotal += item.unit_price * item.quantity
+        subtotal += item.unit_price * item.quantity;
       }
-    })
+    });
 
-    return this.rounded(subtotal)
+    return this.rounded(subtotal);
   }
 
   /**
@@ -77,10 +77,10 @@ class TotalsService extends BaseService {
    * @return {int} shipping total
    */
   getShippingTotal(object) {
-    const { shipping_methods } = object
+    const { shipping_methods } = object;
     return shipping_methods.reduce((acc, next) => {
-      return acc + next.price
-    }, 0)
+      return acc + next.price;
+    }, 0);
   }
 
   /**
@@ -90,54 +90,57 @@ class TotalsService extends BaseService {
    * @return {int} tax total
    */
   getTaxTotal(object) {
-    const subtotal = this.getSubtotal(object)
-    const shippingTotal = this.getShippingTotal(object)
-    const discountTotal = this.getDiscountTotal(object)
-    const giftCardTotal = this.getGiftCardTotal(object)
+    const subtotal = this.getSubtotal(object);
+    const shippingTotal = this.getShippingTotal(object);
+    const discountTotal = this.getDiscountTotal(object);
+    const giftCardTotal = this.getGiftCardTotal(object);
     const tax_rate =
       typeof object.tax_rate !== "undefined"
         ? object.tax_rate
-        : object.region.tax_rate
+        : object.region.tax_rate;
     return this.rounded(
       (subtotal - discountTotal - giftCardTotal + shippingTotal) *
         (tax_rate / 100)
-    )
+    );
   }
 
   getRefundedTotal(object) {
     if (!object.refunds) {
-      return 0
+      return 0;
     }
 
-    const total = object.refunds.reduce((acc, next) => acc + next.amount, 0)
-    return this.rounded(total)
+    const total = object.refunds.reduce((acc, next) => acc + next.amount, 0);
+    return this.rounded(total);
   }
 
   getLineItemRefund(object, lineItem) {
-    const { discounts } = object
+    const { discounts } = object;
     const tax_rate =
       typeof object.tax_rate !== "undefined"
         ? object.tax_rate
-        : object.region.tax_rate
-    const taxRate = (tax_rate || 0) / 100
+        : object.region.tax_rate;
+    const taxRate = (tax_rate || 0) / 100;
 
-    const discount = discounts.find(({ rule }) => rule.type !== "free_shipping")
+    const discount = discounts.find(
+      ({ rule }) => rule.type !== "free_shipping"
+    );
 
     if (!discount || !lineItem.allow_discounts) {
-      return lineItem.unit_price * lineItem.quantity * (1 + taxRate)
+      return lineItem.unit_price * lineItem.quantity * (1 + taxRate);
     }
 
-    const lineDiscounts = this.getLineDiscounts(object, discount)
+    const lineDiscounts = this.getLineDiscounts(object, discount);
     const discountedLine = lineDiscounts.find(
       (line) => line.item.id === lineItem.id
-    )
+    );
 
     const discountAmount =
-      (discountedLine.amount / discountedLine.item.quantity) * lineItem.quantity
+      (discountedLine.amount / discountedLine.item.quantity) *
+      lineItem.quantity;
 
     return this.rounded(
       (lineItem.unit_price * lineItem.quantity - discountAmount) * (1 + taxRate)
-    )
+    );
   }
 
   /**
@@ -149,20 +152,20 @@ class TotalsService extends BaseService {
    * @return {int} the calculated subtotal
    */
   getRefundTotal(order, lineItems) {
-    let itemIds = order.items.map((i) => i.id)
+    let itemIds = order.items.map((i) => i.id);
 
     // in case we swap a swap, we need to include swap items
     if (order.swaps && order.swaps.length) {
       for (const s of order.swaps) {
-        const swapItemIds = s.additional_items.map((el) => el.id)
-        itemIds = [...itemIds, ...swapItemIds]
+        const swapItemIds = s.additional_items.map((el) => el.id);
+        itemIds = [...itemIds, ...swapItemIds];
       }
     }
 
     if (order.claims && order.claims.length) {
       for (const c of order.claims) {
-        const claimItemIds = c.additional_items.map((el) => el.id)
-        itemIds = [...itemIds, ...claimItemIds]
+        const claimItemIds = c.additional_items.map((el) => el.id);
+        itemIds = [...itemIds, ...claimItemIds];
       }
     }
 
@@ -171,13 +174,13 @@ class TotalsService extends BaseService {
         throw new MedusaError(
           MedusaError.Types.INVALID_DATA,
           "Line item does not exist on order"
-        )
+        );
       }
 
-      return this.getLineItemRefund(order, i)
-    })
+      return this.getLineItemRefund(order, i);
+    });
 
-    return this.rounded(refunds.reduce((acc, next) => acc + next, 0))
+    return this.rounded(refunds.reduce((acc, next) => acc + next, 0));
   }
 
   /**
@@ -196,14 +199,14 @@ class TotalsService extends BaseService {
         lineItem,
         variant,
         amount: 0,
-      }
+      };
     }
     if (discountType === "percentage") {
       return {
         lineItem,
         variant,
         amount: ((variantPrice * lineItem.quantity) / 100) * value,
-      }
+      };
     } else {
       return {
         lineItem,
@@ -212,7 +215,7 @@ class TotalsService extends BaseService {
           value >= variantPrice * lineItem.quantity
             ? variantPrice * lineItem.quantity
             : value * lineItem.quantity,
-      }
+      };
     }
   }
 
@@ -228,7 +231,7 @@ class TotalsService extends BaseService {
    *    and applied discount
    */
   getAllocationItemDiscounts(discount, cart) {
-    const discounts = []
+    const discounts = [];
     for (const item of cart.items) {
       if (discount.rule.valid_for?.length > 0) {
         discount.rule.valid_for.map(({ id }) => {
@@ -241,91 +244,91 @@ class TotalsService extends BaseService {
                 discount.rule.value,
                 discount.rule.type
               )
-            )
+            );
           }
-        })
+        });
       }
     }
-    return discounts
+    return discounts;
   }
 
   getLineDiscounts(cart, discount) {
-    const subtotal = this.getSubtotal(cart, { excludeNonDiscounts: true })
+    const subtotal = this.getSubtotal(cart, { excludeNonDiscounts: true });
 
-    let merged = [...cart.items]
+    let merged = [...cart.items];
 
     // merge items from order with items from order swaps
     if (cart.swaps && cart.swaps.length) {
       for (const s of cart.swaps) {
-        merged = [...merged, ...s.additional_items]
+        merged = [...merged, ...s.additional_items];
       }
     }
 
     if (cart.claims && cart.claims.length) {
       for (const c of cart.claims) {
-        merged = [...merged, ...c.additional_items]
+        merged = [...merged, ...c.additional_items];
       }
     }
 
-    const { type, allocation, value } = discount.rule
+    const { type, allocation, value } = discount.rule;
     if (allocation === "total") {
-      let percentage = 0
+      let percentage = 0;
       if (type === "percentage") {
-        percentage = value / 100
+        percentage = value / 100;
       } else if (type === "fixed") {
         // If the fixed discount exceeds the subtotal we should
         // calculate a 100% discount
-        const nominator = Math.min(value, subtotal)
-        percentage = nominator / subtotal
+        const nominator = Math.min(value, subtotal);
+        percentage = nominator / subtotal;
       }
 
       return merged.map((item) => {
-        const lineTotal = item.unit_price * item.quantity
+        const lineTotal = item.unit_price * item.quantity;
 
         return {
           item,
           amount: lineTotal * percentage,
-        }
-      })
+        };
+      });
     } else if (allocation === "item") {
       const allocationDiscounts = this.getAllocationItemDiscounts(
         discount,
         cart,
         type
-      )
+      );
       return merged.map((item) => {
         const discounted = allocationDiscounts.find(
           (a) => a.lineItem.id === item.id
-        )
+        );
         return {
           item,
           amount: discounted ? discounted.amount : 0,
-        }
-      })
+        };
+      });
     }
 
-    return merged.map((i) => ({ item: i, amount: 0 }))
+    return merged.map((i) => ({ item: i, amount: 0 }));
   }
 
   getGiftCardTotal(cart) {
-    const giftCardable = this.getSubtotal(cart) - this.getDiscountTotal(cart)
+    const giftCardable = this.getSubtotal(cart) - this.getDiscountTotal(cart);
 
     if (cart.gift_card_transactions) {
       return cart.gift_card_transactions.reduce(
         (acc, next) => acc + next.amount,
         0
-      )
+      );
     }
 
     if (!cart.gift_cards || !cart.gift_cards.length) {
-      return 0
+      return 0;
     }
 
     const toReturn = cart.gift_cards.reduce(
       (acc, next) => acc + next.balance,
       0
-    )
-    return Math.min(giftCardable, toReturn)
+    );
+    return Math.min(giftCardable, toReturn);
   }
 
   /**
@@ -335,55 +338,55 @@ class TotalsService extends BaseService {
    * @return {int} the total discounts amount
    */
   getDiscountTotal(cart) {
-    const subtotal = this.getSubtotal(cart, { excludeNonDiscounts: true })
+    const subtotal = this.getSubtotal(cart, { excludeNonDiscounts: true });
 
     if (!cart.discounts || !cart.discounts.length) {
-      return 0
+      return 0;
     }
 
     // we only support having free shipping and one other discount, so first
     // find the discount, which is not free shipping.
     const discount = cart.discounts.find(
       ({ rule }) => rule.type !== "free_shipping"
-    )
+    );
 
     if (!discount) {
-      return 0
+      return 0;
     }
 
-    const { type, allocation, value } = discount.rule
-    let toReturn = 0
+    const { type, allocation, value } = discount.rule;
+    let toReturn = 0;
 
     if (type === "percentage" && allocation === "total") {
-      toReturn = (subtotal / 100) * value
+      toReturn = (subtotal / 100) * value;
     } else if (type === "percentage" && allocation === "item") {
       const itemPercentageDiscounts = this.getAllocationItemDiscounts(
         discount,
         cart,
         "percentage"
-      )
-      toReturn = _.sumBy(itemPercentageDiscounts, (d) => d.amount)
+      );
+      toReturn = _.sumBy(itemPercentageDiscounts, (d) => d.amount);
     } else if (type === "fixed" && allocation === "total") {
-      toReturn = value
+      toReturn = value;
     } else if (type === "fixed" && allocation === "item") {
       const itemFixedDiscounts = this.getAllocationItemDiscounts(
         discount,
         cart,
         "fixed"
-      )
-      toReturn = _.sumBy(itemFixedDiscounts, (d) => d.amount)
+      );
+      toReturn = _.sumBy(itemFixedDiscounts, (d) => d.amount);
     }
 
     if (subtotal < 0) {
-      return this.rounded(Math.max(subtotal, toReturn))
+      return this.rounded(Math.max(subtotal, toReturn));
     }
 
-    return this.rounded(Math.min(subtotal, toReturn))
+    return this.rounded(Math.min(subtotal, toReturn));
   }
 
   rounded(value) {
-    return Math.round(value)
+    return Math.round(value);
   }
 }
 
-export default TotalsService
+export default TotalsService;

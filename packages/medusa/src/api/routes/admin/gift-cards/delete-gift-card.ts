@@ -25,14 +25,14 @@
  *               type: boolean
  */
 export default async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params;
 
-  const giftCardService = req.scope.resolve("giftCardService")
-  await giftCardService.delete(id)
+  const giftCardService = req.scope.resolve("giftCardService");
+  await giftCardService.delete(id);
 
   res.json({
     id,
     object: "gift-card",
     deleted: true,
-  })
-}
+  });
+};

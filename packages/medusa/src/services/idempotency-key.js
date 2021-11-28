@@ -1,21 +1,21 @@
-import { BaseService } from "medusa-interfaces"
-import { MedusaError } from "medusa-core-utils"
-import { v4 } from "uuid"
+import { BaseService } from "medusa-interfaces";
+import { MedusaError } from "medusa-core-utils";
+import { v4 } from "uuid";
 
-const KEY_LOCKED_TIMEOUT = 1000
+const KEY_LOCKED_TIMEOUT = 1000;
 
 class IdempotencyKeyService extends BaseService {
   constructor({ manager, idempotencyKeyRepository, transactionService }) {
-    super()
+    super();
 
     /** @private @constant {EntityManager} */
-    this.manager_ = manager
+    this.manager_ = manager;
 
     /** @private @constant {IdempotencyKeyRepository} */
-    this.idempotencyKeyRepository_ = idempotencyKeyRepository
+    this.idempotencyKeyRepository_ = idempotencyKeyRepository;
 
     /** @private @constant {TransactionService} */
-    this.transactionService_ = transactionService
+    this.transactionService_ = transactionService;
   }
 
   /**
@@ -29,20 +29,20 @@ class IdempotencyKeyService extends BaseService {
   async initializeRequest(headerKey, reqMethod, reqParams, reqPath) {
     return this.atomicPhase_(async (_) => {
       // If idempotency key exists, return it
-      let key = await this.retrieve(headerKey)
+      let key = await this.retrieve(headerKey);
 
       if (key) {
-        return key
+        return key;
       }
 
       key = await this.create({
         request_method: reqMethod,
         request_params: reqParams,
         request_path: reqPath,
-      })
+      });
 
-      return key
-    }, "SERIALIZABLE")
+      return key;
+    }, "SERIALIZABLE");
   }
 
   /**
@@ -56,16 +56,16 @@ class IdempotencyKeyService extends BaseService {
     return this.atomicPhase_(async (manager) => {
       const idempotencyKeyRepo = manager.getCustomRepository(
         this.idempotencyKeyRepository_
-      )
+      );
 
       if (!payload.idempotency_key) {
-        payload.idempotency_key = v4()
+        payload.idempotency_key = v4();
       }
 
-      const created = await idempotencyKeyRepo.create(payload)
-      const result = await idempotencyKeyRepo.save(created)
-      return result
-    })
+      const created = await idempotencyKeyRepo.create(payload);
+      const result = await idempotencyKeyRepo.save(created);
+      return result;
+    });
   }
 
   /**
@@ -76,13 +76,13 @@ class IdempotencyKeyService extends BaseService {
   async retrieve(idempotencyKey) {
     const idempotencyKeyRepo = this.manager_.getCustomRepository(
       this.idempotencyKeyRepository_
-    )
+    );
 
     const key = await idempotencyKeyRepo.findOne({
       where: { idempotency_key: idempotencyKey },
-    })
+    });
 
-    return key
+    return key;
   }
 
   /**
@@ -95,21 +95,21 @@ class IdempotencyKeyService extends BaseService {
     return this.atomicPhase_(async (manager) => {
       const idempotencyKeyRepo = manager.getCustomRepository(
         this.idempotencyKeyRepository_
-      )
+      );
 
-      const key = this.retrieve(idempotencyKey)
+      const key = this.retrieve(idempotencyKey);
 
       if (key.locked_at && key.locked_at > Date.now() - KEY_LOCKED_TIMEOUT) {
-        throw new MedusaError("conflict", "Key already locked")
+        throw new MedusaError("conflict", "Key already locked");
       }
 
       const updated = await idempotencyKeyRepo.save({
         ...key,
         locked_at: Date.now(),
-      })
+      });
 
-      return updated
-    })
+      return updated;
+    });
   }
 
   /**
@@ -122,17 +122,17 @@ class IdempotencyKeyService extends BaseService {
     return this.atomicPhase_(async (manager) => {
       const idempotencyKeyRepo = manager.getCustomRepository(
         this.idempotencyKeyRepository_
-      )
+      );
 
-      const iKey = await this.retrieve(idempotencyKey)
+      const iKey = await this.retrieve(idempotencyKey);
 
       for (const [key, value] of Object.entries(update)) {
-        iKey[key] = value
+        iKey[key] = value;
       }
 
-      const updated = await idempotencyKeyRepo.save(iKey)
-      return updated
-    })
+      const updated = await idempotencyKeyRepo.save(iKey);
+      return updated;
+    });
   }
 
   /**
@@ -148,30 +148,30 @@ class IdempotencyKeyService extends BaseService {
   async workStage(idempotencyKey, func) {
     try {
       return await this.atomicPhase_(async (manager) => {
-        let key
+        let key;
 
         const { recovery_point, response_code, response_body } = await func(
           manager
-        )
+        );
 
         if (recovery_point) {
           key = await this.update(idempotencyKey, {
             recovery_point,
-          })
+          });
         } else {
           key = await this.update(idempotencyKey, {
             recovery_point: "finished",
             response_body,
             response_code,
-          })
+          });
         }
 
-        return { key }
-      }, "SERIALIZABLE")
+        return { key };
+      }, "SERIALIZABLE");
     } catch (err) {
-      return { error: err }
+      return { error: err };
     }
   }
 }
 
-export default IdempotencyKeyService
+export default IdempotencyKeyService;

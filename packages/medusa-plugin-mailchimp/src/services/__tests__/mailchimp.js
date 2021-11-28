@@ -1,21 +1,21 @@
 const MailchimpMock = jest.fn().mockImplementation(() => {
   return {
     subscribeNewsletter: jest.fn().mockReturnValue(Promise.resolve("success")),
-  }
-})
+  };
+});
 
 describe("MailchimpService", () => {
   describe("newsletterSubscribe", () => {
-    let result
+    let result;
     beforeAll(async () => {
-      jest.clearAllMocks()
-      const mailchimpService = new MailchimpMock()
+      jest.clearAllMocks();
+      const mailchimpService = new MailchimpMock();
 
-      result = await mailchimpService.subscribeNewsletter("medusa@medusa.com")
-    })
+      result = await mailchimpService.subscribeNewsletter("medusa@medusa.com");
+    });
 
     it("resolves successfully", () => {
-      expect(result).toEqual("success")
-    })
-  })
-})
+      expect(result).toEqual("success");
+    });
+  });
+});

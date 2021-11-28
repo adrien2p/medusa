@@ -1,26 +1,26 @@
 export default async (req, res) => {
   try {
-    const contentfulService = req.scope.resolve("contentfulService")
+    const contentfulService = req.scope.resolve("contentfulService");
 
-    const contentfulType = req.body.sys.contentType.sys.id
-    const entryId = req.body.sys.id
+    const contentfulType = req.body.sys.contentType.sys.id;
+    const entryId = req.body.sys.id;
 
-    let updated = {}
+    let updated = {};
     switch (contentfulType) {
       case "product":
-        updated = await contentfulService.sendContentfulProductToAdmin(entryId)
-        break
+        updated = await contentfulService.sendContentfulProductToAdmin(entryId);
+        break;
       case "productVariant":
         updated = await contentfulService.sendContentfulProductVariantToAdmin(
           entryId
-        )
-        break
+        );
+        break;
       default:
-        break
+        break;
     }
 
-    res.status(200).send(updated)
+    res.status(200).send(updated);
   } catch (error) {
-    res.status(400).send(`Webhook error: ${error.message}`)
+    res.status(400).send(`Webhook error: ${error.message}`);
   }
-}
+};

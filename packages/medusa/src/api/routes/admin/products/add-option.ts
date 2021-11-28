@@ -1,7 +1,7 @@
-import { IsString } from "class-validator"
-import { defaultAdminProductFields, defaultAdminProductRelations } from "."
-import { ProductService } from "../../../../services"
-import { validator } from "../../../../utils/validator"
+import { IsString } from "class-validator";
+import { defaultAdminProductFields, defaultAdminProductRelations } from ".";
+import { ProductService } from "../../../../services";
+import { validator } from "../../../../utils/validator";
 
 /**
  * @oas [post] /products/{id}/options
@@ -34,25 +34,25 @@ import { validator } from "../../../../utils/validator"
  *               $ref: "#/components/schemas/product"
  */
 export default async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params;
 
   const validated = await validator(
     AdminPostProductsProductOptionsReq,
     req.body
-  )
+  );
 
-  const productService: ProductService = req.scope.resolve("productService")
+  const productService: ProductService = req.scope.resolve("productService");
 
-  await productService.addOption(id, validated.title)
+  await productService.addOption(id, validated.title);
   const product = await productService.retrieve(id, {
     select: defaultAdminProductFields,
     relations: defaultAdminProductRelations,
-  })
+  });
 
-  res.json({ product })
-}
+  res.json({ product });
+};
 
 class AdminPostProductsProductOptionsReq {
   @IsString()
-  title: string
+  title: string;
 }

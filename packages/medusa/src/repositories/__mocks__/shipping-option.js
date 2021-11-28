@@ -1,4 +1,4 @@
-import { IdMap } from "medusa-test-utils"
+import { IdMap } from "medusa-test-utils";
 
 export const options = {
   validOption: {
@@ -41,21 +41,21 @@ export const options = {
       amount: 10,
     },
   },
-}
+};
 
 export const ShippingOptionModelMock = {
   create: jest.fn().mockReturnValue(Promise.resolve()),
   updateOne: jest.fn().mockImplementation((query, update) => {
-    return Promise.resolve()
+    return Promise.resolve();
   }),
   deleteOne: jest.fn().mockReturnValue(Promise.resolve()),
-  findOne: jest.fn().mockImplementation(query => {
+  findOne: jest.fn().mockImplementation((query) => {
     if (query._id === IdMap.getId("noCalc")) {
-      return Promise.resolve(options.noCalc)
+      return Promise.resolve(options.noCalc);
     }
     if (query._id === IdMap.getId("validId")) {
-      return Promise.resolve(options.validOption)
+      return Promise.resolve(options.validOption);
     }
-    return Promise.resolve(undefined)
+    return Promise.resolve(undefined);
   }),
-}
+};

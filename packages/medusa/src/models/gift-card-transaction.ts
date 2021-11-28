@@ -8,45 +8,45 @@ import {
   ManyToOne,
   Unique,
   JoinColumn,
-} from "typeorm"
-import { ulid } from "ulid"
-import { resolveDbType } from "../utils/db-aware-column"
+} from "typeorm";
+import { ulid } from "ulid";
+import { resolveDbType } from "../utils/db-aware-column";
 
-import { GiftCard } from "./gift-card"
-import { Order } from "./order"
+import { GiftCard } from "./gift-card";
+import { Order } from "./order";
 
 @Unique("gcuniq", ["gift_card_id", "order_id"])
 @Entity()
 export class GiftCardTransaction {
   @PrimaryColumn()
-  id: string
+  id: string;
 
   @Column()
-  gift_card_id: string
+  gift_card_id: string;
 
   @ManyToOne(() => GiftCard)
   @JoinColumn({ name: "gift_card_id" })
-  gift_card: GiftCard
+  gift_card: GiftCard;
 
   @Index()
   @Column()
-  order_id: string
+  order_id: string;
 
   @ManyToOne(() => Order)
   @JoinColumn({ name: "order_id" })
-  order: Order
+  order: Order;
 
   @Column("int")
-  amount: number
+  amount: number;
 
   @CreateDateColumn({ type: resolveDbType("timestamptz") })
-  created_at: Date
+  created_at: Date;
 
   @BeforeInsert()
   private beforeInsert() {
-    if (this.id) return
-    const id = ulid()
-    this.id = `gct_${id}`
+    if (this.id) return;
+    const id = ulid();
+    this.id = `gct_${id}`;
   }
 }
 

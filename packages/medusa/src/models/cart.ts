@@ -98,18 +98,18 @@ import {
   OneToOne,
   PrimaryColumn,
   UpdateDateColumn,
-} from "typeorm"
-import { ulid } from "ulid"
-import { DbAwareColumn, resolveDbType } from "../utils/db-aware-column"
-import { Address } from "./address"
-import { Customer } from "./customer"
-import { Discount } from "./discount"
-import { GiftCard } from "./gift-card"
-import { LineItem } from "./line-item"
-import { Payment } from "./payment"
-import { PaymentSession } from "./payment-session"
-import { Region } from "./region"
-import { ShippingMethod } from "./shipping-method"
+} from "typeorm";
+import { ulid } from "ulid";
+import { DbAwareColumn, resolveDbType } from "../utils/db-aware-column";
+import { Address } from "./address";
+import { Customer } from "./customer";
+import { Discount } from "./discount";
+import { GiftCard } from "./gift-card";
+import { LineItem } from "./line-item";
+import { Payment } from "./payment";
+import { PaymentSession } from "./payment-session";
+import { Region } from "./region";
+import { ShippingMethod } from "./shipping-method";
 
 export enum CartType {
   DEFAULT = "default",
@@ -122,43 +122,43 @@ export enum CartType {
 @Entity()
 export class Cart {
   @PrimaryColumn()
-  id: string
+  id: string;
 
   @Column({ nullable: true })
-  email: string
+  email: string;
 
   @Index()
   @Column({ nullable: true })
-  billing_address_id: string
+  billing_address_id: string;
 
   @ManyToOne(() => Address, {
     cascade: ["insert", "remove", "soft-remove"],
   })
   @JoinColumn({ name: "billing_address_id" })
-  billing_address: Address
+  billing_address: Address;
 
   @Index()
   @Column({ nullable: true })
-  shipping_address_id: string
+  shipping_address_id: string;
 
   @ManyToOne(() => Address, {
     cascade: ["insert", "remove", "soft-remove"],
   })
   @JoinColumn({ name: "shipping_address_id" })
-  shipping_address: Address
+  shipping_address: Address;
 
   @OneToMany(() => LineItem, (lineItem) => lineItem.cart, {
     cascade: ["insert", "remove"],
   })
-  items: LineItem[]
+  items: LineItem[];
 
   @Index()
   @Column()
-  region_id: string
+  region_id: string;
 
   @ManyToOne(() => Region)
   @JoinColumn({ name: "region_id" })
-  region: Region
+  region: Region;
 
   @ManyToMany(() => Discount)
   @JoinTable({
@@ -172,7 +172,7 @@ export class Cart {
       referencedColumnName: "id",
     },
   })
-  discounts: Discount
+  discounts: Discount;
 
   @ManyToMany(() => GiftCard)
   @JoinTable({
@@ -186,86 +186,86 @@ export class Cart {
       referencedColumnName: "id",
     },
   })
-  gift_cards: GiftCard
+  gift_cards: GiftCard;
 
   @Index()
   @Column({ nullable: true })
-  customer_id: string
+  customer_id: string;
 
   @ManyToOne(() => Customer)
   @JoinColumn({ name: "customer_id" })
-  customer: Customer
+  customer: Customer;
 
-  payment_session: PaymentSession
+  payment_session: PaymentSession;
 
   @OneToMany(() => PaymentSession, (paymentSession) => paymentSession.cart, {
     cascade: true,
   })
-  payment_sessions: PaymentSession[]
+  payment_sessions: PaymentSession[];
 
   @Index()
   @Column({ nullable: true })
-  payment_id: string
+  payment_id: string;
 
   @OneToOne(() => Payment)
   @JoinColumn({ name: "payment_id" })
-  payment: Payment
+  payment: Payment;
 
   @OneToMany(() => ShippingMethod, (method) => method.cart, {
     cascade: ["soft-remove", "remove"],
   })
-  shipping_methods: ShippingMethod[]
+  shipping_methods: ShippingMethod[];
 
   @DbAwareColumn({ type: "enum", enum: CartType, default: "default" })
-  type: boolean
+  type: boolean;
 
   @Column({ type: resolveDbType("timestamptz"), nullable: true })
-  completed_at: Date
+  completed_at: Date;
 
   @Column({ type: resolveDbType("timestamptz"), nullable: true })
-  payment_authorized_at: Date
+  payment_authorized_at: Date;
 
   @CreateDateColumn({ type: resolveDbType("timestamptz") })
-  created_at: Date
+  created_at: Date;
 
   @UpdateDateColumn({ type: resolveDbType("timestamptz") })
-  updated_at: Date
+  updated_at: Date;
 
   @DeleteDateColumn({ type: resolveDbType("timestamptz") })
-  deleted_at: Date
+  deleted_at: Date;
 
   @DbAwareColumn({ type: "jsonb", nullable: true })
-  metadata: any
+  metadata: any;
 
   @Column({ nullable: true })
-  idempotency_key: string
+  idempotency_key: string;
 
   @DbAwareColumn({ type: "jsonb", nullable: true })
-  context: any
+  context: any;
 
   // Total fields
-  shipping_total: number
-  discount_total: number
-  tax_total: number
-  refunded_total: number
-  total: number
-  subtotal: number
-  refundable_amount: number
-  gift_card_total: number
+  shipping_total: number;
+  discount_total: number;
+  tax_total: number;
+  refunded_total: number;
+  total: number;
+  subtotal: number;
+  refundable_amount: number;
+  gift_card_total: number;
 
   @BeforeInsert()
   private beforeInsert(): undefined | void {
     if (this.id) {
-      return
+      return;
     }
-    const id = ulid()
-    this.id = `cart_${id}`
+    const id = ulid();
+    this.id = `cart_${id}`;
   }
 
   @AfterLoad()
   private afterLoad(): void {
     if (this.payment_sessions) {
-      this.payment_session = this.payment_sessions.find((p) => p.is_selected)!
+      this.payment_session = this.payment_sessions.find((p) => p.is_selected)!;
     }
   }
 }

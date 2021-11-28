@@ -1,4 +1,4 @@
-import { Type, Transform } from "class-transformer"
+import { Type, Transform } from "class-transformer";
 import {
   IsEmail,
   IsOptional,
@@ -9,10 +9,10 @@ import {
   IsObject,
   IsInt,
   IsNotEmpty,
-} from "class-validator"
-import { OrderService } from "../../../../services"
-import { AddressPayload } from "../../../../types/common"
-import { validator } from "../../../../utils/validator"
+} from "class-validator";
+import { OrderService } from "../../../../services";
+import { AddressPayload } from "../../../../types/common";
+import { validator } from "../../../../utils/validator";
 /**
  * @oas [post] /orders
  * operationId: "PostOrders"
@@ -111,93 +111,93 @@ import { validator } from "../../../../utils/validator"
  */
 
 export default async (req, res) => {
-  const validated = await validator(AdminPostOrdersReq, req.body)
+  const validated = await validator(AdminPostOrdersReq, req.body);
 
-  const orderService: OrderService = req.scope.resolve("orderService")
-  let order = await orderService.create(validated)
-  order = await orderService.decorate(order, [], ["region"])
+  const orderService: OrderService = req.scope.resolve("orderService");
+  let order = await orderService.create(validated);
+  order = await orderService.decorate(order, [], ["region"]);
 
-  res.status(200).json({ order })
-}
+  res.status(200).json({ order });
+};
 
 export class AdminPostOrdersReq {
   @IsString()
   @IsOptional()
-  status?: string
+  status?: string;
 
   @IsEmail()
   @IsNotEmpty()
-  email: string
+  email: string;
 
   @IsNotEmpty()
   @ValidateNested()
   @Type(() => AddressPayload)
-  billing_address: AddressPayload
+  billing_address: AddressPayload;
 
   @IsNotEmpty()
   @ValidateNested()
   @Type(() => AddressPayload)
-  shipping_address: AddressPayload
+  shipping_address: AddressPayload;
 
   @IsArray()
   @IsNotEmpty()
-  items: object[]
+  items: object[] = [];
 
   @IsString()
   @IsNotEmpty()
-  region: string
+  region: string;
 
   @IsArray()
   @IsOptional()
-  discounts?: object[]
+  discounts?: object[] = [];
 
   @IsString()
   @IsNotEmpty()
-  customer_id: string
+  customer_id: string;
 
   @IsNotEmpty()
   @ValidateNested()
   @Type(() => PaymentMethod)
-  payment_method: PaymentMethod
+  payment_method: PaymentMethod;
 
   @IsNotEmpty()
   @ValidateNested({ each: true })
   @Type(() => ShippingMethod)
-  shipping_method?: ShippingMethod[]
+  shipping_method?: ShippingMethod[];
 
   @IsBoolean()
   @IsOptional()
-  no_notification?: boolean
+  no_notification?: boolean;
 }
 
 class PaymentMethod {
   @IsString()
   @IsNotEmpty()
-  provider_id: string
+  provider_id: string;
 
   @IsObject()
   @IsOptional()
-  data?: object
+  data?: object = {};
 }
 
 class ShippingMethod {
   @IsString()
   @IsNotEmpty()
-  provider_id: string
+  provider_id: string;
 
   @IsString()
   @IsNotEmpty()
-  profile_id: string
+  profile_id: string;
 
   @IsInt()
   @IsNotEmpty()
-  price: number
+  price: number;
 
   @IsObject()
   @IsOptional()
-  data?: object
+  data?: object = {};
 
   @IsArray()
   @IsOptional()
-  items?: object[]
+  items?: object[] = [];
 }

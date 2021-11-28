@@ -1,9 +1,9 @@
-import { Type } from "class-transformer"
-import { ValidateNested } from "class-validator"
-import { defaultStoreCustomersFields, defaultStoreCustomersRelations } from "."
-import CustomerService from "../../../../services/customer"
-import { AddressCreatePayload } from "../../../../types/common"
-import { validator } from "../../../../utils/validator"
+import { Type } from "class-transformer";
+import { ValidateNested } from "class-validator";
+import { defaultStoreCustomersFields, defaultStoreCustomersRelations } from ".";
+import CustomerService from "../../../../services/customer";
+import { AddressCreatePayload } from "../../../../types/common";
+import { validator } from "../../../../utils/validator";
 
 /**
  * @oas [post] /customers/me/addresses
@@ -35,26 +35,26 @@ import { validator } from "../../../../utils/validator"
  *              $ref: "#/components/schemas/customer"
  */
 export default async (req, res) => {
-  const id = req.user.customer_id
+  const id = req.user.customer_id;
 
   const validated = await validator(
     StorePostCustomersCustomerAddressesReq,
     req.body
-  )
+  );
 
-  const customerService: CustomerService = req.scope.resolve("customerService")
+  const customerService: CustomerService = req.scope.resolve("customerService");
 
-  let customer = await customerService.addAddress(id, validated.address)
+  let customer = await customerService.addAddress(id, validated.address);
   customer = await customerService.retrieve(id, {
     relations: defaultStoreCustomersRelations,
     select: defaultStoreCustomersFields,
-  })
+  });
 
-  res.status(200).json({ customer })
-}
+  res.status(200).json({ customer });
+};
 
 export class StorePostCustomersCustomerAddressesReq {
   @ValidateNested()
   @Type(() => AddressCreatePayload)
-  address: AddressCreatePayload
+  address: AddressCreatePayload;
 }

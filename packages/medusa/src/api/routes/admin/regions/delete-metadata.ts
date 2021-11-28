@@ -1,6 +1,6 @@
-import { defaultAdminRegionRelations, defaultAdminRegionFields } from "."
-import { Region } from "../../../.."
-import RegionService from "../../../../services/region"
+import { defaultAdminRegionRelations, defaultAdminRegionFields } from ".";
+import { Region } from "../../../..";
+import RegionService from "../../../../services/region";
 
 /**
  * @oas [delete] /regions/{id}/metadata/{key}
@@ -24,15 +24,15 @@ import RegionService from "../../../../services/region"
  *               $ref: "#/components/schemas/region"
  */
 export default async (req, res) => {
-  const { id, key } = req.params
+  const { id, key } = req.params;
 
-  const regionService: RegionService = req.scope.resolve("regionService")
-  await regionService.deleteMetadata(id, key)
+  const regionService: RegionService = req.scope.resolve("regionService");
+  await regionService.deleteMetadata(id, key);
 
   const region: Region = await regionService.retrieve(id, {
     select: defaultAdminRegionFields,
     relations: defaultAdminRegionRelations,
-  })
+  });
 
-  res.status(200).json({ region })
-}
+  res.status(200).json({ region });
+};

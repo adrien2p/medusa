@@ -1,15 +1,15 @@
-import axios from "axios"
-import _ from "lodash"
-import { hmacValidator } from "@adyen/api-library"
-import { BaseService } from "medusa-interfaces"
-import { Client, Config, CheckoutAPI } from "@adyen/api-library"
+import axios from "axios";
+import _ from "lodash";
+import { hmacValidator } from "@adyen/api-library";
+import { BaseService } from "medusa-interfaces";
+import { Client, Config, CheckoutAPI } from "@adyen/api-library";
 
 class AdyenService extends BaseService {
   constructor({ cartService }, options) {
-    super()
+    super();
 
     /** @private @constant {CartService} */
-    this.cartService_ = cartService
+    this.cartService_ = cartService;
 
     /**
      * {
@@ -23,53 +23,53 @@ class AdyenService extends BaseService {
      *    payment_endpoint: ""
      * }
      */
-    this.options_ = options
+    this.options_ = options;
 
     /** @private @constant {AxiosClient} */
-    this.adyenClient_ = this.initAdyenClient()
+    this.adyenClient_ = this.initAdyenClient();
 
     /** @private @constant {AxiosClient} */
-    this.adyenPaymentApi = this.initPaymentClient()
+    this.adyenPaymentApi = this.initPaymentClient();
   }
 
   withTransaction(transactionManager) {
     if (!transactionManager) {
-      return this
+      return this;
     }
 
     const cloned = new AdyenService({
       cartService: this.cartService_,
       totalsService: this.totalsService_,
-    })
+    });
 
-    this.transactionManager_ = transactionManager
+    this.transactionManager_ = transactionManager;
 
-    return cloned
+    return cloned;
   }
 
   getOptions() {
-    return this.options_
+    return this.options_;
   }
 
   initAdyenClient() {
-    const config = new Config()
-    config.apiKey = this.options_.api_key
-    config.merchantAccount = this.options_.merchant_account
+    const config = new Config();
+    config.apiKey = this.options_.api_key;
+    config.merchantAccount = this.options_.merchant_account;
 
     const client = new Client({
       config,
-    })
+    });
 
     if (this.options_.live_endpoint_prefix) {
       client.setEnvironment(
         this.options_.environment,
         this.options_.live_endpoint_prefix
-      )
+      );
     } else {
-      client.setEnvironment(this.options_.environment)
+      client.setEnvironment(this.options_.environment);
     }
 
-    return client
+    return client;
   }
 
   initPaymentClient() {
@@ -80,7 +80,7 @@ class AdyenService extends BaseService {
         "Content-Type": "application/json",
         "x-API-key": this.options_.api_key,
       },
-    })
+    });
   }
 
   /**
@@ -89,14 +89,14 @@ class AdyenService extends BaseService {
    * @returns {string} the status of the payment
    */
   validateNotification(notification) {
-    const validator = new hmacValidator()
+    const validator = new hmacValidator();
 
     const validated = validator.validateHMAC(
       notification,
       this.options_.notification_hmac
-    )
+    );
 
-    return validated
+    return validated;
   }
 
   /**
@@ -109,14 +109,14 @@ class AdyenService extends BaseService {
       merchantAccount: this.options_.merchant_account,
       channel: "Web",
       shopperReference: customer.id,
-    }
+    };
 
     try {
-      const checkout = new CheckoutAPI(this.adyenClient_)
-      const methods = await checkout.paymentMethods(request)
-      return methods.storedPaymentMethods || []
+      const checkout = new CheckoutAPI(this.adyenClient_);
+      const methods = await checkout.paymentMethods(request);
+      return methods.storedPaymentMethods || [];
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
@@ -138,13 +138,13 @@ class AdyenService extends BaseService {
       merchantAccount: this.options_.merchant_account,
       channel: "Web",
       shopperReference: customerId,
-    }
+    };
 
     try {
-      const checkout = new CheckoutAPI(this.adyenClient_)
-      return checkout.paymentMethods(request)
+      const checkout = new CheckoutAPI(this.adyenClient_);
+      return checkout.paymentMethods(request);
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
@@ -154,42 +154,42 @@ class AdyenService extends BaseService {
    * @returns {string} the status of the payment
    */
   getStatus(paymentData) {
-    const { resultCode } = paymentData
-    let status = "pending"
+    const { resultCode } = paymentData;
+    let status = "pending";
 
     if (resultCode === "Pending") {
-      return status
+      return status;
     }
 
     if (resultCode === "Refused") {
-      return status
+      return status;
     }
 
     if (resultCode === "Error") {
-      status = "error"
+      status = "error";
     }
 
     if (resultCode === "Authorised") {
-      status = "authorized"
+      status = "authorized";
     }
 
     if (resultCode === "Canceled") {
-      status = "canceled"
+      status = "canceled";
     }
 
     if (resultCode === "ChallengeShopper") {
-      status = "requires_more"
+      status = "requires_more";
     }
 
     if (resultCode === "RedirectShopper") {
-      status = "requires_more"
+      status = "requires_more";
     }
 
     if (resultCode === "IdentifyShopper") {
-      status = "requires_more"
+      status = "requires_more";
     }
 
-    return status
+    return status;
   }
 
   /**
@@ -198,7 +198,7 @@ class AdyenService extends BaseService {
    * @returns {object} empty payment data
    */
   async createPayment(cart) {
-    return { cart_id: cart.id }
+    return { cart_id: cart.id };
   }
 
   /**
@@ -208,7 +208,7 @@ class AdyenService extends BaseService {
    * @returns {object} payment method data
    */
   async getPaymentData(paymentSession) {
-    return { ...paymentSession.data }
+    return { ...paymentSession.data };
   }
 
   /**
@@ -218,7 +218,7 @@ class AdyenService extends BaseService {
    * @returns {Promise<object>} Stripe payment intent
    */
   async retrieve(sessionData) {
-    return sessionData
+    return sessionData;
   }
 
   /**
@@ -230,12 +230,12 @@ class AdyenService extends BaseService {
    * @returns {Promise<{ status: string, data: object }>} result with data and status
    */
   async authorizePayment(session, context) {
-    const sessionData = session.data
+    const sessionData = session.data;
 
-    const status = this.getStatus(sessionData)
+    const status = this.getStatus(sessionData);
 
     if (sessionData.resultCode === "RedirectShopper") {
-      return { data: sessionData, status: "requires_more" }
+      return { data: sessionData, status: "requires_more" };
     }
 
     // If session data is present, we already called authorize once.
@@ -244,32 +244,32 @@ class AdyenService extends BaseService {
       const updated = await this.updatePaymentData(sessionData, {
         details: sessionData.details,
         paymentData: sessionData.paymentData,
-      })
+      });
 
-      return { data: updated, status: this.getStatus(updated) }
+      return { data: updated, status: this.getStatus(updated) };
     }
 
     if (status === "authorized") {
-      return { data: sessionData, status: "authorized" }
+      return { data: sessionData, status: "authorized" };
     }
 
     const cart = await this.cartService_.retrieve(session.cart_id, {
       select: ["total"],
       relations: ["region", "shipping_address"],
-    })
+    });
 
     const amount = {
       currency: cart.region.currency_code.toUpperCase(),
       value: cart.total,
-    }
+    };
 
-    let paymentData = sessionData.paymentData
+    let paymentData = sessionData.paymentData;
     if (!paymentData) {
       paymentData = {
         paymentMethod: {
           type: sessionData.type,
         },
-      }
+      };
     }
 
     let request = {
@@ -283,33 +283,33 @@ class AdyenService extends BaseService {
       metadata: {
         cart_id: cart.id,
       },
-    }
+    };
 
-    const checkout = new CheckoutAPI(this.adyenClient_)
+    const checkout = new CheckoutAPI(this.adyenClient_);
 
     try {
       const authorizedPayment = await checkout.payments(request, {
         idempotencyKey: context.idempotency_key || "",
-      })
+      });
 
       return {
         data: authorizedPayment,
         status: this.getStatus(authorizedPayment),
-      }
+      };
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
   async updatePaymentData(sessionData, update) {
     if (_.isEmpty(update.details)) {
-      return { ...sessionData, ...update }
+      return { ...sessionData, ...update };
     }
 
-    const checkout = new CheckoutAPI(this.adyenClient_)
-    const updated = await checkout.paymentsDetails(update)
+    const checkout = new CheckoutAPI(this.adyenClient_);
+    const updated = await checkout.paymentsDetails(update);
 
-    return updated
+    return updated;
   }
 
   /**
@@ -319,7 +319,7 @@ class AdyenService extends BaseService {
    * @returns {Promise} result of the update operation
    */
   async updatePayment(paymentData, details) {
-    return paymentData
+    return paymentData;
   }
 
   /**
@@ -332,10 +332,10 @@ class AdyenService extends BaseService {
     const request = {
       paymentData,
       details,
-    }
+    };
 
-    const checkout = new CheckoutAPI(this.adyenClient_)
-    return checkout.paymentsDetails(request)
+    const checkout = new CheckoutAPI(this.adyenClient_);
+    return checkout.paymentsDetails(request);
   }
 
   /**
@@ -345,11 +345,11 @@ class AdyenService extends BaseService {
    */
   async capturePayment(payment) {
     if (payment.captured_at !== null) {
-      return
+      return;
     }
 
-    const { pspReference, merchantReference } = payment.data
-    const { amount, currency_code } = payment
+    const { pspReference, merchantReference } = payment.data;
+    const { amount, currency_code } = payment;
 
     try {
       const captured = await this.adyenPaymentApi.post(
@@ -362,18 +362,18 @@ class AdyenService extends BaseService {
           },
           reference: merchantReference,
         }
-      )
+      );
 
       if (captured.data.pspReference && captured.data.status !== "received") {
         throw new MedusaError(
           MedusaError.Types.INVALID_ARGUMENT,
           "Could not process capture"
-        )
+        );
       }
 
-      return { pspReference }
+      return { pspReference };
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
@@ -384,23 +384,23 @@ class AdyenService extends BaseService {
    * @returns {object} payment data result of refund
    */
   async refundPayment(payment, amountToRefund) {
-    const { pspReference } = payment.data
-    const { currency_code } = payment
+    const { pspReference } = payment.data;
+    const { currency_code } = payment;
 
     const refundAmount = {
       currency: currency_code.toUpperCase(),
       value: amountToRefund,
-    }
+    };
 
     try {
       await this.adyenPaymentApi.post(`/payments/${pspReference}/refunds`, {
         merchantAccount: this.options_.merchant_account,
         amount: refundAmount,
-      })
+      });
 
-      return { pspReference }
+      return { pspReference };
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
@@ -408,7 +408,7 @@ class AdyenService extends BaseService {
    * Adyen does not have a way of deleting payments, hence the empty impl.
    */
   async deletePayment(_) {
-    return {}
+    return {};
   }
 
   /**
@@ -417,17 +417,17 @@ class AdyenService extends BaseService {
    * @returns {object} payment data result of cancel
    */
   async cancelPayment(payment) {
-    const { pspReference } = payment.data
+    const { pspReference } = payment.data;
 
     try {
       return this.adyenPaymentApi.post("/cancel", {
         originalReference: pspReference,
         merchantAccount: this.options_.merchant_account,
-      })
+      });
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 }
 
-export default AdyenService
+export default AdyenService;

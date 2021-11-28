@@ -1,10 +1,10 @@
-import SendGrid from "@sendgrid/mail"
+import SendGrid from "@sendgrid/mail";
 
-import { NotificationService } from "medusa-interfaces"
-import { humanizeAmount, zeroDecimalCurrencies } from "medusa-core-utils"
+import { NotificationService } from "medusa-interfaces";
+import { humanizeAmount, zeroDecimalCurrencies } from "medusa-core-utils";
 
 class SendGridService extends NotificationService {
-  static identifier = "sendgrid"
+  static identifier = "sendgrid";
 
   /**
    * @param {Object} options - options defined in `medusa-config.js`
@@ -35,39 +35,39 @@ class SendGridService extends NotificationService {
     },
     options
   ) {
-    super()
+    super();
 
-    this.options_ = options
+    this.options_ = options;
 
-    this.fulfillmentProviderService_ = fulfillmentProviderService
-    this.storeService_ = storeService
-    this.lineItemService_ = lineItemService
-    this.orderService_ = orderService
-    this.cartService_ = cartService
-    this.claimService_ = claimService
-    this.returnService_ = returnService
-    this.swapService_ = swapService
-    this.fulfillmentService_ = fulfillmentService
-    this.totalsService_ = totalsService
-    this.productVariantService_ = productVariantService
+    this.fulfillmentProviderService_ = fulfillmentProviderService;
+    this.storeService_ = storeService;
+    this.lineItemService_ = lineItemService;
+    this.orderService_ = orderService;
+    this.cartService_ = cartService;
+    this.claimService_ = claimService;
+    this.returnService_ = returnService;
+    this.swapService_ = swapService;
+    this.fulfillmentService_ = fulfillmentService;
+    this.totalsService_ = totalsService;
+    this.productVariantService_ = productVariantService;
 
-    SendGrid.setApiKey(options.api_key)
+    SendGrid.setApiKey(options.api_key);
   }
 
   async fetchAttachments(event, data, attachmentGenerator) {
     switch (event) {
       case "swap.created":
       case "order.return_requested": {
-        let attachments = []
-        const { shipping_method, shipping_data } = data.return_request
+        let attachments = [];
+        const { shipping_method, shipping_data } = data.return_request;
         if (shipping_method) {
-          const provider = shipping_method.shipping_option.provider_id
+          const provider = shipping_method.shipping_option.provider_id;
 
           const lbl = await this.fulfillmentProviderService_.retrieveDocuments(
             provider,
             shipping_data,
             "label"
-          )
+          );
 
           attachments = attachments.concat(
             lbl.map((d) => ({
@@ -75,156 +75,157 @@ class SendGridService extends NotificationService {
               base64: d.base_64,
               type: d.type,
             }))
-          )
+          );
         }
 
         if (attachmentGenerator && attachmentGenerator.createReturnInvoice) {
           const base64 = await attachmentGenerator.createReturnInvoice(
             data.order,
             data.return_request.items
-          )
+          );
           attachments.push({
             name: "invoice",
             base64,
             type: "application/pdf",
-          })
+          });
         }
 
-        return attachments
+        return attachments;
       }
       default:
-        return []
+        return [];
     }
   }
 
   async fetchData(event, eventData, attachmentGenerator) {
     switch (event) {
       case "order.return_requested":
-        return this.returnRequestedData(eventData, attachmentGenerator)
+        return this.returnRequestedData(eventData, attachmentGenerator);
       case "swap.shipment_created":
-        return this.swapShipmentCreatedData(eventData, attachmentGenerator)
+        return this.swapShipmentCreatedData(eventData, attachmentGenerator);
       case "claim.shipment_created":
-        return this.claimShipmentCreatedData(eventData, attachmentGenerator)
+        return this.claimShipmentCreatedData(eventData, attachmentGenerator);
       case "order.items_returned":
-        return this.itemsReturnedData(eventData, attachmentGenerator)
+        return this.itemsReturnedData(eventData, attachmentGenerator);
       case "swap.received":
-        return this.swapReceivedData(eventData, attachmentGenerator)
+        return this.swapReceivedData(eventData, attachmentGenerator);
       case "swap.created":
-        return this.swapCreatedData(eventData, attachmentGenerator)
+        return this.swapCreatedData(eventData, attachmentGenerator);
       case "gift_card.created":
-        return this.gcCreatedData(eventData, attachmentGenerator)
+        return this.gcCreatedData(eventData, attachmentGenerator);
       case "order.gift_card_created":
-        return this.gcCreatedData(eventData, attachmentGenerator)
+        return this.gcCreatedData(eventData, attachmentGenerator);
       case "order.placed":
-        return this.orderPlacedData(eventData, attachmentGenerator)
+        return this.orderPlacedData(eventData, attachmentGenerator);
       case "order.shipment_created":
-        return this.orderShipmentCreatedData(eventData, attachmentGenerator)
+        return this.orderShipmentCreatedData(eventData, attachmentGenerator);
       case "order.canceled":
-        return this.orderCanceledData(eventData, attachmentGenerator)
+        return this.orderCanceledData(eventData, attachmentGenerator);
       case "user.password_reset":
-        return this.userPasswordResetData(eventData, attachmentGenerator)
+        return this.userPasswordResetData(eventData, attachmentGenerator);
       case "customer.password_reset":
-        return this.customerPasswordResetData(eventData, attachmentGenerator)
+        return this.customerPasswordResetData(eventData, attachmentGenerator);
       case "restock-notification.restocked":
         return await this.restockNotificationData(
           eventData,
           attachmentGenerator
-        )
+        );
       default:
-        return {}
+        return {};
     }
   }
 
   getLocalizedTemplateId(event, locale) {
     if (this.options_.localization && this.options_.localization[locale]) {
-      const map = this.options_.localization[locale]
+      const map = this.options_.localization[locale];
       switch (event) {
         case "order.return_requested":
-          return map.order_return_requested_template
+          return map.order_return_requested_template;
         case "swap.shipment_created":
-          return map.swap_shipment_created_template
+          return map.swap_shipment_created_template;
         case "claim.shipment_created":
-          return map.claim_shipment_created_template
+          return map.claim_shipment_created_template;
         case "order.items_returned":
-          return map.order_items_returned_template
+          return map.order_items_returned_template;
         case "swap.received":
-          return map.swap_received_template
+          return map.swap_received_template;
         case "swap.created":
-          return map.swap_created_template
+          return map.swap_created_template;
         case "gift_card.created":
-          return map.gift_card_created_template
+          return map.gift_card_created_template;
         case "order.gift_card_created":
-          return map.gift_card_created_template
+          return map.gift_card_created_template;
         case "order.placed":
-          return map.order_placed_template
+          return map.order_placed_template;
         case "order.shipment_created":
-          return map.order_shipped_template
+          return map.order_shipped_template;
         case "order.canceled":
-          return map.order_canceled_template
+          return map.order_canceled_template;
         case "user.password_reset":
-          return map.user_password_reset_template
+          return map.user_password_reset_template;
         case "customer.password_reset":
-          return map.customer_password_reset_template
+          return map.customer_password_reset_template;
         case "restock-notification.restocked":
-          return map.medusa_restock_template
+          return map.medusa_restock_template;
         default:
-          return null
+          return null;
       }
     }
-    return null
+    return null;
   }
 
   getTemplateId(event) {
     switch (event) {
       case "order.return_requested":
-        return this.options_.order_return_requested_template
+        return this.options_.order_return_requested_template;
       case "swap.shipment_created":
-        return this.options_.swap_shipment_created_template
+        return this.options_.swap_shipment_created_template;
       case "claim.shipment_created":
-        return this.options_.claim_shipment_created_template
+        return this.options_.claim_shipment_created_template;
       case "order.items_returned":
-        return this.options_.order_items_returned_template
+        return this.options_.order_items_returned_template;
       case "swap.received":
-        return this.options_.swap_received_template
+        return this.options_.swap_received_template;
       case "swap.created":
-        return this.options_.swap_created_template
+        return this.options_.swap_created_template;
       case "gift_card.created":
-        return this.options_.gift_card_created_template
+        return this.options_.gift_card_created_template;
       case "order.gift_card_created":
-        return this.options_.gift_card_created_template
+        return this.options_.gift_card_created_template;
       case "order.placed":
-        return this.options_.order_placed_template
+        return this.options_.order_placed_template;
       case "order.shipment_created":
-        return this.options_.order_shipped_template
+        return this.options_.order_shipped_template;
       case "order.canceled":
-        return this.options_.order_canceled_template
+        return this.options_.order_canceled_template;
       case "user.password_reset":
-        return this.options_.user_password_reset_template
+        return this.options_.user_password_reset_template;
       case "customer.password_reset":
-        return this.options_.customer_password_reset_template
+        return this.options_.customer_password_reset_template;
       case "restock-notification.restocked":
-        return this.options_.medusa_restock_template
+        return this.options_.medusa_restock_template;
       default:
-        return null
+        return null;
     }
   }
 
   async sendNotification(event, eventData, attachmentGenerator) {
-    let templateId = this.getTemplateId(event)
+    let templateId = this.getTemplateId(event);
 
     if (!templateId) {
-      return false
+      return false;
     }
 
-    const data = await this.fetchData(event, eventData, attachmentGenerator)
+    const data = await this.fetchData(event, eventData, attachmentGenerator);
     const attachments = await this.fetchAttachments(
       event,
       data,
       attachmentGenerator
-    )
+    );
 
     if (data.locale) {
-      templateId = this.getLocalizedTemplateId(event, data.locale) || templateId
+      templateId =
+        this.getLocalizedTemplateId(event, data.locale) || templateId;
     }
 
     const sendOptions = {
@@ -233,10 +234,10 @@ class SendGridService extends NotificationService {
       to: data.email,
       dynamic_template_data: data,
       has_attachments: attachments?.length,
-    }
+    };
 
     if (attachments?.length) {
-      sendOptions.has_attachments = true
+      sendOptions.has_attachments = true;
       sendOptions.attachments = attachments.map((a) => {
         return {
           content: a.base64,
@@ -244,31 +245,31 @@ class SendGridService extends NotificationService {
           type: a.type,
           disposition: "attachment",
           contentId: a.name,
-        }
-      })
+        };
+      });
     }
 
     const status = await SendGrid.send(sendOptions)
       .then(() => "sent")
-      .catch(() => "failed")
+      .catch(() => "failed");
 
     // We don't want heavy docs stored in DB
-    delete sendOptions.attachments
+    delete sendOptions.attachments;
 
-    return { to: data.email, status, data: sendOptions }
+    return { to: data.email, status, data: sendOptions };
   }
 
   async resendNotification(notification, config, attachmentGenerator) {
     const sendOptions = {
       ...notification.data,
       to: config.to || notification.to,
-    }
+    };
 
     const attachs = await this.fetchAttachments(
       notification.event_name,
       notification.data.dynamic_template_data,
       attachmentGenerator
-    )
+    );
 
     sendOptions.attachments = attachs.map((a) => {
       return {
@@ -277,14 +278,14 @@ class SendGridService extends NotificationService {
         type: a.type,
         disposition: "attachment",
         contentId: a.name,
-      }
-    })
+      };
+    });
 
     const status = await SendGrid.send(sendOptions)
       .then(() => "sent")
-      .catch(() => "failed")
+      .catch(() => "failed");
 
-    return { to: sendOptions.to, status, data: sendOptions }
+    return { to: sendOptions.to, status, data: sendOptions };
   }
 
   /**
@@ -297,9 +298,9 @@ class SendGridService extends NotificationService {
    */
   async sendEmail(options) {
     try {
-      return SendGrid.send(options)
+      return SendGrid.send(options);
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
@@ -330,13 +331,13 @@ class SendGridService extends NotificationService {
         "gift_cards",
         "gift_card_transactions",
       ],
-    })
+    });
 
     const shipment = await this.fulfillmentService_.retrieve(fulfillment_id, {
       relations: ["items", "tracking_links"],
-    })
+    });
 
-    const locale = await this.extractLocale(order)
+    const locale = await this.extractLocale(order);
 
     return {
       locale,
@@ -346,7 +347,7 @@ class SendGridService extends NotificationService {
       fulfillment: shipment,
       tracking_links: shipment.tracking_links,
       tracking_number: shipment.tracking_numbers.join(", "),
-    }
+    };
   }
 
   async orderPlacedData({ id }) {
@@ -375,7 +376,7 @@ class SendGridService extends NotificationService {
         "gift_cards",
         "gift_card_transactions",
       ],
-    })
+    });
 
     const {
       subtotal,
@@ -384,14 +385,14 @@ class SendGridService extends NotificationService {
       shipping_total,
       gift_card_total,
       total,
-    } = order
+    } = order;
 
-    const taxRate = order.tax_rate / 100
-    const currencyCode = order.currency_code.toUpperCase()
+    const taxRate = order.tax_rate / 100;
+    const currencyCode = order.currency_code.toUpperCase();
 
-    const items = this.processItems_(order.items, taxRate, currencyCode)
+    const items = this.processItems_(order.items, taxRate, currencyCode);
 
-    let discounts = []
+    let discounts = [];
     if (order.discounts) {
       discounts = order.discounts.map((discount) => {
         return {
@@ -400,24 +401,24 @@ class SendGridService extends NotificationService {
           descriptor: `${discount.rule.value}${
             discount.rule.type === "percentage" ? "%" : ` ${currencyCode}`
           }`,
-        }
-      })
+        };
+      });
     }
 
-    let giftCards = []
+    let giftCards = [];
     if (order.gift_cards) {
       giftCards = order.gift_cards.map((gc) => {
         return {
           is_giftcard: true,
           code: gc.code,
           descriptor: `${gc.value} ${currencyCode}`,
-        }
-      })
+        };
+      });
 
-      discounts.concat(giftCards)
+      discounts.concat(giftCards);
     }
 
-    const locale = await this.extractLocale(order)
+    const locale = await this.extractLocale(order);
 
     return {
       ...order,
@@ -445,28 +446,28 @@ class SendGridService extends NotificationService {
         currencyCode
       )} ${currencyCode}`,
       total: `${this.humanPrice_(total, currencyCode)} ${currencyCode}`,
-    }
+    };
   }
 
   async gcCreatedData({ id }) {
     const giftCard = await this.giftCardService_.retrieve(id, {
       relations: ["region", "order"],
-    })
+    });
 
     if (!giftCard.order) {
-      return
+      return;
     }
 
-    const taxRate = giftCard.region.tax_rate / 100
+    const taxRate = giftCard.region.tax_rate / 100;
 
-    const locale = await this.extractLocale(order)
+    const locale = await this.extractLocale(order);
 
     return {
       ...giftCard,
       locale,
       email: giftCard.order.email,
       display_value: giftCard.value * (1 + taxRate),
-    }
+    };
   }
 
   async returnRequestedData({ id, return_id }) {
@@ -480,19 +481,19 @@ class SendGridService extends NotificationService {
         "shipping_method",
         "shipping_method.shipping_option",
       ],
-    })
+    });
 
     const items = await this.lineItemService_.list({
       id: returnRequest.items.map(({ item_id }) => item_id),
-    })
+    });
 
     returnRequest.items = returnRequest.items.map((item) => {
-      const found = items.find((i) => i.id === item.item_id)
+      const found = items.find((i) => i.id === item.item_id);
       return {
         ...item,
         item: found,
-      }
-    })
+      };
+    });
 
     // Fetch the order
     const order = await this.orderService_.retrieve(id, {
@@ -507,39 +508,42 @@ class SendGridService extends NotificationService {
         "swaps",
         "swaps.additional_items",
       ],
-    })
+    });
 
-    let merged = [...order.items]
+    let merged = [...order.items];
 
     // merge items from order with items from order swaps
     if (order.swaps && order.swaps.length) {
       for (const s of order.swaps) {
-        merged = [...merged, ...s.additional_items]
+        merged = [...merged, ...s.additional_items];
       }
     }
 
     // Calculate which items are in the return
     const returnItems = returnRequest.items.map((i) => {
-      const found = merged.find((oi) => oi.id === i.item_id)
+      const found = merged.find((oi) => oi.id === i.item_id);
       return {
         ...found,
         quantity: i.quantity,
-      }
-    })
+      };
+    });
 
-    const taxRate = order.tax_rate / 100
-    const currencyCode = order.currency_code.toUpperCase()
+    const taxRate = order.tax_rate / 100;
+    const currencyCode = order.currency_code.toUpperCase();
 
     // Get total of the returned products
-    const item_subtotal = this.totalsService_.getRefundTotal(order, returnItems)
+    const item_subtotal = this.totalsService_.getRefundTotal(
+      order,
+      returnItems
+    );
 
     // If the return has a shipping method get the price and any attachments
-    let shippingTotal = 0
+    let shippingTotal = 0;
     if (returnRequest.shipping_method) {
-      shippingTotal = returnRequest.shipping_method.price * (1 + taxRate)
+      shippingTotal = returnRequest.shipping_method.price * (1 + taxRate);
     }
 
-    const locale = await this.extractLocale(order)
+    const locale = await this.extractLocale(order);
 
     return {
       locale,
@@ -567,11 +571,11 @@ class SendGridService extends NotificationService {
       },
       order,
       date: returnRequest.updated_at.toDateString(),
-    }
+    };
   }
 
   async swapCreatedData({ id }) {
-    const store = await this.storeService_.retrieve()
+    const store = await this.storeService_.retrieve();
     const swap = await this.swapService_.retrieve(id, {
       relations: [
         "additional_items",
@@ -581,26 +585,26 @@ class SendGridService extends NotificationService {
         "return_order.shipping_method",
         "return_order.shipping_method.shipping_option",
       ],
-    })
+    });
 
-    const returnRequest = swap.return_order
+    const returnRequest = swap.return_order;
 
     const items = await this.lineItemService_.list({
       id: returnRequest.items.map(({ item_id }) => item_id),
-    })
+    });
 
     returnRequest.items = returnRequest.items.map((item) => {
-      const found = items.find((i) => i.id === item.item_id)
+      const found = items.find((i) => i.id === item.item_id);
       return {
         ...item,
         item: found,
-      }
-    })
+      };
+    });
 
     const swapLink = store.swap_link_template.replace(
       /\{cart_id\}/,
       swap.cart_id
-    )
+    );
 
     const order = await this.orderService_.retrieve(swap.order_id, {
       select: ["total"],
@@ -613,45 +617,45 @@ class SendGridService extends NotificationService {
         "swaps",
         "swaps.additional_items",
       ],
-    })
+    });
 
-    const taxRate = order.tax_rate / 100
-    const currencyCode = order.currency_code.toUpperCase()
+    const taxRate = order.tax_rate / 100;
+    const currencyCode = order.currency_code.toUpperCase();
 
-    let merged = [...order.items]
+    let merged = [...order.items];
 
     // merge items from order with items from order swaps
     if (order.swaps && order.swaps.length) {
       for (const s of order.swaps) {
-        merged = [...merged, ...s.additional_items]
+        merged = [...merged, ...s.additional_items];
       }
     }
 
     const returnItems = this.processItems_(
       swap.return_order.items.map((i) => {
-        const found = merged.find((oi) => oi.id === i.item_id)
+        const found = merged.find((oi) => oi.id === i.item_id);
         return {
           ...found,
           quantity: i.quantity,
-        }
+        };
       }),
       taxRate,
       currencyCode
-    )
+    );
 
-    const returnTotal = this.totalsService_.getRefundTotal(order, returnItems)
+    const returnTotal = this.totalsService_.getRefundTotal(order, returnItems);
 
     const constructedOrder = {
       ...order,
       shipping_methods: [],
       items: swap.additional_items,
-    }
+    };
 
-    const additionalTotal = this.totalsService_.getTotal(constructedOrder)
+    const additionalTotal = this.totalsService_.getTotal(constructedOrder);
 
-    const refundAmount = swap.return_order.refund_amount
+    const refundAmount = swap.return_order.refund_amount;
 
-    const locale = await this.extractLocale(order)
+    const locale = await this.extractLocale(order);
 
     return {
       locale,
@@ -675,11 +679,11 @@ class SendGridService extends NotificationService {
         additionalTotal,
         currencyCode
       )} ${currencyCode}`,
-    }
+    };
   }
 
   async itemsReturnedData(data) {
-    return this.returnRequestedData(data)
+    return this.returnRequestedData(data);
   }
 
   async swapShipmentCreatedData({ id, fulfillment_id }) {
@@ -691,7 +695,7 @@ class SendGridService extends NotificationService {
         "return_order",
         "return_order.items",
       ],
-    })
+    });
 
     const order = await this.orderService_.retrieve(swap.order_id, {
       relations: [
@@ -702,49 +706,49 @@ class SendGridService extends NotificationService {
         "swaps",
         "swaps.additional_items",
       ],
-    })
+    });
 
-    let merged = [...order.items]
+    let merged = [...order.items];
 
     // merge items from order with items from order swaps
     if (order.swaps && order.swaps.length) {
       for (const s of order.swaps) {
-        merged = [...merged, ...s.additional_items]
+        merged = [...merged, ...s.additional_items];
       }
     }
 
-    const taxRate = order.tax_rate / 100
-    const currencyCode = order.currency_code.toUpperCase()
+    const taxRate = order.tax_rate / 100;
+    const currencyCode = order.currency_code.toUpperCase();
 
     const returnItems = this.processItems_(
       swap.return_order.items.map((i) => {
-        const found = merged.find((oi) => oi.id === i.item_id)
+        const found = merged.find((oi) => oi.id === i.item_id);
         return {
           ...found,
           quantity: i.quantity,
-        }
+        };
       }),
       taxRate,
       currencyCode
-    )
+    );
 
-    const returnTotal = this.totalsService_.getRefundTotal(order, returnItems)
+    const returnTotal = this.totalsService_.getRefundTotal(order, returnItems);
 
     const constructedOrder = {
       ...order,
       shipping_methods: swap.shipping_methods,
       items: swap.additional_items,
-    }
+    };
 
-    const additionalTotal = this.totalsService_.getTotal(constructedOrder)
+    const additionalTotal = this.totalsService_.getTotal(constructedOrder);
 
-    const refundAmount = swap.return_order.refund_amount
+    const refundAmount = swap.return_order.refund_amount;
 
     const shipment = await this.fulfillmentService_.retrieve(fulfillment_id, {
       relations: ["tracking_links"],
-    })
+    });
 
-    const locale = await this.extractLocale(order)
+    const locale = await this.extractLocale(order);
 
     return {
       locale,
@@ -776,19 +780,19 @@ class SendGridService extends NotificationService {
       fulfillment: shipment,
       tracking_links: shipment.tracking_links,
       tracking_number: shipment.tracking_numbers.join(", "),
-    }
+    };
   }
 
   async claimShipmentCreatedData({ id, fulfillment_id }) {
     const claim = await this.claimService_.retrieve(id, {
       relations: ["order", "order.items", "order.shipping_address"],
-    })
+    });
 
     const shipment = await this.fulfillmentService_.retrieve(fulfillment_id, {
       relations: ["tracking_links"],
-    })
+    });
 
-    const locale = await this.extractLocale(claim.order)
+    const locale = await this.extractLocale(claim.order);
 
     return {
       locale,
@@ -798,17 +802,17 @@ class SendGridService extends NotificationService {
       fulfillment: shipment,
       tracking_links: shipment.tracking_links,
       tracking_number: shipment.tracking_numbers.join(", "),
-    }
+    };
   }
 
   async restockNotificationData({ variant_id, emails }) {
     const variant = await this.productVariantService_.retrieve(variant_id, {
       relations: ["product"],
-    })
+    });
 
-    let thumb
+    let thumb;
     if (variant.product.thumbnail) {
-      thumb = this.normalizeThumbUrl_(variant.product.thumbnail)
+      thumb = this.normalizeThumbUrl_(variant.product.thumbnail);
     }
 
     return {
@@ -819,15 +823,15 @@ class SendGridService extends NotificationService {
       variant,
       variant_id,
       emails,
-    }
+    };
   }
 
   userPasswordResetData(data) {
-    return data
+    return data;
   }
 
   customerPasswordResetData(data) {
-    return data
+    return data;
   }
 
   processItems_(items, taxRate, currencyCode) {
@@ -839,32 +843,32 @@ class SendGridService extends NotificationService {
           i.unit_price * (1 + taxRate),
           currencyCode
         )} ${currencyCode}`,
-      }
-    })
+      };
+    });
   }
 
   humanPrice_(amount, currency) {
     if (!amount) {
-      return "0.00"
+      return "0.00";
     }
 
-    const normalized = humanizeAmount(amount, currency)
+    const normalized = humanizeAmount(amount, currency);
     return normalized.toFixed(
       zeroDecimalCurrencies.includes(currency.toLowerCase()) ? 0 : 2
-    )
+    );
   }
 
   normalizeThumbUrl_(url) {
     if (!url) {
-      return null
+      return null;
     }
 
     if (url.startsWith("http")) {
-      return url
+      return url;
     } else if (url.startsWith("//")) {
-      return `https:${url}`
+      return `https:${url}`;
     }
-    return url
+    return url;
   }
 
   async extractLocale(fromOrder) {
@@ -872,19 +876,19 @@ class SendGridService extends NotificationService {
       try {
         const cart = await this.cartService_.retrieve(fromOrder.cart_id, {
           select: ["context"],
-        })
+        });
 
         if (cart.context && cart.context.locale) {
-          return cart.context.locale
+          return cart.context.locale;
         }
       } catch (err) {
-        console.log(err)
-        console.warn("Failed to gather context for order")
-        return null
+        console.log(err);
+        console.warn("Failed to gather context for order");
+        return null;
       }
     }
-    return null
+    return null;
   }
 }
 
-export default SendGridService
+export default SendGridService;

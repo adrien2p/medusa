@@ -13,26 +13,26 @@ import {
   ManyToMany,
   JoinColumn,
   JoinTable,
-} from "typeorm"
-import { ulid } from "ulid"
-import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column"
+} from "typeorm";
+import { ulid } from "ulid";
+import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column";
 
-import { Currency } from "./currency"
+import { Currency } from "./currency";
 
 @Entity()
 export class Store {
   @PrimaryColumn()
-  id: string
+  id: string;
 
   @Column({ default: "Medusa Store" })
-  name: string
+  name: string;
 
   @Column({ default: "usd" })
-  default_currency_code: string
+  default_currency_code: string;
 
   @ManyToOne(() => Currency)
   @JoinColumn({ name: "default_currency_code", referencedColumnName: "code" })
-  default_currency: Currency
+  default_currency: Currency;
 
   @ManyToMany(() => Currency)
   @JoinTable({
@@ -46,27 +46,27 @@ export class Store {
       referencedColumnName: "code",
     },
   })
-  currencies: Currency[]
+  currencies: Currency[];
 
   @Column({ nullable: true })
-  swap_link_template: string
+  swap_link_template: string;
 
   @Column({ nullable: true })
-  payment_link_template: string
+  payment_link_template: string;
 
   @CreateDateColumn({ type: resolveDbType("timestamptz") })
-  created_at: Date
+  created_at: Date;
 
   @UpdateDateColumn({ type: resolveDbType("timestamptz") })
-  updated_at: Date
+  updated_at: Date;
 
   @DbAwareColumn({ type: "jsonb", nullable: true })
-  metadata: any
+  metadata: any;
 
   @BeforeInsert()
   private beforeInsert() {
-    const id = ulid()
-    this.id = `store_${id}`
+    const id = ulid();
+    this.id = `store_${id}`;
   }
 }
 

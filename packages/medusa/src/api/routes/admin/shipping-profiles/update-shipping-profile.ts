@@ -1,6 +1,6 @@
-import { IsOptional, IsString } from "class-validator"
-import { ShippingProfileService } from "../../../../services"
-import { validator } from "../../../../utils/validator"
+import { IsOptional, IsString } from "class-validator";
+import { ShippingProfileService } from "../../../../services";
+import { validator } from "../../../../utils/validator";
 
 /**
  * @oas [post] /shipping-profiles/{id}
@@ -30,25 +30,25 @@ import { validator } from "../../../../utils/validator"
  *               $ref: "#/components/schemas/shipping_profile"
  */
 export default async (req, res) => {
-  const { profile_id } = req.params
+  const { profile_id } = req.params;
 
   const validated = await validator(
     AdminPostShippingProfilesProfileReq,
     req.body
-  )
+  );
 
   const profileService: ShippingProfileService = req.scope.resolve(
     "shippingProfileService"
-  )
+  );
 
-  await profileService.update(profile_id, validated)
+  await profileService.update(profile_id, validated);
 
-  const data = await profileService.retrieve(profile_id)
-  res.status(200).json({ shipping_profile: data })
-}
+  const data = await profileService.retrieve(profile_id);
+  res.status(200).json({ shipping_profile: data });
+};
 
 export class AdminPostShippingProfilesProfileReq {
   @IsString()
   @IsOptional()
-  name?: string
+  name?: string;
 }

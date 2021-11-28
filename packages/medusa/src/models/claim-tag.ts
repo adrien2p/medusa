@@ -10,36 +10,36 @@ import {
   ManyToOne,
   OneToMany,
   JoinColumn,
-} from "typeorm"
-import { ulid } from "ulid"
-import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column"
+} from "typeorm";
+import { ulid } from "ulid";
+import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column";
 
 @Entity()
 export class ClaimTag {
   @PrimaryColumn()
-  id: string
+  id: string;
 
   @Index()
   @Column()
-  value: string
+  value: string;
 
   @CreateDateColumn({ type: resolveDbType("timestamptz") })
-  created_at: Date
+  created_at: Date;
 
   @UpdateDateColumn({ type: resolveDbType("timestamptz") })
-  updated_at: Date
+  updated_at: Date;
 
   @DeleteDateColumn({ type: resolveDbType("timestamptz") })
-  deleted_at: Date
+  deleted_at: Date;
 
   @DbAwareColumn({ type: "jsonb", nullable: true })
-  metadata: any
+  metadata: any;
 
   @BeforeInsert()
   private beforeInsert() {
-    if (this.id) return
-    const id = ulid()
-    this.id = `ctag_${id}`
+    if (this.id) return;
+    const id = ulid();
+    this.id = `ctag_${id}`;
   }
 }
 

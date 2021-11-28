@@ -1,4 +1,4 @@
-import path from "path"
+import path from "path";
 
 /**
  * Formats a filename into the correct container resolution name.
@@ -8,37 +8,37 @@ import path from "path"
  * @return {string} the formatted name
  */
 function formatRegistrationName(fn) {
-  const parsed = path.parse(fn)
-  const parsedDir = path.parse(parsed.dir)
+  const parsed = path.parse(fn);
+  const parsedDir = path.parse(parsed.dir);
 
-  const rawname = parsed.name
-  let namespace = parsedDir.name
+  const rawname = parsed.name;
+  let namespace = parsedDir.name;
   if (namespace.startsWith("__")) {
-    const parsedCoreDir = path.parse(parsedDir.dir)
-    namespace = parsedCoreDir.name
+    const parsedCoreDir = path.parse(parsedDir.dir);
+    namespace = parsedCoreDir.name;
   }
 
   switch (namespace) {
     // We strip the last character when adding the type of registration
     // this is a trick for plural "ies"
     case "repositories":
-      namespace = "repositorys"
-      break
+      namespace = "repositorys";
+      break;
     default:
-      break
+      break;
   }
 
   const upperNamespace =
-    namespace.charAt(0).toUpperCase() + namespace.slice(1, -1)
+    namespace.charAt(0).toUpperCase() + namespace.slice(1, -1);
 
   const parts = rawname.split("-").map((n, index) => {
     if (index !== 0) {
-      return n.charAt(0).toUpperCase() + n.slice(1)
+      return n.charAt(0).toUpperCase() + n.slice(1);
     }
-    return n
-  })
+    return n;
+  });
 
-  return parts.join("") + upperNamespace
+  return parts.join("") + upperNamespace;
 }
 
-export default formatRegistrationName
+export default formatRegistrationName;

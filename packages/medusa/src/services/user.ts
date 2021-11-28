@@ -1,23 +1,23 @@
-import jwt from "jsonwebtoken"
-import { MedusaError, Validator } from "medusa-core-utils"
-import { BaseService } from "medusa-interfaces"
-import Scrypt from "scrypt-kdf"
-import { EntityManager } from "typeorm"
-import { User } from "../models/user"
-import { UserRepository } from "../repositories/user"
-import { FindConfig } from "../types/common"
+import jwt from "jsonwebtoken";
+import { MedusaError, Validator } from "medusa-core-utils";
+import { BaseService } from "medusa-interfaces";
+import Scrypt from "scrypt-kdf";
+import { EntityManager } from "typeorm";
+import { User } from "../models/user";
+import { UserRepository } from "../repositories/user";
+import { FindConfig } from "../types/common";
 import {
   CreateUserInput,
   FilterableUserProps,
   UpdateUserInput,
-} from "../types/user"
-import EventBusService from "./event-bus"
+} from "../types/user";
+import EventBusService from "./event-bus";
 
 type UserServiceProps = {
-  userRepository: typeof UserRepository
-  eventBusService: EventBusService
-  manager: EntityManager
-}
+  userRepository: typeof UserRepository;
+  eventBusService: EventBusService;
+  manager: EntityManager;
+};
 
 /**
  * Provides layer to manipulate users.
@@ -26,40 +26,40 @@ type UserServiceProps = {
 class UserService extends BaseService {
   static Events = {
     PASSWORD_RESET: "user.password_reset",
-  }
+  };
 
-  private userRepository_: typeof UserRepository
-  private eventBus_: EventBusService
-  private manager_: EntityManager
-  private transactionManager_: EntityManager
+  private userRepository_: typeof UserRepository;
+  private eventBus_: EventBusService;
+  private manager_: EntityManager;
+  private transactionManager_: EntityManager;
 
   constructor({ userRepository, eventBusService, manager }: UserServiceProps) {
-    super()
+    super();
 
     /** @private @const {UserRepository} */
-    this.userRepository_ = userRepository
+    this.userRepository_ = userRepository;
 
     /** @private @const {EventBus} */
-    this.eventBus_ = eventBusService
+    this.eventBus_ = eventBusService;
 
     /** @private @const {EntityManager} */
-    this.manager_ = manager
+    this.manager_ = manager;
   }
 
   withTransaction(transactionManager: EntityManager): UserService {
     if (!transactionManager) {
-      return this
+      return this;
     }
 
     const cloned = new UserService({
       manager: transactionManager,
       userRepository: this.userRepository_,
       eventBusService: this.eventBus_,
-    })
+    });
 
-    cloned.transactionManager_ = transactionManager
+    cloned.transactionManager_ = transactionManager;
 
-    return cloned
+    return cloned;
   }
 
   /**
@@ -68,16 +68,16 @@ class UserService extends BaseService {
    * @return {string} the validated email
    */
   validateEmail_(email: string): string {
-    const schema = Validator.string().email().required()
-    const { value, error } = schema.validate(email)
+    const schema = Validator.string().email().required();
+    const { value, error } = schema.validate(email);
     if (error) {
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
         "The email is not valid"
-      )
+      );
     }
 
-    return value.toLowerCase()
+    return value.toLowerCase();
   }
 
   /**
@@ -85,8 +85,8 @@ class UserService extends BaseService {
    * @return {Promise} the result of the find operation
    */
   async list(selector: FilterableUserProps): Promise<User[]> {
-    const userRepo = this.manager_.getCustomRepository(this.userRepository_)
-    return userRepo.find({ where: selector })
+    const userRepo = this.manager_.getCustomRepository(this.userRepository_);
+    return userRepo.find({ where: selector });
   }
 
   /**
@@ -97,20 +97,20 @@ class UserService extends BaseService {
    * @return {Promise<User>} the user document.
    */
   async retrieve(userId: string, config: FindConfig<User> = {}): Promise<User> {
-    const userRepo = this.manager_.getCustomRepository(this.userRepository_)
-    const validatedId = this.validateId_(userId)
-    const query = this.buildQuery_({ id: validatedId }, config)
+    const userRepo = this.manager_.getCustomRepository(this.userRepository_);
+    const validatedId = this.validateId_(userId);
+    const query = this.buildQuery_({ id: validatedId }, config);
 
-    const user = await userRepo.findOne(query)
+    const user = await userRepo.findOne(query);
 
     if (!user) {
       throw new MedusaError(
         MedusaError.Types.NOT_FOUND,
         `User with id: ${userId} was not found`
-      )
+      );
     }
 
-    return user
+    return user;
   }
 
   /**
@@ -124,21 +124,21 @@ class UserService extends BaseService {
     apiToken: string,
     relations: string[] = []
   ): Promise<User> {
-    const userRepo = this.manager_.getCustomRepository(this.userRepository_)
+    const userRepo = this.manager_.getCustomRepository(this.userRepository_);
 
     const user = await userRepo.findOne({
       where: { api_token: apiToken },
       relations,
-    })
+    });
 
     if (!user) {
       throw new MedusaError(
         MedusaError.Types.NOT_FOUND,
         `User with api token: ${apiToken} was not found`
-      )
+      );
     }
 
-    return user
+    return user;
   }
 
   /**
@@ -152,19 +152,19 @@ class UserService extends BaseService {
     email: string,
     config: FindConfig<User> = {}
   ): Promise<User> {
-    const userRepo = this.manager_.getCustomRepository(this.userRepository_)
+    const userRepo = this.manager_.getCustomRepository(this.userRepository_);
 
-    const query = this.buildQuery_({ email: email.toLowerCase() }, config)
-    const user = await userRepo.findOne(query)
+    const query = this.buildQuery_({ email: email.toLowerCase() }, config);
+    const user = await userRepo.findOne(query);
 
     if (!user) {
       throw new MedusaError(
         MedusaError.Types.NOT_FOUND,
         `User with email: ${email} was not found`
-      )
+      );
     }
 
-    return user
+    return user;
   }
 
   /**
@@ -173,8 +173,8 @@ class UserService extends BaseService {
    * @return {string} hashed password
    */
   async hashPassword_(password: string): Promise<string> {
-    const buf = await Scrypt.kdf(password, { logN: 1, r: 1, p: 1 })
-    return buf.toString("base64")
+    const buf = await Scrypt.kdf(password, { logN: 1, r: 1, p: 1 });
+    return buf.toString("base64");
   }
 
   /**
@@ -186,24 +186,24 @@ class UserService extends BaseService {
    */
   async create(user: CreateUserInput, password: string): Promise<User> {
     return this.atomicPhase_(async (manager: EntityManager) => {
-      const userRepo = manager.getCustomRepository(this.userRepository_)
+      const userRepo = manager.getCustomRepository(this.userRepository_);
 
       const createData = { ...user } as CreateUserInput & {
-        password_hash: string
-      }
+        password_hash: string;
+      };
 
-      const validatedEmail = this.validateEmail_(user.email)
+      const validatedEmail = this.validateEmail_(user.email);
       if (password) {
-        const hashedPassword = await this.hashPassword_(password)
-        createData.password_hash = hashedPassword
+        const hashedPassword = await this.hashPassword_(password);
+        createData.password_hash = hashedPassword;
       }
 
-      createData.email = validatedEmail
+      createData.email = validatedEmail;
 
-      const created = userRepo.create(createData)
+      const created = userRepo.create(createData);
 
-      return userRepo.save(created)
-    })
+      return userRepo.save(created);
+    });
   }
 
   /**
@@ -214,37 +214,37 @@ class UserService extends BaseService {
    */
   async update(userId: string, update: UpdateUserInput): Promise<User> {
     return this.atomicPhase_(async (manager: EntityManager) => {
-      const userRepo = manager.getCustomRepository(this.userRepository_)
-      const validatedId = this.validateId_(userId)
+      const userRepo = manager.getCustomRepository(this.userRepository_);
+      const validatedId = this.validateId_(userId);
 
-      const user = await this.retrieve(validatedId)
+      const user = await this.retrieve(validatedId);
 
-      const { email, password_hash, metadata, ...rest } = update
+      const { email, password_hash, metadata, ...rest } = update;
 
       if (email) {
         throw new MedusaError(
           MedusaError.Types.INVALID_DATA,
           "You are not allowed to update email"
-        )
+        );
       }
 
       if (password_hash) {
         throw new MedusaError(
           MedusaError.Types.INVALID_DATA,
           "Use dedicated methods, `setPassword`, `generateResetPasswordToken` for password operations"
-        )
+        );
       }
 
       if (metadata) {
-        user.metadata = this.setMetadata_(user, metadata)
+        user.metadata = this.setMetadata_(user, metadata);
       }
 
       for (const [key, value] of Object.entries(rest)) {
-        user[key as keyof User] = value
+        user[key as keyof User] = value;
       }
 
-      return userRepo.save(user)
-    })
+      return userRepo.save(user);
+    });
   }
 
   /**
@@ -255,19 +255,19 @@ class UserService extends BaseService {
    */
   async delete(userId: string): Promise<null> {
     return this.atomicPhase_(async (manager: EntityManager) => {
-      const userRepo = manager.getCustomRepository(this.userRepository_)
+      const userRepo = manager.getCustomRepository(this.userRepository_);
 
       // Should not fail, if user does not exist, since delete is idempotent
-      const user = await userRepo.findOne({ where: { id: userId } })
+      const user = await userRepo.findOne({ where: { id: userId } });
 
       if (!user) {
-        return Promise.resolve()
+        return Promise.resolve();
       }
 
-      await userRepo.softRemove(user)
+      await userRepo.softRemove(user);
 
-      return Promise.resolve()
-    })
+      return Promise.resolve();
+    });
   }
 
   /**
@@ -280,22 +280,22 @@ class UserService extends BaseService {
    */
   async setPassword_(userId: string, password: string): Promise<User> {
     return this.atomicPhase_(async (manager: EntityManager) => {
-      const userRepo = manager.getCustomRepository(this.userRepository_)
+      const userRepo = manager.getCustomRepository(this.userRepository_);
 
-      const user = await this.retrieve(userId)
+      const user = await this.retrieve(userId);
 
-      const hashedPassword = await this.hashPassword_(password)
+      const hashedPassword = await this.hashPassword_(password);
       if (!hashedPassword) {
         throw new MedusaError(
           MedusaError.Types.DB_ERROR,
           `An error occured while hashing password`
-        )
+        );
       }
 
-      user.password_hash = hashedPassword
+      user.password_hash = hashedPassword;
 
-      return userRepo.save(user)
-    })
+      return userRepo.save(user);
+    });
   }
 
   /**
@@ -308,18 +308,18 @@ class UserService extends BaseService {
    * @return {string} the generated JSON web token
    */
   async generateResetPasswordToken(userId: string): Promise<string> {
-    const user = await this.retrieve(userId)
-    const secret = user.password_hash
-    const expiry = Math.floor(Date.now() / 1000) + 60 * 15
-    const payload = { user_id: user.id, exp: expiry }
-    const token = jwt.sign(payload, secret)
+    const user = await this.retrieve(userId);
+    const secret = user.password_hash;
+    const expiry = Math.floor(Date.now() / 1000) + 60 * 15;
+    const payload = { user_id: user.id, exp: expiry };
+    const token = jwt.sign(payload, secret);
     // Notify subscribers
     this.eventBus_.emit(UserService.Events.PASSWORD_RESET, {
       email: user.email,
       token,
-    })
-    return token
+    });
+    return token;
   }
 }
 
-export default UserService
+export default UserService;

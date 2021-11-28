@@ -1,12 +1,12 @@
-import _ from "lodash"
-import axios from "axios"
-import { PaymentService } from "medusa-interfaces"
+import _ from "lodash";
+import axios from "axios";
+import { PaymentService } from "medusa-interfaces";
 
 class KlarnaProviderService extends PaymentService {
-  static identifier = "klarna"
+  static identifier = "klarna";
 
   constructor({ shippingProfileService }, options) {
-    super()
+    super();
 
     /**
      * Required Klarna options:
@@ -22,7 +22,7 @@ class KlarnaProviderService extends PaymentService {
      *    }
      *  }
      */
-    this.options_ = options
+    this.options_ = options;
 
     /** @private @const {Klarna} */
     this.klarna_ = axios.create({
@@ -31,29 +31,29 @@ class KlarnaProviderService extends PaymentService {
         username: options.user,
         password: options.password,
       },
-    })
+    });
 
-    this.klarnaOrderUrl_ = "/checkout/v3/orders"
+    this.klarnaOrderUrl_ = "/checkout/v3/orders";
 
-    this.klarnaOrderManagementUrl_ = "/ordermanagement/v1/orders"
+    this.klarnaOrderManagementUrl_ = "/ordermanagement/v1/orders";
 
-    this.backendUrl_ = options.backend_url
+    this.backendUrl_ = options.backend_url;
 
     /** @private @const {ShippingProfileService} */
-    this.shippingProfileService_ = shippingProfileService
+    this.shippingProfileService_ = shippingProfileService;
   }
 
   async lineItemsToOrderLines_(cart, taxRate) {
-    let order_lines = []
+    let order_lines = [];
 
-    const tax = taxRate / 100
+    const tax = taxRate / 100;
 
     cart.items.forEach((item) => {
       // Withdraw discount from the total item amount
-      const quantity = item.quantity
-      const unit_price = item.unit_price * (tax + 1)
-      const total_amount = unit_price * quantity
-      const total_tax_amount = total_amount * (tax / (1 + tax))
+      const quantity = item.quantity;
+      const unit_price = item.unit_price * (tax + 1);
+      const total_amount = unit_price * quantity;
+      const total_tax_amount = total_amount * (tax / (1 + tax));
 
       order_lines.push({
         name: item.title,
@@ -62,18 +62,18 @@ class KlarnaProviderService extends PaymentService {
         unit_price,
         total_amount,
         total_tax_amount,
-      })
-    })
+      });
+    });
 
     if (cart.shipping_methods.length) {
       const { name, price } = cart.shipping_methods.reduce(
         (acc, next) => {
-          acc.name = [...acc.name, next.data.name]
-          acc.price += next.price
-          return acc
+          acc.name = [...acc.name, next.data.name];
+          acc.price += next.price;
+          return acc;
         },
         { name: [], price: 0 }
-      )
+      );
 
       order_lines.push({
         name: name.join(" + "),
@@ -83,10 +83,10 @@ class KlarnaProviderService extends PaymentService {
         tax_rate: tax * 10000,
         total_amount: price * (1 + tax),
         total_tax_amount: price * tax,
-      })
+      });
     }
 
-    return order_lines
+    return order_lines;
   }
 
   async cartToKlarnaOrder(cart) {
@@ -94,13 +94,16 @@ class KlarnaProviderService extends PaymentService {
       // Cart id is stored, such that we can use it for hooks
       merchant_data: cart.id,
       locale: "en-US",
-    }
+    };
 
-    const { region, gift_card_total, discount_total, tax_total, total } = cart
+    const { region, gift_card_total, discount_total, tax_total, total } = cart;
 
-    const taxRate = region.tax_rate / 100
+    const taxRate = region.tax_rate / 100;
 
-    order.order_lines = await this.lineItemsToOrderLines_(cart, region.tax_rate)
+    order.order_lines = await this.lineItemsToOrderLines_(
+      cart,
+      region.tax_rate
+    );
 
     if (discount_total > 0) {
       order.order_lines.push({
@@ -112,7 +115,7 @@ class KlarnaProviderService extends PaymentService {
         tax_rate: taxRate * 10000,
         total_amount: -discount_total * (1 + taxRate),
         total_tax_amount: -discount_total * taxRate,
-      })
+      });
     } else if (discount_total < 0) {
       order.order_lines.push({
         name: `Discount Payback`,
@@ -122,7 +125,7 @@ class KlarnaProviderService extends PaymentService {
         tax_rate: taxRate * 10000,
         total_amount: -discount_total * (1 + taxRate),
         total_tax_amount: -discount_total * taxRate,
-      })
+      });
     }
 
     if (gift_card_total) {
@@ -135,7 +138,7 @@ class KlarnaProviderService extends PaymentService {
         tax_rate: taxRate * 10000,
         total_amount: -gift_card_total * (1 + taxRate),
         total_tax_amount: -gift_card_total * taxRate,
-      })
+      });
     }
 
     if (!_.isEmpty(cart.billing_address)) {
@@ -146,22 +149,22 @@ class KlarnaProviderService extends PaymentService {
         postal_code: cart.billing_address.postal_code,
         city: cart.billing_address.city,
         country: cart.billing_address.country_code,
-      }
+      };
     }
 
     const hasCountry =
-      !_.isEmpty(cart.shipping_address) && cart.shipping_address.country_code
+      !_.isEmpty(cart.shipping_address) && cart.shipping_address.country_code;
 
     if (hasCountry) {
-      order.purchase_country = cart.shipping_address.country_code.toUpperCase()
+      order.purchase_country = cart.shipping_address.country_code.toUpperCase();
     } else {
       // Defaults to Sweden
-      order.purchase_country = "SE"
+      order.purchase_country = "SE";
     }
 
-    order.order_amount = total
-    order.order_tax_amount = tax_total
-    order.purchase_currency = region.currency_code.toUpperCase()
+    order.order_amount = total;
+    order.order_tax_amount = tax_total;
+    order.purchase_currency = region.currency_code.toUpperCase();
 
     order.merchant_urls = {
       terms: this.options_.merchant_urls.terms,
@@ -170,62 +173,62 @@ class KlarnaProviderService extends PaymentService {
       push: `${this.backendUrl_}/klarna/push?klarna_order_id={checkout.order.id}`,
       shipping_option_update: `${this.backendUrl_}/klarna/shipping`,
       address_update: `${this.backendUrl_}/klarna/address`,
-    }
+    };
 
     if (cart.shipping_address && cart.shipping_address.first_name) {
       let shippingOptions = await this.shippingProfileService_.fetchCartOptions(
         cart
-      )
+      );
 
       shippingOptions = shippingOptions.filter(
         (so) => !so.data?.require_drop_point
-      )
+      );
 
       // If the cart does not have shipping methods yet, preselect one from
       // shipping_options and set the selected shipping method
       if (cart.shipping_methods.length) {
-        const shipping_method = cart.shipping_methods[0]
+        const shipping_method = cart.shipping_methods[0];
         order.selected_shipping_option = {
           id: shipping_method.shipping_option.id,
           name: shipping_method.shipping_option.name,
           price: shipping_method.price * (1 + taxRate),
           tax_amount: shipping_method.price * taxRate,
           tax_rate: taxRate * 10000,
-        }
+        };
       }
 
       const partitioned = shippingOptions.reduce((acc, next) => {
         if (acc[next.profile_id]) {
-          acc[next.profile_id] = [...acc[next.profile_id], next]
+          acc[next.profile_id] = [...acc[next.profile_id], next];
         } else {
-          acc[next.profile_id] = [next]
+          acc[next.profile_id] = [next];
         }
-        return acc
-      }, {})
+        return acc;
+      }, {});
 
       // Helper function that calculates the cartesian product of multiple arrays
       // Don't touch :D
       // From: https://stackoverflow.com/questions/12303989/cartesian-product-of-multiple-arrays-in-javascript
       const f = (a, b) =>
-        [].concat(...a.map((d) => b.map((e) => [].concat(d, e))))
-      const cartesian = (a, b, ...c) => (b ? cartesian(f(a, b), ...c) : a)
+        [].concat(...a.map((d) => b.map((e) => [].concat(d, e))));
+      const cartesian = (a, b, ...c) => (b ? cartesian(f(a, b), ...c) : a);
 
-      const methods = Object.keys(partitioned).map((k) => partitioned[k])
-      const combinations = cartesian(...methods)
+      const methods = Object.keys(partitioned).map((k) => partitioned[k]);
+      const combinations = cartesian(...methods);
 
       // Use the cartesian product of shipping methods to generate correct
       // format for the Klarna Widget
       order.shipping_options = combinations.map((combination) => {
-        combination = Array.isArray(combination) ? combination : [combination]
+        combination = Array.isArray(combination) ? combination : [combination];
         const details = combination.reduce(
           (acc, next) => {
-            acc.id = [...acc.id, next.id]
-            acc.name = [...acc.name, next.name]
-            acc.price += next.amount
-            return acc
+            acc.id = [...acc.id, next.id];
+            acc.name = [...acc.name, next.name];
+            acc.price += next.amount;
+            return acc;
           },
           { id: [], name: [], price: 0 }
-        )
+        );
 
         return {
           id: details.id.join("."),
@@ -233,11 +236,11 @@ class KlarnaProviderService extends PaymentService {
           price: details.price * (1 + taxRate),
           tax_amount: details.price * taxRate,
           tax_rate: taxRate * 10000,
-        }
-      })
+        };
+      });
     }
 
-    return order
+    return order;
   }
 
   /**
@@ -246,18 +249,18 @@ class KlarnaProviderService extends PaymentService {
    * @returns {string} the status of the Klarna order
    */
   async getStatus(paymentData) {
-    const { order_id } = paymentData
+    const { order_id } = paymentData;
     const { data: order } = await this.klarna_.get(
       `${this.klarnaOrderUrl_}/${order_id}`
-    )
+    );
 
-    let status = "pending"
+    let status = "pending";
 
     if (order.status === "checkout_complete") {
-      status = "authorized"
+      status = "authorized";
     }
 
-    return status
+    return status;
   }
 
   /**
@@ -268,15 +271,15 @@ class KlarnaProviderService extends PaymentService {
    */
   async createPayment(cart) {
     try {
-      const order = await this.cartToKlarnaOrder(cart)
+      const order = await this.cartToKlarnaOrder(cart);
 
       const klarnaPayment = await this.klarna_
         .post(this.klarnaOrderUrl_, order)
-        .then(({ data }) => data)
+        .then(({ data }) => data);
 
-      return klarnaPayment
+      return klarnaPayment;
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
@@ -289,9 +292,9 @@ class KlarnaProviderService extends PaymentService {
     try {
       return this.klarna_
         .get(`${this.klarnaOrderUrl_}/${paymentData.order_id}`)
-        .then(({ data }) => data)
+        .then(({ data }) => data);
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
@@ -304,9 +307,9 @@ class KlarnaProviderService extends PaymentService {
     try {
       return this.klarna_
         .get(`${this.klarnaOrderUrl_}/${sessionData.data.order_id}`)
-        .then(({ data }) => data)
+        .then(({ data }) => data);
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
@@ -319,9 +322,9 @@ class KlarnaProviderService extends PaymentService {
     try {
       return this.klarna_
         .get(`${this.klarnaOrderManagementUrl_}/${klarnaOrderId}`)
-        .then(({ data }) => data)
+        .then(({ data }) => data);
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
@@ -334,11 +337,11 @@ class KlarnaProviderService extends PaymentService {
    */
   async authorizePayment(sessionData, context = {}) {
     try {
-      const paymentStatus = await this.getStatus(sessionData.data)
+      const paymentStatus = await this.getStatus(sessionData.data);
 
-      return { data: sessionData.data, status: paymentStatus }
+      return { data: sessionData.data, status: paymentStatus };
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
@@ -351,18 +354,18 @@ class KlarnaProviderService extends PaymentService {
     try {
       await this.klarna_.post(
         `${this.klarnaOrderManagementUrl_}/${klarnaOrderId}/acknowledge`
-      )
+      );
 
       await this.klarna_.patch(
         `${this.klarnaOrderManagementUrl_}/${klarnaOrderId}/merchant-references`,
         {
           merchant_reference1: orderId,
         }
-      )
+      );
 
-      return klarnaOrderId
+      return klarnaOrderId;
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
@@ -379,19 +382,19 @@ class KlarnaProviderService extends PaymentService {
         {
           merchant_reference1: orderId,
         }
-      )
+      );
 
-      return klarnaOrderId
+      return klarnaOrderId;
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
   async updatePaymentData(sessionData, update) {
     try {
-      return { ...sessionData, ...update }
+      return { ...sessionData, ...update };
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
@@ -403,18 +406,18 @@ class KlarnaProviderService extends PaymentService {
    */
   async updatePayment(paymentData, cart) {
     if (cart.total !== paymentData.order_amount) {
-      const order = await this.cartToKlarnaOrder(cart)
+      const order = await this.cartToKlarnaOrder(cart);
       return this.klarna_
         .post(`${this.klarnaOrderUrl_}/${paymentData.order_id}`, order)
         .then(({ data }) => data)
         .catch(async (_) => {
           return this.klarna_
             .post(this.klarnaOrderUrl_, order)
-            .then(({ data }) => data)
-        })
+            .then(({ data }) => data);
+        });
     }
 
-    return paymentData
+    return paymentData;
   }
 
   /**
@@ -423,23 +426,23 @@ class KlarnaProviderService extends PaymentService {
    * @returns {string} id of captured order
    */
   async capturePayment(payment) {
-    const { order_id } = payment.data
+    const { order_id } = payment.data;
     try {
       const { data: order } = await this.klarna_.get(
         `${this.klarnaOrderManagementUrl_}/${order_id}`
-      )
-      const { order_amount } = order
+      );
+      const { order_amount } = order;
 
       await this.klarna_.post(
         `${this.klarnaOrderManagementUrl_}/${order_id}/captures`,
         {
           captured_amount: order_amount,
         }
-      )
+      );
 
-      return this.retrieveCompletedOrder(order_id)
+      return this.retrieveCompletedOrder(order_id);
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
@@ -449,18 +452,18 @@ class KlarnaProviderService extends PaymentService {
    * @returns {string} id of refunded order
    */
   async refundPayment(payment, amountToRefund) {
-    const { order_id } = payment.data
+    const { order_id } = payment.data;
     try {
       await this.klarna_.post(
         `${this.klarnaOrderManagementUrl_}/${order_id}/refunds`,
         {
           refunded_amount: amountToRefund,
         }
-      )
+      );
 
-      return this.retrieveCompletedOrder(order_id)
+      return this.retrieveCompletedOrder(order_id);
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
@@ -470,21 +473,21 @@ class KlarnaProviderService extends PaymentService {
    * @returns {string} id of cancelled order
    */
   async cancelPayment(payment) {
-    const { order_id } = payment.data
+    const { order_id } = payment.data;
     try {
       await this.klarna_.post(
         `${this.klarnaOrderManagementUrl_}/${order_id}/cancel`
-      )
+      );
 
-      return this.retrieveCompletedOrder(order_id)
+      return this.retrieveCompletedOrder(order_id);
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
   async deletePayment(_) {
-    return Promise.resolve()
+    return Promise.resolve();
   }
 }
 
-export default KlarnaProviderService
+export default KlarnaProviderService;

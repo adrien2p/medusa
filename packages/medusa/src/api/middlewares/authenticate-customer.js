@@ -1,4 +1,4 @@
-import passport from "passport"
+import passport from "passport";
 
 export default () => {
   // Always go to next
@@ -8,11 +8,11 @@ export default () => {
       { session: false },
       (err, user, info) => {
         if (err) {
-          return next(err)
+          return next(err);
         }
-        req.user = user
-        return next()
+        req.user = user;
+        return next();
       }
-    )(req, res, next)
-  }
-}
+    )(req, res, next);
+  };
+};

@@ -1,18 +1,18 @@
-import { IdMap } from "medusa-test-utils"
-import jwt from "jsonwebtoken"
-import { request } from "../../../../../helpers/test-request"
-import { UserServiceMock } from "../../../../../services/__mocks__/user"
+import { IdMap } from "medusa-test-utils";
+import jwt from "jsonwebtoken";
+import { request } from "../../../../../helpers/test-request";
+import { UserServiceMock } from "../../../../../services/__mocks__/user";
 
 describe("POST /admin/users/reset-password", () => {
   describe("successfully resets password", () => {
-    let subject
+    let subject;
 
     beforeEach(async () => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     it("calls UserService setPassword", async () => {
-      const exp = Math.floor(Date.now() / 1000) + 60 * 15
+      const exp = Math.floor(Date.now() / 1000) + 60 * 15;
 
       subject = await request("POST", `/admin/users/reset-password`, {
         payload: {
@@ -33,19 +33,19 @@ describe("POST /admin/users/reset-password", () => {
             userId: IdMap.getId("admin_user"),
           },
         },
-      })
-      expect(UserServiceMock.setPassword).toHaveBeenCalledTimes(1)
+      });
+      expect(UserServiceMock.setPassword).toHaveBeenCalledTimes(1);
       expect(UserServiceMock.setPassword).toHaveBeenCalledWith(
         IdMap.getId("vandijk"),
         "new-password"
-      )
-    })
+      );
+    });
 
     it("returns updated user", () => {
-      expect(subject.body.user.id).toEqual(IdMap.getId("vandijk"))
-    })
+      expect(subject.body.user.id).toEqual(IdMap.getId("vandijk"));
+    });
     it("returns 200", () => {
-      expect(subject.status).toEqual(200)
-    })
-  })
-})
+      expect(subject.status).toEqual(200);
+    });
+  });
+});

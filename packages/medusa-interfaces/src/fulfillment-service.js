@@ -1,4 +1,4 @@
-import BaseService from "./base-service"
+import BaseService from "./base-service";
 
 /**
  * The interface that all fulfillment services must inherit from. The intercace
@@ -8,11 +8,11 @@ import BaseService from "./base-service"
  */
 class BaseFulfillmentService extends BaseService {
   constructor() {
-    super()
+    super();
   }
 
   getIdentifier() {
-    return this.constructor.identifier
+    return this.constructor.identifier;
   }
 
   /**
@@ -38,7 +38,9 @@ class BaseFulfillmentService extends BaseService {
    *    is usually important for future actions like generating shipping labels
    */
   validateFulfillmentData(data, cart) {
-    throw Error("validateFulfillmentData must be overridden by the child class")
+    throw Error(
+      "validateFulfillmentData must be overridden by the child class"
+    );
   }
 
   /**
@@ -46,22 +48,22 @@ class BaseFulfillmentService extends BaseService {
    * that a fulfillment option does in fact exist.
    */
   validateOption(data) {
-    throw Error("validateOption must be overridden by the child class")
+    throw Error("validateOption must be overridden by the child class");
   }
 
   canCalculate(data) {
-    throw Error("canCalculate must be overridden by the child class")
+    throw Error("canCalculate must be overridden by the child class");
   }
 
   /**
    * Used to calculate a price for a given shipping option.
    */
   calculatePrice(data, cart) {
-    throw Error("calculatePrice must be overridden by the child class")
+    throw Error("calculatePrice must be overridden by the child class");
   }
 
   createFulfillment() {
-    throw Error("createOrder must be overridden by the child class")
+    throw Error("createOrder must be overridden by the child class");
   }
 
   /**
@@ -69,7 +71,7 @@ class BaseFulfillmentService extends BaseService {
    * Will default to returning no documents.
    */
   getFulfillmentDocuments(data) {
-    return []
+    return [];
   }
 
   /**
@@ -78,22 +80,22 @@ class BaseFulfillmentService extends BaseService {
    * documents attached to the return.
    */
   createReturn(fromData) {
-    throw Error("createReturn must be overridden by the child class")
+    throw Error("createReturn must be overridden by the child class");
   }
 
   /**
    * Used to retrieve documents related to a return order.
    */
   getReturnDocuments(data) {
-    return []
+    return [];
   }
 
   /**
    * Used to retrieve documents related to a shipment.
    */
   getShipmentDocuments(data) {
-    return []
+    return [];
   }
 }
 
-export default BaseFulfillmentService
+export default BaseFulfillmentService;

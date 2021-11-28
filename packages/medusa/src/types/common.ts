@@ -1,161 +1,172 @@
-import { Transform } from "class-transformer"
-import { transformDate } from "../utils/validators/date-transform"
-import { Type } from "class-transformer"
-import { IsDate, IsNumber, IsOptional, IsString } from "class-validator"
-import "reflect-metadata"
+import { Transform } from "class-transformer";
+import { transformDate } from "../utils/validators/date-transform";
+import { Type } from "class-transformer";
+import {
+  IsDate,
+  IsNumber,
+  IsObject,
+  IsOptional,
+  IsString,
+} from "class-validator";
+import "reflect-metadata";
 
 export type PartialPick<T, K extends keyof T> = {
-  [P in K]?: T[P]
-}
+  [P in K]?: T[P];
+};
 
 export interface FindConfig<Entity> {
-  select?: (keyof Entity)[]
-  skip?: number
-  take?: number
-  relations?: string[]
-  order?: "ASC" | "DESC"
+  select?: (keyof Entity)[];
+  skip?: number;
+  take?: number;
+  relations?: string[];
+  order?: "ASC" | "DESC";
 }
 
-export type PaginatedResponse = { limit: number; offset: number; count: number }
+export type PaginatedResponse = {
+  limit: number;
+  offset: number;
+  count: number;
+};
 
 export type DeleteResponse = {
-  id: string
-  object: string
-  deleted: boolean
-}
+  id: string;
+  object: string;
+  deleted: boolean;
+};
 
 export class DateComparisonOperator {
   @IsOptional()
   @IsDate()
   @Transform(transformDate)
-  lt?: Date
+  lt?: Date;
 
   @IsOptional()
   @IsDate()
   @Transform(transformDate)
-  gt?: Date
+  gt?: Date;
 
   @IsOptional()
   @IsDate()
   @Transform(transformDate)
-  gte?: Date
+  gte?: Date;
 
   @IsOptional()
   @IsDate()
   @Transform(transformDate)
-  lte?: Date
+  lte?: Date;
 }
 
 export class StringComparisonOperator {
   @IsString()
   @IsOptional()
-  lt?: string
+  lt?: string;
 
   @IsString()
   @IsOptional()
-  gt?: string
+  gt?: string;
 
   @IsString()
   @IsOptional()
-  gte?: string
+  gte?: string;
 
   @IsString()
   @IsOptional()
-  lte?: string
+  lte?: string;
 }
 
 export class NumericalComparisonOperator {
   @IsNumber()
   @IsOptional()
   @Type(() => Number)
-  lt?: number
+  lt?: number;
 
   @IsNumber()
   @IsOptional()
   @Type(() => Number)
-  gt?: number
+  gt?: number;
 
   @IsNumber()
   @IsOptional()
   @Type(() => Number)
-  gte?: number
+  gte?: number;
 
   @IsNumber()
   @IsOptional()
   @Type(() => Number)
-  lte?: number
+  lte?: number;
 }
 
 export class AddressPayload {
   @IsOptional()
   @IsString()
-  first_name: string
+  first_name: string;
 
   @IsOptional()
   @IsString()
-  last_name: string
+  last_name: string;
 
   @IsOptional()
   @IsString()
-  phone: string
+  phone: string;
 
   @IsOptional()
-  metadata: object
-
-  @IsOptional()
-  @IsString()
-  company: string
+  @IsObject()
+  metadata: object = {};
 
   @IsOptional()
   @IsString()
-  address_1: string
+  company: string;
 
   @IsOptional()
   @IsString()
-  address_2: string
+  address_1: string;
 
   @IsOptional()
   @IsString()
-  city: string
+  address_2: string;
 
   @IsOptional()
   @IsString()
-  country_code: string
+  city: string;
 
   @IsOptional()
   @IsString()
-  province: string
+  country_code: string;
 
   @IsOptional()
   @IsString()
-  postal_code: string
+  province: string;
+
+  @IsOptional()
+  @IsString()
+  postal_code: string;
 }
 
 export class AddressCreatePayload {
   @IsString()
-  first_name: string
+  first_name: string;
   @IsString()
-  last_name: string
+  last_name: string;
   @IsOptional()
   @IsString()
-  phone: string
+  phone: string;
   @IsOptional()
-  metadata: object
-  @IsOptional()
-  @IsString()
-  company: string
-  @IsString()
-  address_1: string
+  metadata: object;
   @IsOptional()
   @IsString()
-  address_2: string
+  company: string;
   @IsString()
-  city: string
-  @IsString()
-  country_code: string
+  address_1: string;
   @IsOptional()
   @IsString()
-  province: string
+  address_2: string;
   @IsString()
-  postal_code: string
+  city: string;
+  @IsString()
+  country_code: string;
+  @IsOptional()
+  @IsString()
+  province: string;
+  @IsString()
+  postal_code: string;
 }

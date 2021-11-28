@@ -9,26 +9,26 @@ import {
   PrimaryColumn,
   ManyToOne,
   JoinColumn,
-} from "typeorm"
-import { ProductVariant } from "@medusajs/medusa"
+} from "typeorm";
+import { ProductVariant } from "@medusajs/medusa";
 
 @Entity()
 export class RestockNotification {
   @PrimaryColumn()
-  variant_id: string
+  variant_id: string;
 
   @ManyToOne(() => ProductVariant)
   @JoinColumn({ name: "variant_id" })
-  variant: ProductVariant
+  variant: ProductVariant;
 
   @Column({ type: "jsonb" })
-  emails: string[]
+  emails: string[];
 
   @CreateDateColumn({ type: "timestamptz" })
-  created_at: Date
+  created_at: Date;
 
   @UpdateDateColumn({ type: "timestamptz" })
-  updated_at: Date
+  updated_at: Date;
 }
 
 /**

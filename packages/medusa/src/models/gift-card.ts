@@ -9,70 +9,70 @@ import {
   PrimaryColumn,
   ManyToOne,
   JoinColumn,
-} from "typeorm"
-import { ulid } from "ulid"
-import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column"
+} from "typeorm";
+import { ulid } from "ulid";
+import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column";
 
-import { Region } from "./region"
-import { Order } from "./order"
+import { Region } from "./region";
+import { Order } from "./order";
 
 @Entity()
 export class GiftCard {
   @PrimaryColumn()
-  id: string
+  id: string;
 
   @Index({ unique: true })
   @Column()
-  code: string
+  code: string;
 
   @Column("int")
-  value: number
+  value: number;
 
   @Column("int")
-  balance: number
+  balance: number;
 
   @Index()
   @Column()
-  region_id: string
+  region_id: string;
 
   @ManyToOne(() => Region)
   @JoinColumn({ name: "region_id" })
-  region: Region
+  region: Region;
 
   @Index()
   @Column({ nullable: true })
-  order_id: string
+  order_id: string;
 
   @ManyToOne(() => Order)
   @JoinColumn({ name: "order_id" })
-  order: Order
+  order: Order;
 
   @Column({ default: false })
-  is_disabled: boolean
+  is_disabled: boolean;
 
   @Column({
     type: resolveDbType("timestamptz"),
     nullable: true,
   })
-  ends_at: Date
+  ends_at: Date;
 
   @CreateDateColumn({ type: resolveDbType("timestamptz") })
-  created_at: Date
+  created_at: Date;
 
   @UpdateDateColumn({ type: resolveDbType("timestamptz") })
-  updated_at: Date
+  updated_at: Date;
 
   @DeleteDateColumn({ type: resolveDbType("timestamptz") })
-  deleted_at: Date
+  deleted_at: Date;
 
   @DbAwareColumn({ type: "jsonb", nullable: true })
-  metadata: any
+  metadata: any;
 
   @BeforeInsert()
   private beforeInsert() {
-    if (this.id) return
-    const id = ulid()
-    this.id = `gift_${id}`
+    if (this.id) return;
+    const id = ulid();
+    this.id = `gift_${id}`;
   }
 }
 

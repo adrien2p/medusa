@@ -1,5 +1,5 @@
-import { MedusaError, Validator } from "medusa-core-utils"
-import { defaultFields, defaultRelations } from "./"
+import { MedusaError, Validator } from "medusa-core-utils";
+import { defaultFields, defaultRelations } from "./";
 
 /**
  * @oas [post] /shipping-options
@@ -83,27 +83,27 @@ export default async (req, res) => {
       .optional(),
     is_return: Validator.boolean().default(false),
     admin_only: Validator.boolean().default(false),
-  })
+  });
 
-  const { value, error } = schema.validate(req.body)
+  const { value, error } = schema.validate(req.body);
   if (error) {
-    throw new MedusaError(MedusaError.Types.INVALID_DATA, error.details)
+    throw new MedusaError(MedusaError.Types.INVALID_DATA, error.details);
   }
 
-  const optionService = req.scope.resolve("shippingOptionService")
-  const shippingProfileService = req.scope.resolve("shippingProfileService")
+  const optionService = req.scope.resolve("shippingOptionService");
+  const shippingProfileService = req.scope.resolve("shippingProfileService");
 
   // Add to default shipping profile
   if (!value.profile_id) {
-    const { id } = await shippingProfileService.retrieveDefault()
-    value.profile_id = id
+    const { id } = await shippingProfileService.retrieveDefault();
+    value.profile_id = id;
   }
 
-  const result = await optionService.create(value)
+  const result = await optionService.create(value);
   const data = await optionService.retrieve(result.id, {
     select: defaultFields,
     relations: defaultRelations,
-  })
+  });
 
-  res.status(200).json({ shipping_option: data })
-}
+  res.status(200).json({ shipping_option: data });
+};

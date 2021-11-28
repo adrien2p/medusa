@@ -1,6 +1,6 @@
-import BaseResource from "./base"
-import { AxiosPromise } from "axios"
-import { StoreReturnsRes, StorePostReturnsReq } from "@medusajs/medusa"
+import BaseResource from "./base";
+import { AxiosPromise } from "axios";
+import { StoreReturnsRes, StorePostReturnsReq } from "@medusajs/medusa";
 
 class ReturnsResource extends BaseResource {
   /**
@@ -9,9 +9,9 @@ class ReturnsResource extends BaseResource {
    * @return {AxiosPromise<StoreReturnsRes>}
    */
   create(payload: StorePostReturnsReq): AxiosPromise<StoreReturnsRes> {
-    const path = `/store/returns`
-    return this.client.request("POST", path, payload)
+    const path = `/store/returns`;
+    return this.client.request("POST", path, payload);
   }
 }
 
-export default ReturnsResource
+export default ReturnsResource;

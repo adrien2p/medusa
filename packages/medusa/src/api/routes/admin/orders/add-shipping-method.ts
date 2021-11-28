@@ -4,10 +4,10 @@ import {
   IsObject,
   IsOptional,
   IsString,
-} from "class-validator"
-import { defaultAdminOrdersFields, defaultAdminOrdersRelations } from "."
-import { OrderService } from "../../../../services"
-import { validator } from "../../../../utils/validator"
+} from "class-validator";
+import { defaultAdminOrdersFields, defaultAdminOrdersRelations } from ".";
+import { OrderService } from "../../../../services";
+import { validator } from "../../../../utils/validator";
 
 /**
  * @oas [post] /orders/{id}/shipping-methods
@@ -33,14 +33,14 @@ import { validator } from "../../../../utils/validator"
  *               $ref: "#/components/schemas/order"
  */
 export default async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params;
 
   const validated = await validator(
     AdminPostOrdersOrderShippingMethodsReq,
     req.body
-  )
+  );
 
-  const orderService: OrderService = req.scope.resolve("orderService")
+  const orderService: OrderService = req.scope.resolve("orderService");
 
   await orderService.addShippingMethod(
     id,
@@ -49,26 +49,26 @@ export default async (req, res) => {
     {
       price: validated.price,
     }
-  )
+  );
 
   const order = await orderService.retrieve(id, {
     select: defaultAdminOrdersFields,
     relations: defaultAdminOrdersRelations,
-  })
+  });
 
-  res.status(200).json({ order })
-}
+  res.status(200).json({ order });
+};
 
 export class AdminPostOrdersOrderShippingMethodsReq {
   @IsInt()
   @IsNotEmpty()
-  price: number
+  price: number;
 
   @IsString()
   @IsNotEmpty()
-  option_id: string
+  option_id: string;
 
   @IsObject()
   @IsOptional()
-  data?: object = {}
+  data?: object = {};
 }

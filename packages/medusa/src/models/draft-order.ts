@@ -9,16 +9,16 @@ import {
   OneToOne,
   PrimaryColumn,
   UpdateDateColumn,
-} from "typeorm"
-import { ulid } from "ulid"
+} from "typeorm";
+import { ulid } from "ulid";
 import {
   DbAwareColumn,
   resolveDbGenerationStrategy,
   resolveDbType,
-} from "../utils/db-aware-column"
-import { manualAutoIncrement } from "../utils/manual-auto-increment"
-import { Cart } from "./cart"
-import { Order } from "./order"
+} from "../utils/db-aware-column";
+import { manualAutoIncrement } from "../utils/manual-auto-increment";
+import { Cart } from "./cart";
+import { Order } from "./order";
 
 enum DraftOrderStatus {
   OPEN = "open",
@@ -28,65 +28,65 @@ enum DraftOrderStatus {
 @Entity()
 export class DraftOrder {
   @PrimaryColumn()
-  id: string
+  id: string;
 
   @DbAwareColumn({ type: "enum", enum: DraftOrderStatus, default: "open" })
-  status: DraftOrderStatus
+  status: DraftOrderStatus;
 
   @Index()
   @Column()
   @Generated(resolveDbGenerationStrategy("increment"))
-  display_id: number
+  display_id: number;
 
   @Index()
   @Column({ nullable: true })
-  cart_id: string
+  cart_id: string;
 
   @OneToOne(() => Cart, { onDelete: "CASCADE" })
   @JoinColumn({ name: "cart_id" })
-  cart: Cart
+  cart: Cart;
 
   @Index()
   @Column({ nullable: true })
-  order_id: string
+  order_id: string;
 
   @OneToOne(() => Order)
   @JoinColumn({ name: "order_id" })
-  order: Order
+  order: Order;
 
   @Column({ nullable: true, type: resolveDbType("timestamptz") })
-  canceled_at: Date
+  canceled_at: Date;
 
   @CreateDateColumn({ type: resolveDbType("timestamptz") })
-  created_at: Date
+  created_at: Date;
 
   @UpdateDateColumn({ type: resolveDbType("timestamptz") })
-  updated_at: Date
+  updated_at: Date;
 
   @Column({ type: resolveDbType("timestamptz"), nullable: true })
-  completed_at: Date
+  completed_at: Date;
 
   @Column({ nullable: true })
-  no_notification_order: boolean
+  no_notification_order: boolean;
 
   @DbAwareColumn({ type: "jsonb", nullable: true })
-  metadata: any
+  metadata: any;
 
   @Column({ nullable: true })
-  idempotency_key: string
+  idempotency_key: string;
 
   @BeforeInsert()
   private async beforeInsert(): Promise<void> {
     if (!this.id) {
-      const id = ulid()
-      this.id = `dorder_${id}`
+      const id = ulid();
+      this.id = `dorder_${id}`;
     }
 
     if (process.env.NODE_ENV === "development" && !this.display_id) {
-      const disId = await manualAutoIncrement("draft_order")
+      const disId = await manualAutoIncrement("draft_order");
 
       if (disId) {
-        this.display_id = disId
+        this.display_id = disId;
       }
     }
   }

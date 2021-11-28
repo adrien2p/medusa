@@ -1,10 +1,10 @@
-import { defaultAdminOrdersRelations, defaultAdminOrdersFields } from "."
-import { validator } from "../../../../utils/validator"
-import { IsNumber, IsOptional, IsString } from "class-validator"
-import { identity, omit, pick, pickBy } from "lodash"
-import { OrderService } from "../../../../services"
-import { AdminListOrdersSelector } from "../../../../types/orders"
-import { Type } from "class-transformer"
+import { defaultAdminOrdersRelations, defaultAdminOrdersFields } from ".";
+import { validator } from "../../../../utils/validator";
+import { IsNumber, IsOptional, IsString } from "class-validator";
+import { identity, omit, pick, pickBy } from "lodash";
+import { OrderService } from "../../../../services";
+import { AdminListOrdersSelector } from "../../../../types/orders";
+import { Type } from "class-transformer";
 
 /**
  * @oas [get] /orders
@@ -47,20 +47,20 @@ import { Type } from "class-transformer"
  *                 $ref: "#/components/schemas/order"
  */
 export default async (req, res) => {
-  const value = await validator(AdminGetOrdersParams, req.query)
+  const value = await validator(AdminGetOrdersParams, req.query);
 
-  const orderService: OrderService = req.scope.resolve("orderService")
+  const orderService: OrderService = req.scope.resolve("orderService");
 
-  let includeFields: string[] = []
+  let includeFields: string[] = [];
   if (value.fields) {
-    includeFields = value.fields.split(",")
+    includeFields = value.fields.split(",");
     // Ensure created_at is included, since we are sorting on this
-    includeFields.push("created_at")
+    includeFields.push("created_at");
   }
 
-  let expandFields: string[] = []
+  let expandFields: string[] = [];
   if (value.expand) {
-    expandFields = value.expand.split(",")
+    expandFields = value.expand.split(",");
   }
 
   const listConfig = {
@@ -69,7 +69,7 @@ export default async (req, res) => {
     skip: value.offset,
     take: value.limit,
     order: { created_at: "DESC" },
-  }
+  };
 
   const filterableFields = omit(value, [
     "limit",
@@ -77,39 +77,39 @@ export default async (req, res) => {
     "expand",
     "fields",
     "order",
-  ])
+  ]);
 
   const [orders, count] = await orderService.listAndCount(
     pickBy(filterableFields, identity),
     listConfig
-  )
+  );
 
-  let data = orders
+  let data = orders;
 
-  const fields = [...includeFields, ...expandFields]
+  const fields = [...includeFields, ...expandFields];
   if (fields.length) {
-    data = orders.map((o) => pick(o, fields))
+    data = orders.map((o) => pick(o, fields));
   }
 
-  res.json({ orders: data, count, offset: value.offset, limit: value.limit })
-}
+  res.json({ orders: data, count, offset: value.offset, limit: value.limit });
+};
 
 export class AdminGetOrdersParams extends AdminListOrdersSelector {
   @IsNumber()
   @IsOptional()
   @Type(() => Number)
-  offset = 0
+  offset = 0;
 
   @IsNumber()
   @IsOptional()
   @Type(() => Number)
-  limit = 50
+  limit = 50;
 
   @IsString()
   @IsOptional()
-  expand?: string
+  expand?: string;
 
   @IsString()
   @IsOptional()
-  fields?: string
+  fields?: string;
 }

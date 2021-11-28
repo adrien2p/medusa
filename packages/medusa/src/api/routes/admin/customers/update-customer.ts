@@ -1,7 +1,7 @@
-import { IsEmail, IsObject, IsOptional, IsString } from "class-validator"
-import { MedusaError } from "medusa-core-utils"
-import CustomerService from "../../../../services/customer"
-import { validator } from "../../../../utils/validator"
+import { IsEmail, IsObject, IsOptional, IsString } from "class-validator";
+import { MedusaError } from "medusa-core-utils";
+import CustomerService from "../../../../services/customer";
+import { validator } from "../../../../utils/validator";
 
 /**
  * @oas [post] /customers/{id}
@@ -47,51 +47,51 @@ import { validator } from "../../../../utils/validator"
  *               $ref: "#/components/schemas/customer"
  */
 export default async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params;
 
-  const validated = await validator(AdminPostCustomersCustomerReq, req.body)
+  const validated = await validator(AdminPostCustomersCustomerReq, req.body);
 
-  const customerService: CustomerService = req.scope.resolve("customerService")
+  const customerService: CustomerService = req.scope.resolve("customerService");
 
-  let customer = await customerService.retrieve(id)
+  let customer = await customerService.retrieve(id);
 
   if (validated.email && customer.has_account) {
     throw new MedusaError(
       MedusaError.Types.INVALID_DATA,
       "Email cannot be changed when the user has registered their account"
-    )
+    );
   }
 
-  await customerService.update(id, validated)
+  await customerService.update(id, validated);
 
   customer = await customerService.retrieve(id, {
     relations: ["orders"],
-  })
-  res.status(200).json({ customer })
-}
+  });
+  res.status(200).json({ customer });
+};
 
 export class AdminPostCustomersCustomerReq {
   @IsEmail()
   @IsOptional()
-  email?: string
+  email?: string;
 
   @IsString()
   @IsOptional()
-  first_name?: string
+  first_name?: string;
 
   @IsString()
   @IsOptional()
-  last_name?: string
+  last_name?: string;
 
   @IsString()
   @IsOptional()
-  password?: string
+  password?: string;
 
   @IsString()
   @IsOptional()
-  phone?: string
+  phone?: string;
 
   @IsObject()
   @IsOptional()
-  metadata?: object
+  metadata?: object;
 }

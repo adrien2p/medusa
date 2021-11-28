@@ -1,8 +1,8 @@
-import { Type } from "class-transformer"
-import { IsInt, IsOptional, IsString } from "class-validator"
-import { defaultStoreVariantRelations } from "."
-import ProductVariantService from "../../../../services/product-variant"
-import { validator } from "../../../../utils/validator"
+import { Type } from "class-transformer";
+import { IsInt, IsOptional, IsString } from "class-validator";
+import { defaultStoreVariantRelations } from ".";
+import ProductVariantService from "../../../../services/product-variant";
+import { validator } from "../../../../utils/validator";
 
 /**
  * @oas [get] /variants
@@ -32,50 +32,50 @@ export default async (req, res) => {
   const { limit, offset, expand, ids } = await validator(
     StoreGetVariantsParams,
     req.query
-  )
+  );
 
-  let expandFields: string[] = []
+  let expandFields: string[] = [];
   if (expand) {
-    expandFields = expand.split(",")
+    expandFields = expand.split(",");
   }
 
-  let selector = {}
+  let selector = {};
   const listConfig = {
     relations: expandFields.length
       ? expandFields
       : defaultStoreVariantRelations,
     skip: offset,
     take: limit,
-  }
+  };
 
   if (ids) {
-    selector = { id: ids.split(",") }
+    selector = { id: ids.split(",") };
   }
 
   const variantService: ProductVariantService = req.scope.resolve(
     "productVariantService"
-  )
-  const variants = await variantService.list(selector, listConfig)
+  );
+  const variants = await variantService.list(selector, listConfig);
 
-  res.json({ variants })
-}
+  res.json({ variants });
+};
 
 export class StoreGetVariantsParams {
   @IsOptional()
   @IsInt()
   @Type(() => Number)
-  limit?: number = 100
+  limit?: number = 100;
 
   @IsOptional()
   @IsInt()
   @Type(() => Number)
-  offset?: number = 0
+  offset?: number = 0;
 
   @IsOptional()
   @IsString()
-  expand?: string
+  expand?: string;
 
   @IsOptional()
   @IsString()
-  ids?: string
+  ids?: string;
 }

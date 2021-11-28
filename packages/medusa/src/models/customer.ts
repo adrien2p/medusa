@@ -10,74 +10,68 @@ import {
   OneToOne,
   OneToMany,
   JoinColumn,
-} from "typeorm"
-import { ulid } from "ulid"
-import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column"
+} from "typeorm";
+import { ulid } from "ulid";
+import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column";
 
-import { Address } from "./address"
-import { Order } from "./order"
+import { Address } from "./address";
+import { Order } from "./order";
 
 @Entity()
 export class Customer {
   @PrimaryColumn()
-  id: string
+  id: string;
 
   @Index({ unique: true })
   @Column()
-  email: string
+  email: string;
 
   @Column({ nullable: true })
-  first_name: string
+  first_name: string;
 
   @Column({ nullable: true })
-  last_name: string
+  last_name: string;
 
   @Index()
   @Column({ nullable: true })
-  billing_address_id: string
+  billing_address_id: string;
 
   @OneToOne(() => Address)
   @JoinColumn({ name: "billing_address_id" })
-  billing_address: Address
+  billing_address: Address;
 
-  @OneToMany(
-    () => Address,
-    address => address.customer
-  )
-  shipping_addresses: Address[]
+  @OneToMany(() => Address, (address) => address.customer)
+  shipping_addresses: Address[];
 
   @Column({ nullable: true, select: false })
-  password_hash: string
+  password_hash: string;
 
   @Column({ nullable: true })
-  phone: string
+  phone: string;
 
   @Column({ default: false })
-  has_account: boolean
+  has_account: boolean;
 
-  @OneToMany(
-    () => Order,
-    order => order.customer
-  )
-  orders: Order[]
+  @OneToMany(() => Order, (order) => order.customer)
+  orders: Order[];
 
   @CreateDateColumn({ type: resolveDbType("timestamptz") })
-  created_at: Date
+  created_at: Date;
 
   @UpdateDateColumn({ type: resolveDbType("timestamptz") })
-  updated_at: Date
+  updated_at: Date;
 
   @DeleteDateColumn({ type: resolveDbType("timestamptz") })
-  deleted_at: Date
+  deleted_at: Date;
 
   @DbAwareColumn({ type: "jsonb", nullable: true })
-  metadata: any
+  metadata: any;
 
   @BeforeInsert()
   private beforeInsert() {
-    if (this.id) return
-    const id = ulid()
-    this.id = `cus_${id}`
+    if (this.id) return;
+    const id = ulid();
+    this.id = `cus_${id}`;
   }
 }
 

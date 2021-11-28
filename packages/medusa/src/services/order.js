@@ -1,6 +1,6 @@
-import { MedusaError, Validator } from "medusa-core-utils"
-import { BaseService } from "medusa-interfaces"
-import { Brackets } from "typeorm"
+import { MedusaError, Validator } from "medusa-core-utils";
+import { BaseService } from "medusa-interfaces";
+import { Brackets } from "typeorm";
 
 class OrderService extends BaseService {
   static Events = {
@@ -20,7 +20,7 @@ class OrderService extends BaseService {
     UPDATED: "order.updated",
     CANCELED: "order.canceled",
     COMPLETED: "order.completed",
-  }
+  };
 
   constructor({
     manager,
@@ -42,66 +42,66 @@ class OrderService extends BaseService {
     inventoryService,
     eventBusService,
   }) {
-    super()
+    super();
 
     /** @private @constant {EntityManager} */
-    this.manager_ = manager
+    this.manager_ = manager;
 
     /** @private @constant {OrderRepository} */
-    this.orderRepository_ = orderRepository
+    this.orderRepository_ = orderRepository;
 
     /** @private @constant {CustomerService} */
-    this.customerService_ = customerService
+    this.customerService_ = customerService;
 
     /** @private @constant {PaymentProviderService} */
-    this.paymentProviderService_ = paymentProviderService
+    this.paymentProviderService_ = paymentProviderService;
 
     /** @private @constant {ShippingProvileService} */
-    this.shippingProfileService_ = shippingProfileService
+    this.shippingProfileService_ = shippingProfileService;
 
     /** @private @constant {FulfillmentProviderService} */
-    this.fulfillmentProviderService_ = fulfillmentProviderService
+    this.fulfillmentProviderService_ = fulfillmentProviderService;
 
     /** @private @constant {LineItemService} */
-    this.lineItemService_ = lineItemService
+    this.lineItemService_ = lineItemService;
 
     /** @private @constant {TotalsService} */
-    this.totalsService_ = totalsService
+    this.totalsService_ = totalsService;
 
     /** @private @constant {RegionService} */
-    this.regionService_ = regionService
+    this.regionService_ = regionService;
 
     /** @private @constant {FulfillmentService} */
-    this.fulfillmentService_ = fulfillmentService
+    this.fulfillmentService_ = fulfillmentService;
 
     /** @private @constant {DiscountService} */
-    this.discountService_ = discountService
+    this.discountService_ = discountService;
 
     /** @private @constant {DiscountService} */
-    this.giftCardService_ = giftCardService
+    this.giftCardService_ = giftCardService;
 
     /** @private @constant {EventBus} */
-    this.eventBus_ = eventBusService
+    this.eventBus_ = eventBusService;
 
     /** @private @constant {ShippingOptionService} */
-    this.shippingOptionService_ = shippingOptionService
+    this.shippingOptionService_ = shippingOptionService;
 
     /** @private @constant {CartService} */
-    this.cartService_ = cartService
+    this.cartService_ = cartService;
 
     /** @private @constant {AddressRepository} */
-    this.addressRepository_ = addressRepository
+    this.addressRepository_ = addressRepository;
 
     /** @private @constant {DraftOrderService} */
-    this.draftOrderService_ = draftOrderService
+    this.draftOrderService_ = draftOrderService;
 
     /** @private @constant {InventoryService} */
-    this.inventoryService_ = inventoryService
+    this.inventoryService_ = inventoryService;
   }
 
   withTransaction(manager) {
     if (!manager) {
-      return this
+      return this;
     }
 
     const cloned = new OrderService({
@@ -123,12 +123,12 @@ class OrderService extends BaseService {
       addressRepository: this.addressRepository_,
       draftOrderService: this.draftOrderService_,
       inventoryService: this.inventoryService_,
-    })
+    });
 
-    cloned.transactionManager_ = manager
-    cloned.manager_ = manager
+    cloned.transactionManager_ = manager;
+    cloned.manager_ = manager;
 
-    return cloned
+    return cloned;
   }
 
   /**
@@ -137,7 +137,7 @@ class OrderService extends BaseService {
    * @return {string} the validated id
    */
   validateId_(rawId) {
-    return rawId
+    return rawId;
   }
 
   /**
@@ -147,15 +147,15 @@ class OrderService extends BaseService {
    * @return {Address} the validated address
    */
   validateAddress_(address) {
-    const { value, error } = Validator.address().validate(address)
+    const { value, error } = Validator.address().validate(address);
     if (error) {
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
         "The address is not valid"
-      )
+      );
     }
 
-    return value
+    return value;
   }
 
   /**
@@ -164,16 +164,16 @@ class OrderService extends BaseService {
    * @return {string} the validate email
    */
   validateEmail_(email) {
-    const schema = Validator.string().email()
-    const { value, error } = schema.validate(email)
+    const schema = Validator.string().email();
+    const { value, error } = schema.validate(email);
     if (error) {
       throw new MedusaError(
         MedusaError.Types.INVALID_ARGUMENT,
         "The email is not valid"
-      )
+      );
     }
 
-    return value
+    return value;
   }
 
   /**
@@ -185,54 +185,54 @@ class OrderService extends BaseService {
     selector,
     config = { skip: 0, take: 50, order: { created_at: "DESC" } }
   ) {
-    const orderRepo = this.manager_.getCustomRepository(this.orderRepository_)
-    const query = this.buildQuery_(selector, config)
+    const orderRepo = this.manager_.getCustomRepository(this.orderRepository_);
+    const query = this.buildQuery_(selector, config);
 
     const { select, relations, totalsToSelect } =
-      this.transformQueryForTotals_(config)
+      this.transformQueryForTotals_(config);
 
     if (select && select.length) {
-      query.select = select
+      query.select = select;
     }
 
     if (relations && relations.length) {
-      query.relations = relations
+      query.relations = relations;
     }
 
-    const raw = await orderRepo.find(query)
+    const raw = await orderRepo.find(query);
 
-    return raw.map((r) => this.decorateTotals_(r, totalsToSelect))
+    return raw.map((r) => this.decorateTotals_(r, totalsToSelect));
   }
 
   async listAndCount(
     selector,
     config = { skip: 0, take: 50, order: { created_at: "DESC" } }
   ) {
-    const orderRepo = this.manager_.getCustomRepository(this.orderRepository_)
+    const orderRepo = this.manager_.getCustomRepository(this.orderRepository_);
 
-    let q
+    let q;
     if (selector.q) {
-      q = selector.q
-      delete selector.q
+      q = selector.q;
+      delete selector.q;
     }
 
-    const query = this.buildQuery_(selector, config)
+    const query = this.buildQuery_(selector, config);
 
     if (q) {
-      const where = query.where
+      const where = query.where;
 
-      delete where.display_id
-      delete where.email
+      delete where.display_id;
+      delete where.email;
 
       query.join = {
         alias: "order",
         innerJoin: {
           shipping_address: "order.shipping_address",
         },
-      }
+      };
 
       query.where = (qb) => {
-        qb.where(where)
+        qb.where(where);
 
         qb.andWhere(
           new Brackets((qb) => {
@@ -240,38 +240,38 @@ class OrderService extends BaseService {
               qfn: `%${q}%`,
             })
               .orWhere(`order.email ILIKE :q`, { q: `%${q}%` })
-              .orWhere(`display_id::varchar(255) ILIKE :dId`, { dId: `${q}` })
+              .orWhere(`display_id::varchar(255) ILIKE :dId`, { dId: `${q}` });
           })
-        )
-      }
+        );
+      };
     }
 
     const { select, relations, totalsToSelect } =
-      this.transformQueryForTotals_(config)
+      this.transformQueryForTotals_(config);
 
     if (select && select.length) {
-      query.select = select
+      query.select = select;
     }
 
-    const rels = relations
-    delete query.relations
+    const rels = relations;
+    delete query.relations;
 
-    const raw = await orderRepo.findWithRelations(rels, query)
-    const count = await orderRepo.count(query)
-    const orders = raw.map((r) => this.decorateTotals_(r, totalsToSelect))
+    const raw = await orderRepo.findWithRelations(rels, query);
+    const count = await orderRepo.count(query);
+    const orders = raw.map((r) => this.decorateTotals_(r, totalsToSelect));
 
-    return [orders, count]
+    return [orders, count];
   }
 
   transformQueryForTotals_(config) {
-    let { select, relations } = config
+    let { select, relations } = config;
 
     if (!select) {
       return {
         select,
         relations,
         totalsToSelect: [],
-      }
+      };
     }
 
     const totalFields = [
@@ -287,34 +287,34 @@ class OrderService extends BaseService {
       "items.refundable",
       "swaps.additional_items.refundable",
       "claims.additional_items.refundable",
-    ]
+    ];
 
-    const totalsToSelect = select.filter((v) => totalFields.includes(v))
+    const totalsToSelect = select.filter((v) => totalFields.includes(v));
     if (totalsToSelect.length > 0) {
-      const relationSet = new Set(relations)
-      relationSet.add("items")
-      relationSet.add("swaps")
-      relationSet.add("swaps.additional_items")
-      relationSet.add("claims")
-      relationSet.add("claims.additional_items")
-      relationSet.add("discounts")
-      relationSet.add("discounts.rule")
-      relationSet.add("discounts.rule.valid_for")
-      relationSet.add("gift_cards")
-      relationSet.add("gift_card_transactions")
-      relationSet.add("refunds")
-      relationSet.add("shipping_methods")
-      relationSet.add("region")
-      relations = [...relationSet]
+      const relationSet = new Set(relations);
+      relationSet.add("items");
+      relationSet.add("swaps");
+      relationSet.add("swaps.additional_items");
+      relationSet.add("claims");
+      relationSet.add("claims.additional_items");
+      relationSet.add("discounts");
+      relationSet.add("discounts.rule");
+      relationSet.add("discounts.rule.valid_for");
+      relationSet.add("gift_cards");
+      relationSet.add("gift_card_transactions");
+      relationSet.add("refunds");
+      relationSet.add("shipping_methods");
+      relationSet.add("region");
+      relations = [...relationSet];
 
-      select = select.filter((v) => !totalFields.includes(v))
+      select = select.filter((v) => !totalFields.includes(v));
     }
 
     return {
       relations,
       select,
       totalsToSelect,
-    }
+    };
   }
 
   /**
@@ -324,36 +324,36 @@ class OrderService extends BaseService {
    * @return {Promise<Order>} the order document
    */
   async retrieve(orderId, config = {}) {
-    const orderRepo = this.manager_.getCustomRepository(this.orderRepository_)
-    const validatedId = this.validateId_(orderId)
+    const orderRepo = this.manager_.getCustomRepository(this.orderRepository_);
+    const validatedId = this.validateId_(orderId);
 
     const { select, relations, totalsToSelect } =
-      this.transformQueryForTotals_(config)
+      this.transformQueryForTotals_(config);
 
     const query = {
       where: { id: validatedId },
-    }
+    };
 
     if (relations && relations.length > 0) {
-      query.relations = relations
+      query.relations = relations;
     }
 
     if (select && select.length > 0) {
-      query.select = select
+      query.select = select;
     }
 
-    const rels = query.relations
-    delete query.relations
-    const raw = await orderRepo.findOneWithRelations(rels, query)
+    const rels = query.relations;
+    delete query.relations;
+    const raw = await orderRepo.findOneWithRelations(rels, query);
     if (!raw) {
       throw new MedusaError(
         MedusaError.Types.NOT_FOUND,
         `Order with ${orderId} was not found`
-      )
+      );
     }
 
-    const order = this.decorateTotals_(raw, totalsToSelect)
-    return order
+    const order = this.decorateTotals_(raw, totalsToSelect);
+    return order;
   }
 
   /**
@@ -363,34 +363,34 @@ class OrderService extends BaseService {
    * @return {Promise<Order>} the order document
    */
   async retrieveByCartId(cartId, config = {}) {
-    const orderRepo = this.manager_.getCustomRepository(this.orderRepository_)
+    const orderRepo = this.manager_.getCustomRepository(this.orderRepository_);
 
     const { select, relations, totalsToSelect } =
-      this.transformQueryForTotals_(config)
+      this.transformQueryForTotals_(config);
 
     const query = {
       where: { cart_id: cartId },
-    }
+    };
 
     if (relations && relations.length > 0) {
-      query.relations = relations
+      query.relations = relations;
     }
 
     if (select && select.length > 0) {
-      query.select = select
+      query.select = select;
     }
 
-    const raw = await orderRepo.findOne(query)
+    const raw = await orderRepo.findOne(query);
 
     if (!raw) {
       throw new MedusaError(
         MedusaError.Types.NOT_FOUND,
         `Order with cart id: ${cartId} was not found`
-      )
+      );
     }
 
-    const order = this.decorateTotals_(raw, totalsToSelect)
-    return order
+    const order = this.decorateTotals_(raw, totalsToSelect);
+    return order;
   }
 
   /**
@@ -399,11 +399,11 @@ class OrderService extends BaseService {
    * @return {Promise<Order>} the order document
    */
   async existsByCartId(cartId) {
-    const order = await this.retrieveByCartId(cartId).catch((_) => undefined)
+    const order = await this.retrieveByCartId(cartId).catch((_) => undefined);
     if (!order) {
-      return false
+      return false;
     }
-    return true
+    return true;
   }
 
   /**
@@ -412,13 +412,13 @@ class OrderService extends BaseService {
    */
   async completeOrder(orderId) {
     return this.atomicPhase_(async (manager) => {
-      const order = await this.retrieve(orderId)
+      const order = await this.retrieve(orderId);
 
       if (order.status === "canceled") {
         throw new MedusaError(
           MedusaError.Types.NOT_ALLOWED,
           "A canceled order cannot be completed"
-        )
+        );
       }
 
       // Run all other registered events
@@ -428,17 +428,17 @@ class OrderService extends BaseService {
           id: orderId,
           no_notification: order.no_notification,
         }
-      )
+      );
 
       await completeOrderJob.finished().catch((error) => {
-        throw error
-      })
+        throw error;
+      });
 
-      order.status = "completed"
+      order.status = "completed";
 
-      const orderRepo = manager.getCustomRepository(this.orderRepository_)
-      return orderRepo.save(order)
-    })
+      const orderRepo = manager.getCustomRepository(this.orderRepository_);
+      return orderRepo.save(order);
+    });
   }
 
   /**
@@ -462,41 +462,41 @@ class OrderService extends BaseService {
             "gift_cards",
             "shipping_methods",
           ],
-        })
+        });
 
       if (cart.items.length === 0) {
         throw new MedusaError(
           MedusaError.Types.INVALID_DATA,
           "Cannot create order from empty cart"
-        )
+        );
       }
 
-      const { payment, region, total } = cart
+      const { payment, region, total } = cart;
 
       for (const item of cart.items) {
         try {
           await this.inventoryService_
             .withTransaction(manager)
-            .confirmInventory(item.variant_id, item.quantity)
+            .confirmInventory(item.variant_id, item.quantity);
         } catch (err) {
           if (payment) {
             await this.paymentProviderService_
               .withTransaction(manager)
-              .cancelPayment(payment)
+              .cancelPayment(payment);
           }
           await this.cartService_
             .withTransaction(manager)
-            .update(cart.id, { payment_authorized_at: null })
-          throw err
+            .update(cart.id, { payment_authorized_at: null });
+          throw err;
         }
       }
 
-      const exists = await this.existsByCartId(cart.id)
+      const exists = await this.existsByCartId(cart.id);
       if (exists) {
         throw new MedusaError(
           MedusaError.Types.DUPLICATE_ERROR,
           "Order from cart already exists"
-        )
+        );
       }
 
       // Would be the case if a discount code is applied that covers the item
@@ -507,23 +507,23 @@ class OrderService extends BaseService {
           throw new MedusaError(
             MedusaError.Types.INVALID_ARGUMENT,
             "Cart does not contain a payment method"
-          )
+          );
         }
 
         const paymentStatus = await this.paymentProviderService_
           .withTransaction(manager)
-          .getStatus(payment)
+          .getStatus(payment);
 
         // If payment status is not authorized, we throw
         if (paymentStatus !== "authorized" && paymentStatus !== "succeeded") {
           throw new MedusaError(
             MedusaError.Types.INVALID_ARGUMENT,
             "Payment method is not authorized"
-          )
+          );
         }
       }
 
-      const orderRepo = manager.getCustomRepository(this.orderRepository_)
+      const orderRepo = manager.getCustomRepository(this.orderRepository_);
 
       const toCreate = {
         payment_status: "awaiting",
@@ -539,63 +539,63 @@ class OrderService extends BaseService {
         tax_rate: region.tax_rate,
         currency_code: region.currency_code,
         metadata: cart.metadata || {},
-      }
+      };
 
       if (cart.type === "draft_order") {
         const draft = await this.draftOrderService_
           .withTransaction(manager)
-          .retrieveByCartId(cart.id)
+          .retrieveByCartId(cart.id);
 
-        toCreate.draft_order_id = draft.id
-        toCreate.no_notification = draft.no_notification_order
+        toCreate.draft_order_id = draft.id;
+        toCreate.no_notification = draft.no_notification_order;
       }
 
-      const o = await orderRepo.create(toCreate)
+      const o = await orderRepo.create(toCreate);
 
-      const result = await orderRepo.save(o)
+      const result = await orderRepo.save(o);
 
       if (total !== 0) {
         await this.paymentProviderService_
           .withTransaction(manager)
           .updatePayment(payment.id, {
             order_id: result.id,
-          })
+          });
       }
 
-      let gcBalance = cart.subtotal
+      let gcBalance = cart.subtotal;
       for (const g of cart.gift_cards) {
-        const newBalance = Math.max(0, g.balance - gcBalance)
-        const usage = g.balance - newBalance
+        const newBalance = Math.max(0, g.balance - gcBalance);
+        const usage = g.balance - newBalance;
         await this.giftCardService_.withTransaction(manager).update(g.id, {
           balance: newBalance,
           disabled: newBalance === 0,
-        })
+        });
 
         await this.giftCardService_.withTransaction(manager).createTransaction({
           gift_card_id: g.id,
           order_id: result.id,
           amount: usage,
-        })
+        });
 
-        gcBalance = gcBalance - usage
+        gcBalance = gcBalance - usage;
       }
 
       for (const method of cart.shipping_methods) {
         await this.shippingOptionService_
           .withTransaction(manager)
-          .updateShippingMethod(method.id, { order_id: result.id })
+          .updateShippingMethod(method.id, { order_id: result.id });
       }
 
       for (const item of cart.items) {
         await this.lineItemService_
           .withTransaction(manager)
-          .update(item.id, { order_id: result.id })
+          .update(item.id, { order_id: result.id });
       }
 
       for (const item of cart.items) {
         await this.inventoryService_
           .withTransaction(manager)
-          .adjustInventory(item.variant_id, -item.quantity)
+          .adjustInventory(item.variant_id, -item.quantity);
       }
 
       await this.eventBus_
@@ -603,14 +603,14 @@ class OrderService extends BaseService {
         .emit(OrderService.Events.PLACED, {
           id: result.id,
           no_notification: result.no_notification,
-        })
+        });
 
       await this.cartService_
         .withTransaction(manager)
-        .update(cart.id, { completed_at: new Date() })
+        .update(cart.id, { completed_at: new Date() });
 
-      return result
-    })
+      return result;
+    });
   }
 
   /**
@@ -635,59 +635,59 @@ class OrderService extends BaseService {
       no_notification: undefined,
     }
   ) {
-    const { metadata, no_notification } = config
+    const { metadata, no_notification } = config;
 
     return this.atomicPhase_(async (manager) => {
-      const order = await this.retrieve(orderId, { relations: ["items"] })
-      const shipment = await this.fulfillmentService_.retrieve(fulfillmentId)
+      const order = await this.retrieve(orderId, { relations: ["items"] });
+      const shipment = await this.fulfillmentService_.retrieve(fulfillmentId);
 
       if (order.status === "canceled") {
         throw new MedusaError(
           MedusaError.Types.NOT_ALLOWED,
           "A canceled order cannot be fulfilled as shipped"
-        )
+        );
       }
 
       if (!shipment || shipment.order_id !== orderId) {
         throw new MedusaError(
           MedusaError.Types.NOT_FOUND,
           "Could not find fulfillment"
-        )
+        );
       }
 
       const evaluatedNoNotification =
         no_notification !== undefined
           ? no_notification
-          : shipment.no_notification
+          : shipment.no_notification;
 
       const shipmentRes = await this.fulfillmentService_
         .withTransaction(manager)
         .createShipment(fulfillmentId, trackingLinks, {
           metadata,
           no_notification: evaluatedNoNotification,
-        })
+        });
 
-      order.fulfillment_status = "shipped"
+      order.fulfillment_status = "shipped";
       for (const item of order.items) {
-        const shipped = shipmentRes.items.find((si) => si.item_id === item.id)
+        const shipped = shipmentRes.items.find((si) => si.item_id === item.id);
         if (shipped) {
-          const shippedQty = (item.shipped_quantity || 0) + shipped.quantity
+          const shippedQty = (item.shipped_quantity || 0) + shipped.quantity;
           if (shippedQty !== item.quantity) {
-            order.fulfillment_status = "partially_shipped"
+            order.fulfillment_status = "partially_shipped";
           }
 
           await this.lineItemService_.withTransaction(manager).update(item.id, {
             shipped_quantity: shippedQty,
-          })
+          });
         } else {
           if (item.shipped_quantity !== item.quantity) {
-            order.fulfillment_status = "partially_shipped"
+            order.fulfillment_status = "partially_shipped";
           }
         }
       }
 
-      const orderRepo = manager.getCustomRepository(this.orderRepository_)
-      const result = await orderRepo.save(order)
+      const orderRepo = manager.getCustomRepository(this.orderRepository_);
+      const result = await orderRepo.save(order);
 
       await this.eventBus_
         .withTransaction(manager)
@@ -695,10 +695,10 @@ class OrderService extends BaseService {
           id: orderId,
           fulfillment_id: shipmentRes.id,
           no_notification: evaluatedNoNotification,
-        })
+        });
 
-      return result
-    })
+      return result;
+    });
   }
 
   /**
@@ -708,17 +708,17 @@ class OrderService extends BaseService {
    */
   async create(data) {
     return this.atomicPhase_(async (manager) => {
-      const orderRepo = manager.getCustomRepository(this.orderRepository_)
-      const order = orderRepo.create(data)
-      const result = await orderRepo.save(order)
+      const orderRepo = manager.getCustomRepository(this.orderRepository_);
+      const order = orderRepo.create(data);
+      const result = await orderRepo.save(order);
       await this.eventBus_
         .withTransaction(manager)
         .emit(OrderService.Events.PLACED, {
           id: result.id,
           no_notification: order.no_notification,
-        })
-      return result
-    })
+        });
+      return result;
+    });
   }
 
   /**
@@ -728,31 +728,31 @@ class OrderService extends BaseService {
    * @return {Promise} the result of the update operation
    */
   async updateBillingAddress_(order, address) {
-    const addrRepo = this.manager_.getCustomRepository(this.addressRepository_)
-    address.country_code = address.country_code.toLowerCase()
+    const addrRepo = this.manager_.getCustomRepository(this.addressRepository_);
+    address.country_code = address.country_code.toLowerCase();
 
     const region = await this.regionService_.retrieve(order.region_id, {
       relations: ["countries"],
-    })
+    });
 
     if (!region.countries.find(({ iso_2 }) => address.country_code === iso_2)) {
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
         "Shipping country must be in the order region"
-      )
+      );
     }
 
-    address.country_code = address.country_code.toLowerCase()
+    address.country_code = address.country_code.toLowerCase();
 
     if (order.billing_address_id) {
       const addr = await addrRepo.findOne({
         where: { id: order.billing_address_id },
-      })
+      });
 
-      await addrRepo.save({ ...addr, ...address })
+      await addrRepo.save({ ...addr, ...address });
     } else {
-      const created = await addrRepo.create({ ...address })
-      await addrRepo.save(created)
+      const created = await addrRepo.create({ ...address });
+      await addrRepo.save(created);
     }
   }
 
@@ -763,29 +763,29 @@ class OrderService extends BaseService {
    * @return {Promise} the result of the update operation
    */
   async updateShippingAddress_(order, address) {
-    const addrRepo = this.manager_.getCustomRepository(this.addressRepository_)
-    address.country_code = address.country_code.toLowerCase()
+    const addrRepo = this.manager_.getCustomRepository(this.addressRepository_);
+    address.country_code = address.country_code.toLowerCase();
 
     const region = await this.regionService_.retrieve(order.region_id, {
       relations: ["countries"],
-    })
+    });
 
     if (!region.countries.find(({ iso_2 }) => address.country_code === iso_2)) {
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
         "Shipping country must be in the order region"
-      )
+      );
     }
 
     if (order.shipping_address_id) {
       const addr = await addrRepo.findOne({
         where: { id: order.shipping_address_id },
-      })
+      });
 
-      await addrRepo.save({ ...addr, ...address })
+      await addrRepo.save({ ...addr, ...address });
     } else {
-      const created = addrRepo.create({ ...address })
-      await addrRepo.save(created)
+      const created = addrRepo.create({ ...address });
+      await addrRepo.save(created);
     }
   }
 
@@ -800,21 +800,21 @@ class OrderService extends BaseService {
           "items.variant",
           "items.variant.product",
         ],
-      })
-      const { shipping_methods } = order
+      });
+      const { shipping_methods } = order;
 
       if (order.status === "canceled") {
         throw new MedusaError(
           MedusaError.Types.NOT_ALLOWED,
           "A shipping method cannot be added to a canceled order"
-        )
+        );
       }
 
       const newMethod = await this.shippingOptionService_
         .withTransaction(manager)
-        .createShippingMethod(optionId, data, { order, ...config })
+        .createShippingMethod(optionId, data, { order, ...config });
 
-      const methods = [newMethod]
+      const methods = [newMethod];
       if (shipping_methods.length) {
         for (const sm of shipping_methods) {
           if (
@@ -823,19 +823,19 @@ class OrderService extends BaseService {
           ) {
             await this.shippingOptionService_
               .withTransaction(manager)
-              .deleteShippingMethod(sm)
+              .deleteShippingMethod(sm);
           } else {
-            methods.push(sm)
+            methods.push(sm);
           }
         }
       }
 
-      const result = await this.retrieve(orderId)
+      const result = await this.retrieve(orderId);
       await this.eventBus_
         .withTransaction(manager)
-        .emit(OrderService.Events.UPDATED, { id: result.id })
-      return result
-    })
+        .emit(OrderService.Events.UPDATED, { id: result.id });
+      return result;
+    });
   }
 
   /**
@@ -849,13 +849,13 @@ class OrderService extends BaseService {
    */
   async update(orderId, update) {
     return this.atomicPhase_(async (manager) => {
-      const order = await this.retrieve(orderId)
+      const order = await this.retrieve(orderId);
 
       if (order.status === "canceled") {
         throw new MedusaError(
           MedusaError.Types.NOT_ALLOWED,
           "A canceled order cannot be updated"
-        )
+        );
       }
 
       if (
@@ -867,14 +867,14 @@ class OrderService extends BaseService {
         throw new MedusaError(
           MedusaError.Types.NOT_ALLOWED,
           "Can't update shipping, billing, items and payment method when order is processed"
-        )
+        );
       }
 
       if (update.status || update.fulfillment_status || update.payment_status) {
         throw new MedusaError(
           MedusaError.Types.NOT_ALLOWED,
           "Can't update order statuses. This will happen automatically. Use metadata in order for additional statuses"
-        )
+        );
       }
 
       const {
@@ -884,22 +884,22 @@ class OrderService extends BaseService {
         no_notification,
         items,
         ...rest
-      } = update
+      } = update;
 
       if (update.metadata) {
-        order.metadata = this.setMetadata_(order, metadata)
+        order.metadata = this.setMetadata_(order, metadata);
       }
 
       if (update.shipping_address) {
-        await this.updateShippingAddress_(order, shipping_address)
+        await this.updateShippingAddress_(order, shipping_address);
       }
 
       if (update.billing_address) {
-        await this.updateBillingAddress_(order, billing_address)
+        await this.updateBillingAddress_(order, billing_address);
       }
 
       if (update.no_notification) {
-        order.no_notification = no_notification
+        order.no_notification = no_notification;
       }
 
       if (update.items) {
@@ -907,25 +907,25 @@ class OrderService extends BaseService {
           await this.lineItemService_.withTransaction(manager).create({
             ...item,
             order_id: orderId,
-          })
+          });
         }
       }
 
       for (const [key, value] of Object.entries(rest)) {
-        order[key] = value
+        order[key] = value;
       }
 
-      const orderRepo = manager.getCustomRepository(this.orderRepository_)
-      const result = await orderRepo.save(order)
+      const orderRepo = manager.getCustomRepository(this.orderRepository_);
+      const result = await orderRepo.save(order);
 
       await this.eventBus_
         .withTransaction(manager)
         .emit(OrderService.Events.UPDATED, {
           id: orderId,
           no_notification: order.no_notification,
-        })
-      return result
-    })
+        });
+      return result;
+    });
   }
 
   /**
@@ -946,13 +946,13 @@ class OrderService extends BaseService {
           "swaps",
           "items",
         ],
-      })
+      });
 
       if (order.refunds?.length > 0) {
         throw new MedusaError(
           MedusaError.Types.NOT_ALLOWED,
           "Order with refund(s) cannot be canceled"
-        )
+        );
       }
 
       const throwErrorIf = (arr, pred, type) =>
@@ -960,42 +960,42 @@ class OrderService extends BaseService {
           throw new MedusaError(
             MedusaError.Types.NOT_ALLOWED,
             `All ${type} must be canceled before canceling an order`
-          )
-        })
-      const notCanceled = (o) => !o.canceled_at
+          );
+        });
+      const notCanceled = (o) => !o.canceled_at;
 
-      throwErrorIf(order.fulfillments, notCanceled, "fulfillments")
-      throwErrorIf(order.returns, (r) => r.status !== "canceled", "returns")
-      throwErrorIf(order.swaps, notCanceled, "swaps")
-      throwErrorIf(order.claims, notCanceled, "claims")
+      throwErrorIf(order.fulfillments, notCanceled, "fulfillments");
+      throwErrorIf(order.returns, (r) => r.status !== "canceled", "returns");
+      throwErrorIf(order.swaps, notCanceled, "swaps");
+      throwErrorIf(order.claims, notCanceled, "claims");
 
       for (const item of order.items) {
         await this.inventoryService_
           .withTransaction(manager)
-          .adjustInventory(item.variant_id, item.quantity)
+          .adjustInventory(item.variant_id, item.quantity);
       }
 
       for (const p of order.payments) {
         await this.paymentProviderService_
           .withTransaction(manager)
-          .cancelPayment(p)
+          .cancelPayment(p);
       }
 
-      order.status = "canceled"
-      order.fulfillment_status = "canceled"
-      order.payment_status = "canceled"
+      order.status = "canceled";
+      order.fulfillment_status = "canceled";
+      order.payment_status = "canceled";
 
-      const orderRepo = manager.getCustomRepository(this.orderRepository_)
-      const result = await orderRepo.save(order)
+      const orderRepo = manager.getCustomRepository(this.orderRepository_);
+      const result = await orderRepo.save(order);
 
       await this.eventBus_
         .withTransaction(manager)
         .emit(OrderService.Events.CANCELED, {
           id: order.id,
           no_notification: order.no_notification,
-        })
-      return result
-    })
+        });
+      return result;
+    });
   }
 
   /**
@@ -1005,17 +1005,17 @@ class OrderService extends BaseService {
    */
   async capturePayment(orderId) {
     return this.atomicPhase_(async (manager) => {
-      const orderRepo = manager.getCustomRepository(this.orderRepository_)
-      const order = await this.retrieve(orderId, { relations: ["payments"] })
+      const orderRepo = manager.getCustomRepository(this.orderRepository_);
+      const order = await this.retrieve(orderId, { relations: ["payments"] });
 
       if (order.status === "canceled") {
         throw new MedusaError(
           MedusaError.Types.NOT_ALLOWED,
           "A canceled order cannot capture payment"
-        )
+        );
       }
 
-      const payments = []
+      const payments = [];
       for (const p of order.payments) {
         if (p.captured_at === null) {
           const result = await this.paymentProviderService_
@@ -1029,25 +1029,25 @@ class OrderService extends BaseService {
                   payment_id: p.id,
                   error: err,
                   no_notification: order.no_notification,
-                })
-            })
+                });
+            });
 
           if (result) {
-            payments.push(result)
+            payments.push(result);
           } else {
-            payments.push(p)
+            payments.push(p);
           }
         } else {
-          payments.push(p)
+          payments.push(p);
         }
       }
 
-      order.payments = payments
+      order.payments = payments;
       order.payment_status = payments.every((p) => p.captured_at !== null)
         ? "captured"
-        : "requires_action"
+        : "requires_action";
 
-      const result = await orderRepo.save(order)
+      const result = await orderRepo.save(order);
 
       if (order.payment_status === "captured") {
         this.eventBus_
@@ -1055,11 +1055,11 @@ class OrderService extends BaseService {
           .emit(OrderService.Events.PAYMENT_CAPTURED, {
             id: result.id,
             no_notification: order.no_notification,
-          })
+          });
       }
 
-      return result
-    })
+      return result;
+    });
   }
 
   /**
@@ -1078,19 +1078,19 @@ class OrderService extends BaseService {
       // This will in most cases be called by a webhook so to ensure that
       // things go through smoothly in instances where extra items outside
       // of Medusa are added we allow unknown items
-      return null
+      return null;
     }
 
     if (quantity > item.quantity - item.fulfilled_quantity) {
       throw new MedusaError(
         MedusaError.Types.NOT_ALLOWED,
         "Cannot fulfill more items than have been purchased"
-      )
+      );
     }
     return {
       ...item,
       quantity,
-    }
+    };
   }
 
   /**
@@ -1111,7 +1111,7 @@ class OrderService extends BaseService {
       metadata: {},
     }
   ) {
-    const { metadata, no_notification } = config
+    const { metadata, no_notification } = config;
 
     return this.atomicPhase_(async (manager) => {
       // NOTE: we are telling the service to calculate all totals for us which
@@ -1142,20 +1142,20 @@ class OrderService extends BaseService {
           "items.variant.product",
           "payments",
         ],
-      })
+      });
 
       if (order.status === "canceled") {
         throw new MedusaError(
           MedusaError.Types.NOT_ALLOWED,
           "A canceled order cannot be fulfilled"
-        )
+        );
       }
 
       if (!order.shipping_methods?.length) {
         throw new MedusaError(
           MedusaError.Types.NOT_ALLOWED,
           "Cannot fulfill an order that lacks shipping methods"
-        )
+        );
       }
 
       const fulfillments = await this.fulfillmentService_
@@ -1164,47 +1164,47 @@ class OrderService extends BaseService {
           metadata,
           no_notification: no_notification,
           order_id: orderId,
-        })
-      let successfullyFulfilled = []
+        });
+      let successfullyFulfilled = [];
       for (const f of fulfillments) {
-        successfullyFulfilled = [...successfullyFulfilled, ...f.items]
+        successfullyFulfilled = [...successfullyFulfilled, ...f.items];
       }
 
-      order.fulfillment_status = "fulfilled"
+      order.fulfillment_status = "fulfilled";
 
       // Update all line items to reflect fulfillment
       for (const item of order.items) {
         const fulfillmentItem = successfullyFulfilled.find(
           (f) => item.id === f.item_id
-        )
+        );
 
         if (fulfillmentItem) {
           const fulfilledQuantity =
-            (item.fulfilled_quantity || 0) + fulfillmentItem.quantity
+            (item.fulfilled_quantity || 0) + fulfillmentItem.quantity;
 
           // Update the fulfilled quantity
           await this.lineItemService_.withTransaction(manager).update(item.id, {
             fulfilled_quantity: fulfilledQuantity,
-          })
+          });
 
           if (item.quantity !== fulfilledQuantity) {
-            order.fulfillment_status = "partially_fulfilled"
+            order.fulfillment_status = "partially_fulfilled";
           }
         } else {
           if (item.quantity !== item.fulfilled_quantity) {
-            order.fulfillment_status = "partially_fulfilled"
+            order.fulfillment_status = "partially_fulfilled";
           }
         }
       }
 
-      const orderRepo = manager.getCustomRepository(this.orderRepository_)
+      const orderRepo = manager.getCustomRepository(this.orderRepository_);
 
-      order.fulfillments = [...order.fulfillments, ...fulfillments]
+      order.fulfillments = [...order.fulfillments, ...fulfillments];
 
-      const result = await orderRepo.save(order)
+      const result = await orderRepo.save(order);
 
       const evaluatedNoNotification =
-        no_notification !== undefined ? no_notification : order.no_notification
+        no_notification !== undefined ? no_notification : order.no_notification;
 
       for (const fulfillment of fulfillments) {
         await this.eventBus_
@@ -1213,11 +1213,11 @@ class OrderService extends BaseService {
             id: orderId,
             fulfillment_id: fulfillment.id,
             no_notification: evaluatedNoNotification,
-          })
+          });
       }
 
-      return result
-    })
+      return result;
+    });
   }
 
   /**
@@ -1229,21 +1229,21 @@ class OrderService extends BaseService {
     return this.atomicPhase_(async (manager) => {
       const canceled = await this.fulfillmentService_
         .withTransaction(manager)
-        .cancelFulfillment(fulfillmentId)
+        .cancelFulfillment(fulfillmentId);
 
       if (!canceled.order_id) {
         throw new MedusaError(
           MedusaError.Types.NOT_ALLOWED,
           `Fufillment not related to an order`
-        )
+        );
       }
 
-      const order = await this.retrieve(canceled.order_id)
+      const order = await this.retrieve(canceled.order_id);
 
-      order.fulfillment_status = "canceled"
+      order.fulfillment_status = "canceled";
 
-      const orderRepo = manager.getCustomRepository(this.orderRepository_)
-      const updated = await orderRepo.save(order)
+      const orderRepo = manager.getCustomRepository(this.orderRepository_);
+      const updated = await orderRepo.save(order);
 
       await this.eventBus_
         .withTransaction(manager)
@@ -1251,10 +1251,10 @@ class OrderService extends BaseService {
           id: order.id,
           fulfillment_id: canceled.id,
           no_notification: canceled.no_notification,
-        })
+        });
 
-      return updated
-    })
+      return updated;
+    });
   }
 
   /**
@@ -1270,12 +1270,12 @@ class OrderService extends BaseService {
   async getFulfillmentItems_(order, items, transformer) {
     const toReturn = await Promise.all(
       items.map(async ({ item_id, quantity }) => {
-        const item = order.items.find((i) => i.id.equals(item_id))
-        return transformer(item, quantity)
+        const item = order.items.find((i) => i.id.equals(item_id));
+        return transformer(item, quantity);
       })
-    )
+    );
 
-    return toReturn.filter((i) => !!i)
+    return toReturn.filter((i) => !!i);
   }
 
   /**
@@ -1286,20 +1286,20 @@ class OrderService extends BaseService {
    */
   async archive(orderId) {
     return this.atomicPhase_(async (manager) => {
-      const order = await this.retrieve(orderId)
+      const order = await this.retrieve(orderId);
 
       if (order.status !== ("completed" || "refunded")) {
         throw new MedusaError(
           MedusaError.Types.NOT_ALLOWED,
           "Can't archive an unprocessed order"
-        )
+        );
       }
 
-      order.status = "archived"
-      const orderRepo = manager.getCustomRepository(this.orderRepository_)
-      const result = await orderRepo.save(order)
-      return result
-    })
+      order.status = "archived";
+      const orderRepo = manager.getCustomRepository(this.orderRepository_);
+      const result = await orderRepo.save(order);
+      return result;
+    });
   }
 
   /**
@@ -1320,75 +1320,75 @@ class OrderService extends BaseService {
       no_notification: undefined,
     }
   ) {
-    const { no_notification } = config
+    const { no_notification } = config;
 
     return this.atomicPhase_(async (manager) => {
       const order = await this.retrieve(orderId, {
         select: ["refundable_amount", "total", "refunded_total"],
         relations: ["payments"],
-      })
+      });
 
       if (order.status === "canceled") {
         throw new MedusaError(
           MedusaError.Types.NOT_ALLOWED,
           "A canceled order cannot be refunded"
-        )
+        );
       }
 
       if (refundAmount > order.refundable_amount) {
         throw new MedusaError(
           MedusaError.Types.NOT_ALLOWED,
           "Cannot refund more than the original order amount"
-        )
+        );
       }
 
       const refund = await this.paymentProviderService_
         .withTransaction(manager)
-        .refundPayment(order.payments, refundAmount, reason, note)
+        .refundPayment(order.payments, refundAmount, reason, note);
 
-      const result = await this.retrieve(orderId)
+      const result = await this.retrieve(orderId);
 
       const evaluatedNoNotification =
-        no_notification !== undefined ? no_notification : order.no_notification
+        no_notification !== undefined ? no_notification : order.no_notification;
 
       this.eventBus_.emit(OrderService.Events.REFUND_CREATED, {
         id: result.id,
         refund_id: refund.id,
         no_notification: evaluatedNoNotification,
-      })
-      return result
-    })
+      });
+      return result;
+    });
   }
 
   decorateTotals_(order, totalsFields = []) {
     if (totalsFields.includes("shipping_total")) {
-      order.shipping_total = this.totalsService_.getShippingTotal(order)
+      order.shipping_total = this.totalsService_.getShippingTotal(order);
     }
     if (totalsFields.includes("gift_card_total")) {
-      order.gift_card_total = this.totalsService_.getGiftCardTotal(order)
+      order.gift_card_total = this.totalsService_.getGiftCardTotal(order);
     }
     if (totalsFields.includes("discount_total")) {
-      order.discount_total = this.totalsService_.getDiscountTotal(order)
+      order.discount_total = this.totalsService_.getDiscountTotal(order);
     }
     if (totalsFields.includes("tax_total")) {
-      order.tax_total = this.totalsService_.getTaxTotal(order)
+      order.tax_total = this.totalsService_.getTaxTotal(order);
     }
     if (totalsFields.includes("subtotal")) {
-      order.subtotal = this.totalsService_.getSubtotal(order)
+      order.subtotal = this.totalsService_.getSubtotal(order);
     }
     if (totalsFields.includes("total")) {
-      order.total = this.totalsService_.getTotal(order)
+      order.total = this.totalsService_.getTotal(order);
     }
     if (totalsFields.includes("refunded_total")) {
-      order.refunded_total = this.totalsService_.getRefundedTotal(order)
+      order.refunded_total = this.totalsService_.getRefundedTotal(order);
     }
     if (totalsFields.includes("paid_total")) {
-      order.paid_total = this.totalsService_.getPaidTotal(order)
+      order.paid_total = this.totalsService_.getPaidTotal(order);
     }
     if (totalsFields.includes("refundable_amount")) {
-      const paid_total = this.totalsService_.getPaidTotal(order)
-      const refunded_total = this.totalsService_.getRefundedTotal(order)
-      order.refundable_amount = paid_total - refunded_total
+      const paid_total = this.totalsService_.getPaidTotal(order);
+      const refunded_total = this.totalsService_.getRefundedTotal(order);
+      order.refundable_amount = paid_total - refunded_total;
     }
 
     if (totalsFields.includes("items.refundable")) {
@@ -1398,7 +1398,7 @@ class OrderService extends BaseService {
           ...i,
           quantity: i.quantity - (i.returned_quantity || 0),
         }),
-      }))
+      }));
     }
 
     if (
@@ -1413,7 +1413,7 @@ class OrderService extends BaseService {
             ...i,
             quantity: i.quantity - (i.returned_quantity || 0),
           }),
-        }))
+        }));
       }
     }
 
@@ -1429,11 +1429,11 @@ class OrderService extends BaseService {
             ...i,
             quantity: i.quantity - (i.returned_quantity || 0),
           }),
-        }))
+        }));
       }
     }
 
-    return order
+    return order;
   }
 
   /**
@@ -1454,70 +1454,74 @@ class OrderService extends BaseService {
       const order = await this.retrieve(orderId, {
         select: ["total", "refunded_total", "refundable_amount"],
         relations: ["items", "returns", "payments"],
-      })
+      });
 
       if (order.status === "canceled") {
         throw new MedusaError(
           MedusaError.Types.NOT_ALLOWED,
           "A canceled order cannot be registered as received"
-        )
+        );
       }
 
       if (!receivedReturn || receivedReturn.order_id !== orderId) {
         throw new MedusaError(
           MedusaError.Types.NOT_FOUND,
           `Received return does not exist`
-        )
+        );
       }
 
-      const refundAmount = customRefundAmount || receivedReturn.refund_amount
+      const refundAmount = customRefundAmount || receivedReturn.refund_amount;
 
-      const orderRepo = manager.getCustomRepository(this.orderRepository_)
+      const orderRepo = manager.getCustomRepository(this.orderRepository_);
 
       if (refundAmount > order.refundable_amount) {
-        order.fulfillment_status = "requires_action"
-        const result = await orderRepo.save(order)
+        order.fulfillment_status = "requires_action";
+        const result = await orderRepo.save(order);
         this.eventBus_
           .withTransaction(manager)
           .emit(OrderService.Events.RETURN_ACTION_REQUIRED, {
             id: result.id,
             return_id: receivedReturn.id,
             no_notification: receivedReturn.no_notification,
-          })
-        return result
+          });
+        return result;
       }
 
-      let isFullReturn = true
+      let isFullReturn = true;
       for (const i of order.items) {
         if (i.returned_quantity !== i.quantity) {
-          isFullReturn = false
+          isFullReturn = false;
         }
       }
 
       if (receivedReturn.refund_amount > 0) {
         const refund = await this.paymentProviderService_
           .withTransaction(manager)
-          .refundPayment(order.payments, receivedReturn.refund_amount, "return")
+          .refundPayment(
+            order.payments,
+            receivedReturn.refund_amount,
+            "return"
+          );
 
-        order.refunds = [...(order.refunds || []), refund]
+        order.refunds = [...(order.refunds || []), refund];
       }
 
       if (isFullReturn) {
-        order.fulfillment_status = "returned"
+        order.fulfillment_status = "returned";
       } else {
-        order.fulfillment_status = "partially_returned"
+        order.fulfillment_status = "partially_returned";
       }
 
-      const result = await orderRepo.save(order)
+      const result = await orderRepo.save(order);
       await this.eventBus_
         .withTransaction(manager)
         .emit(OrderService.Events.ITEMS_RETURNED, {
           id: order.id,
           return_id: receivedReturn.id,
           no_notification: receivedReturn.no_notification,
-        })
-      return result
-    })
+        });
+      return result;
+    });
   }
 
   /**
@@ -1527,22 +1531,22 @@ class OrderService extends BaseService {
    * @return {Promise} resolves to the updated result.
    */
   async deleteMetadata(orderId, key) {
-    const validatedId = this.validateId_(orderId)
+    const validatedId = this.validateId_(orderId);
 
     if (typeof key !== "string") {
       throw new MedusaError(
         MedusaError.Types.INVALID_ARGUMENT,
         "Key type is invalid. Metadata keys must be strings"
-      )
+      );
     }
 
-    const keyPath = `metadata.${key}`
+    const keyPath = `metadata.${key}`;
     return this.orderModel_
       .updateOne({ _id: validatedId }, { $unset: { [keyPath]: "" } })
       .catch((err) => {
-        throw new MedusaError(MedusaError.Types.DB_ERROR, err.message)
-      })
+        throw new MedusaError(MedusaError.Types.DB_ERROR, err.message);
+      });
   }
 }
 
-export default OrderService
+export default OrderService;

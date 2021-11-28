@@ -1,6 +1,6 @@
-import axios from "axios"
-import { zeroDecimalCurrencies, humanizeAmount } from "medusa-core-utils"
-import { BaseService } from "medusa-interfaces"
+import axios from "axios";
+import { zeroDecimalCurrencies, humanizeAmount } from "medusa-core-utils";
+import { BaseService } from "medusa-interfaces";
 
 class SlackService extends BaseService {
   /**
@@ -13,15 +13,15 @@ class SlackService extends BaseService {
    *    }
    */
   constructor({ orderService, totalsService, regionService }, options) {
-    super()
+    super();
 
-    this.orderService_ = orderService
+    this.orderService_ = orderService;
 
-    this.totalsService_ = totalsService
+    this.totalsService_ = totalsService;
 
-    this.regionService_ = regionService
+    this.regionService_ = regionService;
 
-    this.options_ = options
+    this.options_ = options;
   }
 
   async orderNotification(orderId) {
@@ -56,20 +56,21 @@ class SlackService extends BaseService {
         "swaps.additional_items",
         "swaps.fulfillments",
       ],
-    })
+    });
 
-    const { subtotal, tax_total, discount_total, shipping_total, total } = order
+    const { subtotal, tax_total, discount_total, shipping_total, total } =
+      order;
 
-    const currencyCode = order.currency_code.toUpperCase()
-    const taxRate = order.tax_rate / 100
+    const currencyCode = order.currency_code.toUpperCase();
+    const taxRate = order.tax_rate / 100;
 
     const getDisplayAmount = (amount) => {
-      const humanAmount = humanizeAmount(amount, currencyCode)
+      const humanAmount = humanizeAmount(amount, currencyCode);
       if (zeroDecimalCurrencies.includes(currencyCode.toLowerCase())) {
-        return humanAmount
+        return humanAmount;
       }
-      return humanAmount.toFixed(2)
-    }
+      return humanAmount.toFixed(2);
+    };
 
     let blocks = [
       {
@@ -109,7 +110,7 @@ class SlackService extends BaseService {
           )} ${currencyCode}`,
         },
       },
-    ]
+    ];
 
     if (order.gift_card_total) {
       blocks.push({
@@ -120,7 +121,7 @@ class SlackService extends BaseService {
             order.gift_card_total
           )} ${currencyCode}`,
         },
-      })
+      });
     }
 
     if (this.options_.show_discount_code) {
@@ -133,13 +134,13 @@ class SlackService extends BaseService {
               d.rule.type === "percentage" ? "%" : ` ${currencyCode}`
             }`,
           },
-        })
-      })
+        });
+      });
     }
 
     blocks.push({
       type: "divider",
-    })
+    });
 
     order.items.forEach((lineItem) => {
       let line = {
@@ -150,33 +151,33 @@ class SlackService extends BaseService {
             lineItem.unit_price * (1 + taxRate)
           )} ${currencyCode}`,
         },
-      }
+      };
 
       if (lineItem.thumbnail) {
-        let url = lineItem.thumbnail
+        let url = lineItem.thumbnail;
         if (lineItem.thumbnail.startsWith("//")) {
-          url = `https:${lineItem.thumbnail}`
+          url = `https:${lineItem.thumbnail}`;
         }
 
         line.accessory = {
           type: "image",
           alt_text: "Item",
           image_url: url,
-        }
+        };
       }
 
-      blocks.push(line)
+      blocks.push(line);
 
       blocks.push({
         type: "divider",
-      })
-    })
+      });
+    });
 
     return axios.post(this.options_.slack_url, {
       text: `Order ${order.display_id} was processed`,
       blocks,
-    })
+    });
   }
 }
 
-export default SlackService
+export default SlackService;

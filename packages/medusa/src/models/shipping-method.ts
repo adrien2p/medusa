@@ -8,16 +8,16 @@ import {
   OneToOne,
   JoinColumn,
   Index,
-} from "typeorm"
-import { ulid } from "ulid"
-import { DbAwareColumn } from "../utils/db-aware-column"
+} from "typeorm";
+import { ulid } from "ulid";
+import { DbAwareColumn } from "../utils/db-aware-column";
 
-import { ClaimOrder } from "./claim-order"
-import { Order } from "./order"
-import { Cart } from "./cart"
-import { Swap } from "./swap"
-import { Return } from "./return"
-import { ShippingOption } from "./shipping-option"
+import { ClaimOrder } from "./claim-order";
+import { Order } from "./order";
+import { Cart } from "./cart";
+import { Swap } from "./swap";
+import { Return } from "./return";
+import { ShippingOption } from "./shipping-option";
 
 @Check(
   `"claim_order_id" IS NOT NULL OR "order_id" IS NOT NULL OR "cart_id" IS NOT NULL OR "swap_id" IS NOT NULL OR "return_id" IS NOT NULL`
@@ -26,70 +26,67 @@ import { ShippingOption } from "./shipping-option"
 @Entity()
 export class ShippingMethod {
   @PrimaryColumn()
-  id: string
+  id: string;
 
   @Index()
   @Column()
-  shipping_option_id: string
+  shipping_option_id: string;
 
   @Index()
   @Column({ nullable: true })
-  order_id: string
+  order_id: string;
 
   @ManyToOne(() => Order)
   @JoinColumn({ name: "order_id" })
-  order: Order
+  order: Order;
 
   @Index()
   @Column({ nullable: true })
-  claim_order_id: string
+  claim_order_id: string;
 
   @ManyToOne(() => ClaimOrder)
   @JoinColumn({ name: "claim_order_id" })
-  claim_order: ClaimOrder
+  claim_order: ClaimOrder;
 
   @Index()
   @Column({ nullable: true })
-  cart_id: string
+  cart_id: string;
 
   @ManyToOne(() => Cart)
   @JoinColumn({ name: "cart_id" })
-  cart: Cart
+  cart: Cart;
 
   @Index()
   @Column({ nullable: true })
-  swap_id: string
+  swap_id: string;
 
   @ManyToOne(() => Swap)
   @JoinColumn({ name: "swap_id" })
-  swap: Swap
+  swap: Swap;
 
   @Index()
   @Column({ nullable: true })
-  return_id: string
+  return_id: string;
 
-  @OneToOne(
-    () => Return,
-    ret => ret.shipping_method
-  )
+  @OneToOne(() => Return, (ret) => ret.shipping_method)
   @JoinColumn({ name: "return_id" })
-  return_order: Return
+  return_order: Return;
 
   @ManyToOne(() => ShippingOption, { eager: true })
   @JoinColumn({ name: "shipping_option_id" })
-  shipping_option: ShippingOption
+  shipping_option: ShippingOption;
 
   @Column({ type: "int" })
-  price: number
+  price: number;
 
   @DbAwareColumn({ type: "jsonb" })
-  data: any
+  data: any;
 
   @BeforeInsert()
   private beforeInsert() {
-    if (this.id) return
-    const id = ulid()
-    this.id = `sm_${id}`
+    if (this.id) return;
+    const id = ulid();
+    this.id = `sm_${id}`;
   }
 }
 

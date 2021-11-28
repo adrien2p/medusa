@@ -1,12 +1,12 @@
-import { Router } from "express"
-import admin from "./routes/admin"
-import store from "./routes/store"
+import { Router } from "express";
+import admin from "./routes/admin";
+import store from "./routes/store";
 
 export default (rootDirectory) => {
-  const app = Router()
+  const app = Router();
 
-  store(app, rootDirectory)
-  admin(app, rootDirectory)
+  store(app, rootDirectory);
+  admin(app, rootDirectory);
 
-  return app
-}
+  return app;
+};

@@ -1,4 +1,4 @@
-import path from "path"
+import path from "path";
 
 export const getMedusaVersion = () => {
   try {
@@ -7,8 +7,8 @@ export const getMedusaVersion = () => {
       `node_modules`,
       `@medusajs/medusa`,
       `package.json`
-    )).version
+    )).version;
   } catch (e) {
-    return ``
+    return ``;
   }
-}
+};

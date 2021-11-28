@@ -1,5 +1,5 @@
-import BaseResource from "./base"
-import { AxiosPromise } from "axios"
+import BaseResource from "./base";
+import { AxiosPromise } from "axios";
 
 class PaymentMethodsResource extends BaseResource {
   /**
@@ -8,9 +8,9 @@ class PaymentMethodsResource extends BaseResource {
    * @return {AxiosPromise<{ payment_methods: object[] }>}
    */
   list(id: string): AxiosPromise<{ payment_methods: object[] }> {
-    const path = `/store/carts/${id}/payment-methods`
-    return this.client.request("GET", path)
+    const path = `/store/carts/${id}/payment-methods`;
+    return this.client.request("GET", path);
   }
 }
 
-export default PaymentMethodsResource
+export default PaymentMethodsResource;

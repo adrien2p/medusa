@@ -1,6 +1,6 @@
-import { IdMap } from "medusa-test-utils"
-import { request } from "../../../../../helpers/test-request"
-import { SwapServiceMock } from "../../../../../services/__mocks__/swap"
+import { IdMap } from "medusa-test-utils";
+import { request } from "../../../../../helpers/test-request";
+import { SwapServiceMock } from "../../../../../services/__mocks__/swap";
 
 const defaultRelations = [
   "order",
@@ -17,7 +17,7 @@ const defaultRelations = [
   "cart.gift_cards",
   "cart.discounts",
   "cart.payment",
-]
+];
 
 const defaultFields = [
   "id",
@@ -35,11 +35,11 @@ const defaultFields = [
   "cart.discount_total",
   "cart.gift_card_total",
   "cart.total",
-]
+];
 
 describe("GET /admin/swaps/:id", () => {
   describe("successfully gets a swap", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
       subject = await request(
@@ -52,27 +52,27 @@ describe("GET /admin/swaps/:id", () => {
             },
           },
         }
-      )
-    })
+      );
+    });
 
     afterAll(() => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     it("calls swapService retrieve", () => {
-      expect(SwapServiceMock.retrieve).toHaveBeenCalledTimes(1)
+      expect(SwapServiceMock.retrieve).toHaveBeenCalledTimes(1);
       expect(SwapServiceMock.retrieve).toHaveBeenCalledWith(
         IdMap.getId("test-swap"),
         {
           select: defaultFields,
           relations: defaultRelations,
         }
-      )
-    })
+      );
+    });
 
     it("returns swap", () => {
-      expect(subject.status).toEqual(200)
-      expect(subject.body.swap.id).toEqual("test-swap")
-    })
-  })
-})
+      expect(subject.status).toEqual(200);
+      expect(subject.body.swap.id).toEqual("test-swap");
+    });
+  });
+});

@@ -1,4 +1,4 @@
-import { Transform, Type } from "class-transformer"
+import { Transform, Type } from "class-transformer";
 import {
   IsArray,
   IsBoolean,
@@ -8,11 +8,11 @@ import {
   IsOptional,
   IsString,
   ValidateNested,
-} from "class-validator"
-import { defaultAdminOrdersFields, defaultAdminOrdersRelations } from "."
-import { OrderService } from "../../../../services"
-import { AddressPayload } from "../../../../types/common"
-import { validator } from "../../../../utils/validator"
+} from "class-validator";
+import { defaultAdminOrdersFields, defaultAdminOrdersRelations } from ".";
+import { OrderService } from "../../../../services";
+import { AddressPayload } from "../../../../types/common";
+import { validator } from "../../../../utils/validator";
 
 /**
  * @oas [post] /orders/{id}
@@ -96,96 +96,96 @@ import { validator } from "../../../../utils/validator"
  */
 
 export default async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params;
 
-  const value = await validator(AdminPostOrdersOrderReq, req.body)
+  const value = await validator(AdminPostOrdersOrderReq, req.body);
 
-  const orderService: OrderService = req.scope.resolve("orderService")
+  const orderService: OrderService = req.scope.resolve("orderService");
 
-  await orderService.update(id, value)
+  await orderService.update(id, value);
 
   const order = await orderService.retrieve(id, {
     select: defaultAdminOrdersFields,
     relations: defaultAdminOrdersRelations,
-  })
+  });
 
-  res.status(200).json({ order })
-}
+  res.status(200).json({ order });
+};
 
 export class AdminPostOrdersOrderReq {
   @IsEmail()
   @IsOptional()
-  email?: string
+  email?: string;
 
   @IsOptional()
   @ValidateNested()
   @Type(() => AddressPayload)
-  billing_address?: AddressPayload
+  billing_address?: AddressPayload = {} as AddressPayload;
 
   @IsOptional()
   @ValidateNested()
   @Type(() => AddressPayload)
-  shipping_address?: AddressPayload
+  shipping_address?: AddressPayload = {} as AddressPayload;
 
   @IsArray()
   @IsOptional()
-  items?: object[]
+  items?: object[] = [];
 
   @IsString()
   @IsOptional()
-  region?: string
+  region?: string;
 
   @IsArray()
   @IsOptional()
-  discounts?: object[]
+  discounts?: object[] = [];
 
   @IsString()
   @IsOptional()
-  customer_id?: string
+  customer_id?: string;
 
   @IsOptional()
   @ValidateNested()
   @Type(() => PaymentMethod)
-  payment_method?: PaymentMethod
+  payment_method?: PaymentMethod = {} as PaymentMethod;
 
   @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => ShippingMethod)
-  shipping_method?: ShippingMethod[]
+  shipping_method?: ShippingMethod[] = [];
 
   @IsBoolean()
   @IsOptional()
-  no_notification?: boolean
+  no_notification?: boolean;
 }
 
 class PaymentMethod {
   @IsString()
   @IsOptional()
-  provider_id?: string
+  provider_id?: string;
 
   @IsObject()
   @IsOptional()
-  data?: object
+  data?: object = {};
 }
 
 class ShippingMethod {
   @IsString()
   @IsOptional()
-  provider_id?: string
+  provider_id?: string;
 
   @IsString()
   @IsOptional()
-  profile_id?: string
+  profile_id?: string;
 
   @IsInt()
   @IsOptional()
-  price?: number
+  price?: number;
 
   @IsObject()
   @IsOptional()
-  data?: object
+  data?: object = {};
 
   @IsArray()
   @IsOptional()
-  items?: object[]
+  items?: object[] = [];
 }

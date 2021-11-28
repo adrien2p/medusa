@@ -1070,4 +1070,4 @@ export const currencies = {
     code: "ZWL",
     name_plural: "Zimbabwean Dollar",
   },
-}
+};

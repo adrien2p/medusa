@@ -1,4 +1,4 @@
-import { StoreService } from "../../../../services"
+import { StoreService } from "../../../../services";
 /**
  * @oas [post] /store/currencies/{code}
  * operationId: "PostStoreCurrenciesCode"
@@ -20,9 +20,9 @@ import { StoreService } from "../../../../services"
  *               $ref: "#/components/schemas/store"
  */
 export default async (req, res) => {
-  const { currency_code } = req.params
+  const { currency_code } = req.params;
 
-  const storeService: StoreService = req.scope.resolve("storeService")
-  const data = await storeService.addCurrency(currency_code)
-  res.status(200).json({ store: data })
-}
+  const storeService: StoreService = req.scope.resolve("storeService");
+  const data = await storeService.addCurrency(currency_code);
+  res.status(200).json({ store: data });
+};

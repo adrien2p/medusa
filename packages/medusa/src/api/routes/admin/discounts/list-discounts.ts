@@ -1,9 +1,9 @@
-import { Type, Transform } from "class-transformer"
-import { IsBoolean, IsInt, IsOptional, IsString } from "class-validator"
-import { defaultAdminDiscountsFields, defaultAdminDiscountsRelations } from "."
-import DiscountService from "../../../../services/discount"
-import { ListSelector } from "../../../../types/discount"
-import { validator } from "../../../../utils/validator"
+import { Type, Transform } from "class-transformer";
+import { IsBoolean, IsInt, IsOptional, IsString } from "class-validator";
+import { defaultAdminDiscountsFields, defaultAdminDiscountsRelations } from ".";
+import DiscountService from "../../../../services/discount";
+import { ListSelector } from "../../../../types/discount";
+import { validator } from "../../../../utils/validator";
 /**
  * @oas [get] /discounts
  * operationId: "GetDiscounts"
@@ -30,17 +30,17 @@ import { validator } from "../../../../utils/validator"
  *               $ref: "#/components/schemas/discount"
  */
 export default async (req, res) => {
-  const validated = await validator(AdminGetDiscountsParams, req.query)
+  const validated = await validator(AdminGetDiscountsParams, req.query);
 
-  const discountService: DiscountService = req.scope.resolve("discountService")
-  const selector: ListSelector = {}
+  const discountService: DiscountService = req.scope.resolve("discountService");
+  const selector: ListSelector = {};
 
   if (validated.q) {
-    selector.q = validated.q
+    selector.q = validated.q;
   }
 
-  selector.is_disabled = validated.is_disabled
-  selector.is_dynamic = validated.is_dynamic
+  selector.is_disabled = validated.is_disabled;
+  selector.is_dynamic = validated.is_dynamic;
 
   const listConfig = {
     select: defaultAdminDiscountsFields,
@@ -48,46 +48,46 @@ export default async (req, res) => {
     skip: validated.offset,
     take: validated.limit,
     order: { created_at: "DESC" },
-  }
+  };
   const [discounts, count] = await discountService.listAndCount(
     selector,
     listConfig
-  )
+  );
 
   res.status(200).json({
     discounts,
     count,
     offset: validated.offset,
     limit: validated.limit,
-  })
-}
+  });
+};
 
 export class AdminGetDiscountsParams {
   @IsString()
   @IsOptional()
-  q?: string
+  q?: string;
 
   @IsBoolean()
   @IsOptional()
-  @Transform(({ value }) => value === "true")
-  is_dynamic?: boolean
+  @Transform(({ value }) => Boolean(value))
+  is_dynamic?: boolean;
 
   @IsBoolean()
   @IsOptional()
-  @Transform(({ value }) => value === "true")
-  is_disabled?: boolean
+  @Transform(({ value }) => Boolean(value))
+  is_disabled?: boolean;
 
   @IsInt()
   @IsOptional()
   @Type(() => Number)
-  limit = 20
+  limit = 20;
 
   @IsInt()
   @IsOptional()
   @Type(() => Number)
-  offset = 0
+  offset = 0;
 
   @IsString()
   @IsOptional()
-  expand?: string
+  expand?: string;
 }

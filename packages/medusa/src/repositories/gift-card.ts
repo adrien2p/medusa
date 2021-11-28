@@ -1,6 +1,6 @@
-import { flatten, groupBy, map, merge } from "lodash"
-import { EntityRepository, FindManyOptions, Repository } from "typeorm"
-import { GiftCard } from "../models/gift-card"
+import { flatten, groupBy, map, merge } from "lodash";
+import { EntityRepository, FindManyOptions, Repository } from "typeorm";
+import { GiftCard } from "../models/gift-card";
 
 @EntityRepository(GiftCard)
 export class GiftCardRepository extends Repository<GiftCard> {
@@ -11,21 +11,21 @@ export class GiftCardRepository extends Repository<GiftCard> {
       "relations"
     > = {}
   ): Promise<GiftCard[]> {
-    let entities
+    let entities;
     if (Array.isArray(idsOrOptionsWithoutRelations)) {
-      entities = await this.findByIds(idsOrOptionsWithoutRelations)
+      entities = await this.findByIds(idsOrOptionsWithoutRelations);
     } else {
-      entities = await this.find(idsOrOptionsWithoutRelations)
+      entities = await this.find(idsOrOptionsWithoutRelations);
     }
-    const entitiesIds = entities.map(({ id }) => id)
+    const entitiesIds = entities.map(({ id }) => id);
 
-    const groupedRelations = {}
+    const groupedRelations = {};
     for (const rel of relations) {
-      const [topLevel] = rel.split(".")
+      const [topLevel] = rel.split(".");
       if (groupedRelations[topLevel]) {
-        groupedRelations[topLevel].push(rel)
+        groupedRelations[topLevel].push(rel);
       } else {
-        groupedRelations[topLevel] = [rel]
+        groupedRelations[topLevel] = [rel];
       }
     }
 
@@ -34,15 +34,15 @@ export class GiftCardRepository extends Repository<GiftCard> {
         return this.findByIds(entitiesIds, {
           select: ["id"],
           relations: rels as string[],
-        })
+        });
       })
-    ).then(flatten)
-    const entitiesAndRelations = entitiesIdsWithRelations.concat(entities)
+    ).then(flatten);
+    const entitiesAndRelations = entitiesIdsWithRelations.concat(entities);
 
-    const entitiesAndRelationsById = groupBy(entitiesAndRelations, "id")
-    return map(entitiesAndRelationsById, entityAndRelations =>
+    const entitiesAndRelationsById = groupBy(entitiesAndRelations, "id");
+    return map(entitiesAndRelationsById, (entityAndRelations) =>
       merge({}, ...entityAndRelations)
-    )
+    );
   }
 
   public async findOneWithRelations(
@@ -50,12 +50,12 @@ export class GiftCardRepository extends Repository<GiftCard> {
     optionsWithoutRelations: Omit<FindManyOptions<GiftCard>, "relations"> = {}
   ): Promise<GiftCard> {
     // Limit 1
-    optionsWithoutRelations.take = 1
+    optionsWithoutRelations.take = 1;
 
     const result = await this.findWithRelations(
       relations,
       optionsWithoutRelations
-    )
-    return result[0]
+    );
+    return result[0];
   }
 }

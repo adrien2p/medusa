@@ -1,5 +1,5 @@
-import { MedusaError } from "medusa-core-utils"
-import { BaseService } from "medusa-interfaces"
+import { MedusaError } from "medusa-core-utils";
+import { BaseService } from "medusa-interfaces";
 
 /**
  * Provides layer to manipulate orchestrate notifications.
@@ -7,27 +7,27 @@ import { BaseService } from "medusa-interfaces"
  */
 class NotificationService extends BaseService {
   constructor(container) {
-    super()
+    super();
 
     const {
       manager,
       notificationProviderRepository,
       notificationRepository,
       logger,
-    } = container
+    } = container;
 
-    this.container_ = container
+    this.container_ = container;
 
     /** @private @const {EntityManager} */
-    this.manager_ = manager
-    this.logger_ = logger
+    this.manager_ = manager;
+    this.logger_ = logger;
 
     /** @private @const {NotificationRepository} */
-    this.notificationRepository_ = notificationRepository
-    this.notificationProviderRepository_ = notificationProviderRepository
+    this.notificationRepository_ = notificationRepository;
+    this.notificationProviderRepository_ = notificationProviderRepository;
 
-    this.subscribers_ = {}
-    this.attachmentGenerator_ = null
+    this.subscribers_ = {};
+    this.attachmentGenerator_ = null;
   }
 
   /**
@@ -36,7 +36,7 @@ class NotificationService extends BaseService {
    * @param {object} service
    */
   registerAttachmentGenerator(service) {
-    this.attachmentGenerator_ = service
+    this.attachmentGenerator_ = service;
   }
 
   /**
@@ -46,7 +46,7 @@ class NotificationService extends BaseService {
    */
   withTransaction(transactionManager) {
     if (!transactionManager) {
-      return this
+      return this;
     }
 
     const cloned = new NotificationService({
@@ -54,11 +54,11 @@ class NotificationService extends BaseService {
       notificationProviderRepository: this.notificationProviderRepository_,
       notificationRepository: this.notificationRepository_,
       logger: this.logger_,
-    })
+    });
 
-    cloned.transactionManager_ = transactionManager
+    cloned.transactionManager_ = transactionManager;
 
-    return cloned
+    return cloned;
   }
 
   /**
@@ -66,12 +66,12 @@ class NotificationService extends BaseService {
    * @param {Array<string>} providers - a list of provider ids
    */
   async registerInstalledProviders(providers) {
-    const { manager, notificationProviderRepository } = this.container_
-    const model = manager.getCustomRepository(notificationProviderRepository)
-    model.update({}, { is_installed: false })
+    const { manager, notificationProviderRepository } = this.container_;
+    const model = manager.getCustomRepository(notificationProviderRepository);
+    model.update({}, { is_installed: false });
     for (const p of providers) {
-      const n = model.create({ id: p, is_installed: true })
-      await model.save(n)
+      const n = model.create({ id: p, is_installed: true });
+      await model.save(n);
     }
   }
 
@@ -87,9 +87,9 @@ class NotificationService extends BaseService {
   ) {
     const notiRepo = this.manager_.getCustomRepository(
       this.notificationRepository_
-    )
-    const query = this.buildQuery_(selector, config)
-    return notiRepo.find(query)
+    );
+    const query = this.buildQuery_(selector, config);
+    return notiRepo.find(query);
   }
 
   /**
@@ -101,21 +101,21 @@ class NotificationService extends BaseService {
   async retrieve(id, config = {}) {
     const notiRepository = this.manager_.getCustomRepository(
       this.notificationRepository_
-    )
+    );
 
-    const validatedId = this.validateId_(id)
-    const query = this.buildQuery_({ id: validatedId }, config)
+    const validatedId = this.validateId_(id);
+    const query = this.buildQuery_({ id: validatedId }, config);
 
-    const notification = await notiRepository.findOne(query)
+    const notification = await notiRepository.findOne(query);
 
     if (!notification) {
       throw new MedusaError(
         MedusaError.Types.NOT_FOUND,
         `Notification with id: ${id} was not found.`
-      )
+      );
     }
 
-    return notification
+    return notification;
   }
 
   /**
@@ -128,13 +128,13 @@ class NotificationService extends BaseService {
       throw new MedusaError(
         MedusaError.Types.NOT_ALLOWED,
         "providerId must be a string"
-      )
+      );
     }
 
     if (this.subscribers_[eventName]) {
-      this.subscribers_[eventName].push(providerId)
+      this.subscribers_[eventName].push(providerId);
     } else {
-      this.subscribers_[eventName] = [providerId]
+      this.subscribers_[eventName] = [providerId];
     }
   }
 
@@ -146,12 +146,12 @@ class NotificationService extends BaseService {
    */
   retrieveProvider_(id) {
     try {
-      return this.container_[`noti_${id}`]
+      return this.container_[`noti_${id}`];
     } catch (err) {
       throw new MedusaError(
         MedusaError.Types.NOT_FOUND,
         `Could not find a notification provider with id: ${id}.`
-      )
+      );
     }
   }
 
@@ -164,24 +164,24 @@ class NotificationService extends BaseService {
    * @return {Promise} - the result of notification subscribed
    */
   handleEvent(eventName, data) {
-    const subs = this.subscribers_[eventName]
+    const subs = this.subscribers_[eventName];
     if (!subs) {
-      return Promise.resolve()
+      return Promise.resolve();
     }
     if (data["no_notification"] === true) {
-      return
+      return;
     }
 
     return Promise.all(
       subs.map(async (providerId) => {
         return this.send(eventName, data, providerId).catch((err) => {
-          console.log(err)
+          console.log(err);
           this.logger_.warn(
             `An error occured while ${providerId} was processing a notification for ${eventName}: ${err.message}`
-          )
-        })
+          );
+        });
       })
-    )
+    );
   }
 
   /**
@@ -193,25 +193,25 @@ class NotificationService extends BaseService {
    * @return {Notification} the created notification
    */
   async send(event, eventData, providerId) {
-    const provider = this.retrieveProvider_(providerId)
+    const provider = this.retrieveProvider_(providerId);
     const result = await provider.sendNotification(
       event,
       eventData,
       this.attachmentGenerator_
-    )
+    );
 
     if (!result) {
-      return
+      return;
     }
 
-    const { to, data } = result
+    const { to, data } = result;
     const notiRepo = this.manager_.getCustomRepository(
       this.notificationRepository_
-    )
+    );
 
-    const [resource_type] = event.split(".")
-    const resource_id = eventData.id
-    const customer_id = eventData.customer_id || null
+    const [resource_type] = event.split(".");
+    const resource_id = eventData.id;
+    const customer_id = eventData.customer_id || null;
 
     const created = notiRepo.create({
       resource_type,
@@ -221,9 +221,9 @@ class NotificationService extends BaseService {
       data,
       event_name: event,
       provider_id: providerId,
-    })
+    });
 
-    return notiRepo.save(created)
+    return notiRepo.save(created);
   }
 
   /**
@@ -235,27 +235,27 @@ class NotificationService extends BaseService {
    * @return {Notification} the newly created notification
    */
   async resend(id, config = {}) {
-    const notification = await this.retrieve(id)
+    const notification = await this.retrieve(id);
 
-    const provider = this.retrieveProvider_(notification.provider_id)
+    const provider = this.retrieveProvider_(notification.provider_id);
     const { to, data } = await provider.resendNotification(
       notification,
       config,
       this.attachmentGenerator_
-    )
+    );
 
     const notiRepo = this.manager_.getCustomRepository(
       this.notificationRepository_
-    )
+    );
     const created = notiRepo.create({
       ...notification,
       to,
       data,
       parent_id: id,
-    })
+    });
 
-    return notiRepo.save(created)
+    return notiRepo.save(created);
   }
 }
 
-export default NotificationService
+export default NotificationService;

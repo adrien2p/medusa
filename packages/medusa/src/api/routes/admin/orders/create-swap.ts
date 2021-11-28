@@ -1,4 +1,4 @@
-import { Type } from "class-transformer"
+import { Type } from "class-transformer";
 import {
   IsOptional,
   IsArray,
@@ -9,16 +9,16 @@ import {
   IsNotEmpty,
   IsNumber,
   ValidateNested,
-} from "class-validator"
-import { MedusaError } from "medusa-core-utils"
-import { defaultAdminOrdersFields, defaultAdminOrdersRelations } from "."
+} from "class-validator";
+import { MedusaError } from "medusa-core-utils";
+import { defaultAdminOrdersFields, defaultAdminOrdersRelations } from ".";
 import {
   IdempotencyKeyService,
   OrderService,
   ReturnService,
   SwapService,
-} from "../../../../services"
-import { validator } from "../../../../utils/validator"
+} from "../../../../services";
+import { validator } from "../../../../utils/validator";
 
 /**
  * @oas [post] /order/{id}/swaps
@@ -106,38 +106,38 @@ import { validator } from "../../../../utils/validator"
  *               $ref: "#/components/schemas/order"
  */
 export default async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params;
 
-  const validated = await validator(AdminPostOrdersOrderSwapsReq, req.body)
+  const validated = await validator(AdminPostOrdersOrderSwapsReq, req.body);
 
   const idempotencyKeyService: IdempotencyKeyService = req.scope.resolve(
     "idempotencyKeyService"
-  )
+  );
 
-  const headerKey = req.get("Idempotency-Key") || ""
+  const headerKey = req.get("Idempotency-Key") || "";
 
-  let idempotencyKey
+  let idempotencyKey;
   try {
     idempotencyKey = await idempotencyKeyService.initializeRequest(
       headerKey,
       req.method,
       req.params,
       req.path
-    )
+    );
   } catch (error) {
-    res.status(409).send("Failed to create idempotency key")
-    return
+    res.status(409).send("Failed to create idempotency key");
+    return;
   }
 
-  res.setHeader("Access-Control-Expose-Headers", "Idempotency-Key")
-  res.setHeader("Idempotency-Key", idempotencyKey.idempotency_key)
+  res.setHeader("Access-Control-Expose-Headers", "Idempotency-Key");
+  res.setHeader("Idempotency-Key", idempotencyKey.idempotency_key);
 
-  const orderService: OrderService = req.scope.resolve("orderService")
-  const swapService: SwapService = req.scope.resolve("swapService")
-  const returnService: ReturnService = req.scope.resolve("returnService")
+  const orderService: OrderService = req.scope.resolve("orderService");
+  const swapService: SwapService = req.scope.resolve("swapService");
+  const returnService: ReturnService = req.scope.resolve("returnService");
 
-  let inProgress = true
-  let err = false
+  let inProgress = true;
+  let err = false;
 
   while (inProgress) {
     switch (idempotencyKey.recovery_point) {
@@ -150,7 +150,7 @@ export default async (req, res) => {
               .retrieve(id, {
                 select: ["refunded_total", "total"],
                 relations: ["items", "swaps", "swaps.additional_items"],
-              })
+              });
 
             const swap = await swapService
               .withTransaction(manager)
@@ -164,30 +164,32 @@ export default async (req, res) => {
                   no_notification: validated.no_notification,
                   allow_backorder: validated.allow_backorder,
                 }
-              )
+              );
 
             await swapService
               .withTransaction(manager)
-              .createCart(swap.id, validated.custom_shipping_options)
+              .createCart(swap.id, validated.custom_shipping_options);
             const returnOrder = await returnService
               .withTransaction(manager)
-              .retrieveBySwap(swap.id)
+              .retrieveBySwap(swap.id);
 
-            await returnService.withTransaction(manager).fulfill(returnOrder.id)
+            await returnService
+              .withTransaction(manager)
+              .fulfill(returnOrder.id);
 
             return {
               recovery_point: "swap_created",
-            }
+            };
           }
-        )
+        );
 
         if (error) {
-          inProgress = false
-          err = error
+          inProgress = false;
+          err = error;
         } else {
-          idempotencyKey = key
+          idempotencyKey = key;
         }
-        break
+        break;
       }
 
       case "swap_created": {
@@ -196,39 +198,39 @@ export default async (req, res) => {
           async (manager) => {
             const swaps = await swapService.list({
               idempotency_key: idempotencyKey.idempotency_key,
-            })
+            });
 
             if (!swaps.length) {
               throw new MedusaError(
                 MedusaError.Types.INVALID_DATA,
                 "Swap not found"
-              )
+              );
             }
 
             const order = await orderService.retrieve(id, {
               select: defaultAdminOrdersFields,
               relations: defaultAdminOrdersRelations,
-            })
+            });
 
             return {
               response_code: 200,
               response_body: { order },
-            }
+            };
           }
-        )
+        );
 
         if (error) {
-          inProgress = false
-          err = error
+          inProgress = false;
+          err = error;
         } else {
-          idempotencyKey = key
+          idempotencyKey = key;
         }
-        break
+        break;
       }
 
       case "finished": {
-        inProgress = false
-        break
+        inProgress = false;
+        break;
       }
 
       default:
@@ -239,88 +241,88 @@ export default async (req, res) => {
             response_code: 500,
             response_body: { message: "Unknown recovery point" },
           }
-        )
-        break
+        );
+        break;
     }
   }
 
   if (err) {
-    throw err
+    throw err;
   }
 
-  res.status(idempotencyKey.response_code).json(idempotencyKey.response_body)
-}
+  res.status(idempotencyKey.response_code).json(idempotencyKey.response_body);
+};
 
 export class AdminPostOrdersOrderSwapsReq {
   @IsArray()
   @IsNotEmpty()
   @ValidateNested({ each: true })
   @Type(() => ReturnItem)
-  return_items: ReturnItem[]
+  return_items: ReturnItem[];
 
   @IsObject()
   @IsOptional()
   @ValidateNested()
   @Type(() => ReturnShipping)
-  return_shipping?: ReturnShipping
+  return_shipping?: ReturnShipping = {} as ReturnShipping;
 
   @IsArray()
   @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => AdditionalItem)
-  additional_items?: AdditionalItem[]
+  additional_items?: AdditionalItem[] = [];
 
   @IsArray()
   @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => CustomShippingOption)
-  custom_shipping_options?: CustomShippingOption[] = []
+  custom_shipping_options?: CustomShippingOption[] = [];
 
   @IsBoolean()
   @IsOptional()
-  no_notification?: boolean
+  no_notification?: boolean;
 
   @IsBoolean()
   @IsOptional()
-  allow_backorder?: boolean = true
+  allow_backorder?: boolean = true;
 }
 
 class ReturnItem {
   @IsString()
   @IsNotEmpty()
-  item_id: string
+  item_id: string;
 
   @IsNumber()
   @IsNotEmpty()
-  quantity: number
+  quantity: number;
 }
 
 class ReturnShipping {
   @IsString()
   @IsNotEmpty()
-  option_id: string
+  option_id: string;
 
   @IsInt()
   @IsOptional()
-  price?: number
+  price?: number;
 }
 
 class CustomShippingOption {
   @IsString()
   @IsNotEmpty()
-  option_id: string
+  option_id: string;
 
   @IsInt()
   @IsNotEmpty()
-  price: number
+  price: number;
 }
 
 class AdditionalItem {
   @IsString()
   @IsNotEmpty()
-  variant_id: string
+  variant_id: string;
 
   @IsNumber()
   @IsNotEmpty()
-  quantity: number
+  quantity: number;
 }

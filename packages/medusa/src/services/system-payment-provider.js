@@ -1,51 +1,51 @@
-import { BaseService } from "medusa-interfaces"
+import { BaseService } from "medusa-interfaces";
 
 class SystemProviderService extends BaseService {
-  static identifier = "system"
+  static identifier = "system";
 
   constructor(_) {
-    super()
+    super();
   }
 
   async createPayment(_) {
-    return {}
+    return {};
   }
 
   async getStatus(_) {
-    return "authorized"
+    return "authorized";
   }
 
   async getPaymentData(_) {
-    return {}
+    return {};
   }
 
   async authorizePayment(_) {
-    return { data: {}, status: "authorized" }
+    return { data: {}, status: "authorized" };
   }
 
   async updatePaymentData(_) {
-    return {}
+    return {};
   }
 
   async updatePayment(_) {
-    return {}
+    return {};
   }
 
   async deletePayment(_) {
-    return {}
+    return {};
   }
 
   async capturePayment(_) {
-    return {}
+    return {};
   }
 
   async refundPayment(_) {
-    return {}
+    return {};
   }
 
   async cancelPayment(_) {
-    return {}
+    return {};
   }
 }
 
-export default SystemProviderService
+export default SystemProviderService;

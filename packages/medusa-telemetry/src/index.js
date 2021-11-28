@@ -1,20 +1,20 @@
-import Telemeter from "./telemeter"
-import createFlush from "./util/create-flush"
+import Telemeter from "./telemeter";
+import createFlush from "./util/create-flush";
 
-const telemeter = new Telemeter()
+const telemeter = new Telemeter();
 
-export const flush = createFlush(telemeter.isTrackingEnabled())
+export const flush = createFlush(telemeter.isTrackingEnabled());
 
 if (flush) {
-  process.on(`exit`, flush)
+  process.on(`exit`, flush);
 }
 
 export const track = (event, data = {}) => {
-  telemeter.track(event, data)
-}
+  telemeter.track(event, data);
+};
 
 export const setTelemetryEnabled = (enabled = true) => {
-  telemeter.setTelemetryEnabled(enabled)
-}
+  telemeter.setTelemetryEnabled(enabled);
+};
 
-export { default as Telemeter } from "./telemeter"
+export { default as Telemeter } from "./telemeter";

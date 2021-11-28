@@ -1,18 +1,18 @@
-import { Entity, Column, PrimaryColumn } from "typeorm"
+import { Entity, Column, PrimaryColumn } from "typeorm";
 
 @Entity()
 export class Currency {
   @PrimaryColumn()
-  code: string
+  code: string;
 
   @Column()
-  symbol: string
+  symbol: string;
 
   @Column()
-  symbol_native: string
+  symbol_native: string;
 
   @Column()
-  name: string
+  name: string;
 }
 
 /**

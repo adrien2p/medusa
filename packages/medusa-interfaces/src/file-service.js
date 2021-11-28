@@ -1,4 +1,4 @@
-import BaseService from "./base-service"
+import BaseService from "./base-service";
 
 /**
  * Interface for file connectors
@@ -6,16 +6,16 @@ import BaseService from "./base-service"
  */
 class BaseFileService extends BaseService {
   constructor() {
-    super()
+    super();
   }
 
   upload() {
-    throw Error("upload must be overridden by the child class")
+    throw Error("upload must be overridden by the child class");
   }
 
   delete() {
-    throw Error("delete must be overridden by the child class")
+    throw Error("delete must be overridden by the child class");
   }
 }
 
-export default BaseFileService
+export default BaseFileService;

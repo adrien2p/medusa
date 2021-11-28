@@ -1,6 +1,6 @@
-import { IsEmail, IsObject, IsOptional, IsString } from "class-validator"
-import { CustomerService } from "../../../../services"
-import { validator } from "../../../../utils/validator"
+import { IsEmail, IsObject, IsOptional, IsString } from "class-validator";
+import { CustomerService } from "../../../../services";
+import { validator } from "../../../../utils/validator";
 
 /**
  * @oas [post] /customers
@@ -27,31 +27,31 @@ import { validator } from "../../../../utils/validator"
  *               $ref: "#/components/schemas/customer"
  */
 export default async (req, res) => {
-  const validated = await validator(AdminPostCustomersReq, req.body)
+  const validated = await validator(AdminPostCustomersReq, req.body);
 
-  const customerService: CustomerService = req.scope.resolve("customerService")
-  const customer = await customerService.create(validated)
-  res.status(201).json({ customer })
-}
+  const customerService: CustomerService = req.scope.resolve("customerService");
+  const customer = await customerService.create(validated);
+  res.status(201).json({ customer });
+};
 
 export class AdminPostCustomersReq {
   @IsEmail()
-  email: string
+  email: string;
 
   @IsString()
-  first_name: string
+  first_name: string;
 
   @IsString()
-  last_name: string
+  last_name: string;
 
   @IsString()
-  password: string
+  password: string;
 
   @IsString()
   @IsOptional()
-  phone?: string
+  phone?: string;
 
   @IsObject()
   @IsOptional()
-  metadata?: object
+  metadata?: object;
 }

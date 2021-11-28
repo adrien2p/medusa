@@ -1,5 +1,5 @@
-import { MedusaError, Validator } from "medusa-core-utils"
-import { defaultFields, defaultRelations } from "./"
+import { MedusaError, Validator } from "medusa-core-utils";
+import { defaultFields, defaultRelations } from "./";
 
 /**
  * @oas [post] /shipping-options/{id}
@@ -46,7 +46,7 @@ import { defaultFields, defaultRelations } from "./"
  *               $ref: "#/components/schemas/shipping_option"
  */
 export default async (req, res) => {
-  const { option_id } = req.params
+  const { option_id } = req.params;
   const schema = Validator.object().keys({
     name: Validator.string().optional(),
     amount: Validator.number().integer().optional(),
@@ -61,21 +61,21 @@ export default async (req, res) => {
       .optional(),
     admin_only: Validator.boolean().optional(),
     metadata: Validator.object().optional(),
-  })
+  });
 
-  const { value, error } = schema.validate(req.body)
+  const { value, error } = schema.validate(req.body);
   if (error) {
-    throw new MedusaError(MedusaError.Types.INVALID_DATA, error.details)
+    throw new MedusaError(MedusaError.Types.INVALID_DATA, error.details);
   }
 
-  const optionService = req.scope.resolve("shippingOptionService")
+  const optionService = req.scope.resolve("shippingOptionService");
 
-  await optionService.update(option_id, value)
+  await optionService.update(option_id, value);
 
   const data = await optionService.retrieve(option_id, {
     select: defaultFields,
     relations: defaultRelations,
-  })
+  });
 
-  res.status(200).json({ shipping_option: data })
-}
+  res.status(200).json({ shipping_option: data });
+};

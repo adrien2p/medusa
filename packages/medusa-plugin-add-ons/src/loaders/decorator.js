@@ -1,6 +1,6 @@
 export default (container, config) => {
-  const cartService = container.resolve("cartService")
-  const addOnLineItemService = container.resolve("addOnLineItemService")
+  const cartService = container.resolve("cartService");
+  const addOnLineItemService = container.resolve("addOnLineItemService");
 
   cartService.addDecorator(async (cart) => {
     try {
@@ -11,16 +11,16 @@ export default (container, config) => {
               item,
               ["title", "quantity", "thumbnail", "content", "should_merge"],
               ["add_ons"]
-            )
+            );
           } else {
-            return item
+            return item;
           }
         })
-      )
+      );
 
-      return cart
+      return cart;
     } catch (error) {
-      return cart
+      return cart;
     }
-  })
-}
+  });
+};

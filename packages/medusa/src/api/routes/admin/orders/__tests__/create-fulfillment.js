@@ -1,10 +1,10 @@
-import { IdMap } from "medusa-test-utils"
-import { request } from "../../../../../helpers/test-request"
-import { OrderServiceMock } from "../../../../../services/__mocks__/order"
+import { IdMap } from "medusa-test-utils";
+import { request } from "../../../../../helpers/test-request";
+import { OrderServiceMock } from "../../../../../services/__mocks__/order";
 
 describe("POST /admin/orders/:id/fulfillment", () => {
   describe("successfully fulfills an order", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
       subject = await request(
@@ -25,15 +25,15 @@ describe("POST /admin/orders/:id/fulfillment", () => {
             },
           },
         }
-      )
-    })
+      );
+    });
 
     afterAll(() => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     it("calls OrderService createFulfillment", () => {
-      expect(OrderServiceMock.createFulfillment).toHaveBeenCalledTimes(1)
+      expect(OrderServiceMock.createFulfillment).toHaveBeenCalledTimes(1);
       expect(OrderServiceMock.createFulfillment).toHaveBeenCalledWith(
         IdMap.getId("test-order"),
         [
@@ -43,13 +43,13 @@ describe("POST /admin/orders/:id/fulfillment", () => {
           },
         ],
         { metadata: undefined, no_notification: undefined }
-      )
-    })
+      );
+    });
 
     it("returns order with fulfillment_status = fulfilled", () => {
-      expect(subject.status).toEqual(200)
-      expect(subject.body.order.id).toEqual(IdMap.getId("test-order"))
-      expect(subject.body.order.fulfillment_status).toEqual("fulfilled")
-    })
-  })
-})
+      expect(subject.status).toEqual(200);
+      expect(subject.body.order.id).toEqual(IdMap.getId("test-order"));
+      expect(subject.body.order.fulfillment_status).toEqual("fulfilled");
+    });
+  });
+});

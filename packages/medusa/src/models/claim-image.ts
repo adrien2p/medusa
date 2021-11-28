@@ -9,49 +9,46 @@ import {
   PrimaryColumn,
   ManyToOne,
   JoinColumn,
-} from "typeorm"
-import { ulid } from "ulid"
+} from "typeorm";
+import { ulid } from "ulid";
 
-import { ClaimItem } from "./claim-item"
+import { ClaimItem } from "./claim-item";
 
-import { DbAwareColumn, resolveDbType } from "../utils/db-aware-column"
+import { DbAwareColumn, resolveDbType } from "../utils/db-aware-column";
 
 @Entity()
 export class ClaimImage {
   @PrimaryColumn()
-  id: string
+  id: string;
 
   @Index()
   @Column()
-  claim_item_id: string
+  claim_item_id: string;
 
-  @ManyToOne(
-    () => ClaimItem,
-    ci => ci.images
-  )
+  @ManyToOne(() => ClaimItem, (ci) => ci.images)
   @JoinColumn({ name: "claim_item_id" })
-  claim_item: ClaimItem
+  claim_item: ClaimItem;
 
   @Column()
-  url: string
+  url: string;
 
   @CreateDateColumn({ type: resolveDbType("timestamptz") })
-  created_at: Date
+  created_at: Date;
 
   @UpdateDateColumn({ type: resolveDbType("timestamptz") })
-  updated_at: Date
+  updated_at: Date;
 
   @DeleteDateColumn({ type: resolveDbType("timestamptz") })
-  deleted_at: Date
+  deleted_at: Date;
 
   @DbAwareColumn({ type: "jsonb", nullable: true })
-  metadata: any
+  metadata: any;
 
   @BeforeInsert()
   private beforeInsert() {
-    if (this.id) return
-    const id = ulid()
-    this.id = `cimg_${id}`
+    if (this.id) return;
+    const id = ulid();
+    this.id = `cimg_${id}`;
   }
 }
 

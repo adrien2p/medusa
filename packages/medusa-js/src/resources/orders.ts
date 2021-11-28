@@ -1,6 +1,6 @@
-import { StoreGetOrdersParams, StoreOrdersRes } from "@medusajs/medusa"
-import { AxiosPromise } from "axios"
-import BaseResource from "./base"
+import { StoreGetOrdersParams, StoreOrdersRes } from "@medusajs/medusa";
+import { AxiosPromise } from "axios";
+import BaseResource from "./base";
 
 class OrdersResource extends BaseResource {
   /**
@@ -9,8 +9,8 @@ class OrdersResource extends BaseResource {
    * @return {AxiosPromise<StoreOrdersRes>}
    */
   retrieve(id: string): AxiosPromise<StoreOrdersRes> {
-    const path = `/store/orders/${id}`
-    return this.client.request("GET", path)
+    const path = `/store/orders/${id}`;
+    return this.client.request("GET", path);
   }
 
   /**
@@ -19,8 +19,8 @@ class OrdersResource extends BaseResource {
    * @return {AxiosPromise<StoreOrdersRes>}
    */
   retrieveByCartId(cart_id: string): AxiosPromise<StoreOrdersRes> {
-    const path = `/store/orders/cart/${cart_id}`
-    return this.client.request("GET", path)
+    const path = `/store/orders/cart/${cart_id}`;
+    return this.client.request("GET", path);
   }
 
   /**
@@ -29,20 +29,20 @@ class OrdersResource extends BaseResource {
    * @return {AxiosPromise<StoreOrdersRes>}
    */
   lookupOrder(payload: StoreGetOrdersParams): AxiosPromise<StoreOrdersRes> {
-    let path = `/store/orders?`
+    let path = `/store/orders?`;
 
     const queryString = Object.entries(payload).map(([key, value]) => {
-      let val = value
+      let val = value;
       if (Array.isArray(value)) {
-        val = value.join(",")
+        val = value.join(",");
       }
 
-      return `${key}=${encodeURIComponent(val as string)}`
-    })
-    path = `/store/orders?${queryString.join("&")}`
+      return `${key}=${encodeURIComponent(val as string)}`;
+    });
+    path = `/store/orders?${queryString.join("&")}`;
 
-    return this.client.request("GET", path, payload)
+    return this.client.request("GET", path, payload);
   }
 }
 
-export default OrdersResource
+export default OrdersResource;

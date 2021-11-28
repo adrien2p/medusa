@@ -1,95 +1,95 @@
-import { flatten, groupBy, map, merge } from "lodash"
+import { flatten, groupBy, map, merge } from "lodash";
 import {
   EntityRepository,
   FindManyOptions,
   FindOperator,
   OrderByCondition,
   Repository,
-} from "typeorm"
-import { ProductTag } from ".."
-import { Product } from "../models/product"
+} from "typeorm";
+import { ProductTag } from "..";
+import { Product } from "../models/product";
 
-type DefaultWithoutRelations = Omit<FindManyOptions<Product>, "relations">
+type DefaultWithoutRelations = Omit<FindManyOptions<Product>, "relations">;
 
 type CustomOptions = {
   where?: DefaultWithoutRelations["where"] & {
-    tags?: FindOperator<ProductTag>
-  }
-  order?: OrderByCondition
-  skip?: number
-  take?: number
-  withDeleted?: boolean
-}
+    tags?: FindOperator<ProductTag>;
+  };
+  order?: OrderByCondition;
+  skip?: number;
+  take?: number;
+  withDeleted?: boolean;
+};
 
-type FindWithRelationsOptions = CustomOptions
+type FindWithRelationsOptions = CustomOptions;
 
 @EntityRepository(Product)
 export class ProductRepository extends Repository<Product> {
   private mergeEntitiesWithRelations(
     entitiesAndRelations: Array<Partial<Product>>
   ): Product[] {
-    const entitiesAndRelationsById = groupBy(entitiesAndRelations, "id")
+    const entitiesAndRelationsById = groupBy(entitiesAndRelations, "id");
     return map(entitiesAndRelationsById, (entityAndRelations) =>
       merge({}, ...entityAndRelations)
-    )
+    );
   }
 
   private async queryProducts(
     optionsWithoutRelations: FindWithRelationsOptions,
     shouldCount = false
   ): Promise<[Product[], number]> {
-    const tags = optionsWithoutRelations?.where?.tags
-    delete optionsWithoutRelations?.where?.tags
+    const tags = optionsWithoutRelations?.where?.tags;
+    delete optionsWithoutRelations?.where?.tags;
     let qb = this.createQueryBuilder("product")
       .select(["product.id"])
       .skip(optionsWithoutRelations.skip)
-      .take(optionsWithoutRelations.take)
+      .take(optionsWithoutRelations.take);
 
     qb = optionsWithoutRelations.where
       ? qb.where(optionsWithoutRelations.where)
-      : qb
+      : qb;
 
     qb = optionsWithoutRelations.order
       ? qb.orderBy(optionsWithoutRelations.order)
-      : qb
+      : qb;
 
     if (tags) {
       qb = qb
         .leftJoinAndSelect("product.tags", "tags")
-        .andWhere(`tags.id IN (:...ids)`, { ids: tags.value })
+        .andWhere(`tags.id IN (:...ids)`, { ids: tags.value });
     }
 
     if (optionsWithoutRelations.withDeleted) {
-      qb = qb.withDeleted()
+      qb = qb.withDeleted();
     }
 
-    let entities: Product[]
-    let count = 0
+    let entities: Product[];
+    let count = 0;
     if (shouldCount) {
-      const result = await qb.getManyAndCount()
-      entities = result[0]
-      count = result[1]
+      const result = await qb.getManyAndCount();
+      entities = result[0];
+      count = result[1];
     } else {
-      entities = await qb.getMany()
+      entities = await qb.getMany();
     }
 
-    return [entities, count]
+    return [entities, count];
   }
 
   private getGroupedRelations(relations: Array<keyof Product>): {
-    [toplevel: string]: string[]
+    [toplevel: string]: string[];
   } {
-    const groupedRelations: { [toplevel: string]: string[] } = {}
+    const groupedRelations: { [toplevel: string]: string[] } = {};
     for (const rel of relations) {
-      const [topLevel] = rel.split(".")
+      const [topLevel] = rel.split(".");
       if (groupedRelations[topLevel]) {
-        groupedRelations[topLevel].push(rel)
+        groupedRelations[topLevel].push(rel);
       } else {
-        groupedRelations[topLevel] = [rel]
+        groupedRelations[topLevel] = [rel];
       }
     }
 
-    return groupedRelations
+    return groupedRelations;
   }
 
   private async queryProductsWithIds(
@@ -99,7 +99,7 @@ export class ProductRepository extends Repository<Product> {
   ): Promise<Product[]> {
     const entitiesIdsWithRelations = await Promise.all(
       Object.entries(groupedRelations).map(([toplevel, rels]) => {
-        let querybuilder = this.createQueryBuilder("products")
+        let querybuilder = this.createQueryBuilder("products");
 
         if (toplevel === "variants") {
           querybuilder = querybuilder
@@ -110,24 +110,24 @@ export class ProductRepository extends Repository<Product> {
             )
             .orderBy({
               "variants.variant_rank": "ASC",
-            })
+            });
         } else {
           querybuilder = querybuilder.leftJoinAndSelect(
             `products.${toplevel}`,
             toplevel
-          )
+          );
         }
 
         for (const rel of rels) {
-          const [_, rest] = rel.split(".")
+          const [_, rest] = rel.split(".");
           if (!rest) {
-            continue
+            continue;
           }
           // Regex matches all '.' except the rightmost
           querybuilder = querybuilder.leftJoinAndSelect(
             rel.replace(/\.(?=[^.]*\.)/g, "__"),
             rel.replace(".", "__")
-          )
+          );
         }
 
         if (withDeleted) {
@@ -135,69 +135,69 @@ export class ProductRepository extends Repository<Product> {
             .where("products.id IN (:...entitiesIds)", {
               entitiesIds: entityIds,
             })
-            .withDeleted()
+            .withDeleted();
         } else {
           querybuilder = querybuilder.where(
             "products.deleted_at IS NULL AND products.id IN (:...entitiesIds)",
             {
               entitiesIds: entityIds,
             }
-          )
+          );
         }
 
-        return querybuilder.getMany()
+        return querybuilder.getMany();
       })
-    ).then(flatten)
+    ).then(flatten);
 
-    return entitiesIdsWithRelations
+    return entitiesIdsWithRelations;
   }
 
   public async findWithRelationsAndCount(
     relations: Array<keyof Product> = [],
     idsOrOptionsWithoutRelations: FindWithRelationsOptions = { where: {} }
   ): Promise<[Product[], number]> {
-    let count: number
-    let entities: Product[]
+    let count: number;
+    let entities: Product[];
     if (Array.isArray(idsOrOptionsWithoutRelations)) {
       entities = await this.findByIds(idsOrOptionsWithoutRelations, {
         withDeleted: idsOrOptionsWithoutRelations.withDeleted ?? false,
-      })
-      count = entities.length
+      });
+      count = entities.length;
     } else {
       const result = await this.queryProducts(
         idsOrOptionsWithoutRelations,
         true
-      )
-      entities = result[0]
-      count = result[1]
+      );
+      entities = result[0];
+      count = result[1];
     }
-    const entitiesIds = entities.map(({ id }) => id)
+    const entitiesIds = entities.map(({ id }) => id);
 
     if (entitiesIds.length === 0) {
       // no need to continue
-      return [[], count]
+      return [[], count];
     }
 
     if (relations.length === 0) {
       const toReturn = await this.findByIds(
         entitiesIds,
         idsOrOptionsWithoutRelations
-      )
-      return [toReturn, toReturn.length]
+      );
+      return [toReturn, toReturn.length];
     }
 
-    const groupedRelations = this.getGroupedRelations(relations)
+    const groupedRelations = this.getGroupedRelations(relations);
     const entitiesIdsWithRelations = await this.queryProductsWithIds(
       entitiesIds,
       groupedRelations,
       idsOrOptionsWithoutRelations.withDeleted
-    )
+    );
 
-    const entitiesAndRelations = entitiesIdsWithRelations.concat(entities)
+    const entitiesAndRelations = entitiesIdsWithRelations.concat(entities);
     const entitiesToReturn =
-      this.mergeEntitiesWithRelations(entitiesAndRelations)
+      this.mergeEntitiesWithRelations(entitiesAndRelations);
 
-    return [entitiesToReturn, count]
+    return [entitiesToReturn, count];
   }
 
   public async findWithRelations(
@@ -205,41 +205,41 @@ export class ProductRepository extends Repository<Product> {
     idsOrOptionsWithoutRelations: FindWithRelationsOptions = {},
     withDeleted = false
   ): Promise<Product[]> {
-    let entities: Product[]
+    let entities: Product[];
     if (Array.isArray(idsOrOptionsWithoutRelations)) {
       entities = await this.findByIds(idsOrOptionsWithoutRelations, {
         withDeleted,
-      })
+      });
     } else {
       const result = await this.queryProducts(
         idsOrOptionsWithoutRelations,
         false
-      )
-      entities = result[0]
+      );
+      entities = result[0];
     }
-    const entitiesIds = entities.map(({ id }) => id)
+    const entitiesIds = entities.map(({ id }) => id);
 
     if (entitiesIds.length === 0) {
       // no need to continue
-      return []
+      return [];
     }
 
     if (relations.length === 0) {
-      return await this.findByIds(entitiesIds, idsOrOptionsWithoutRelations)
+      return await this.findByIds(entitiesIds, idsOrOptionsWithoutRelations);
     }
 
-    const groupedRelations = this.getGroupedRelations(relations)
+    const groupedRelations = this.getGroupedRelations(relations);
     const entitiesIdsWithRelations = await this.queryProductsWithIds(
       entitiesIds,
       groupedRelations,
       withDeleted
-    )
+    );
 
-    const entitiesAndRelations = entitiesIdsWithRelations.concat(entities)
+    const entitiesAndRelations = entitiesIdsWithRelations.concat(entities);
     const entitiesToReturn =
-      this.mergeEntitiesWithRelations(entitiesAndRelations)
+      this.mergeEntitiesWithRelations(entitiesAndRelations);
 
-    return entitiesToReturn
+    return entitiesToReturn;
   }
 
   public async findOneWithRelations(
@@ -247,12 +247,12 @@ export class ProductRepository extends Repository<Product> {
     optionsWithoutRelations: FindWithRelationsOptions = { where: {} }
   ): Promise<Product> {
     // Limit 1
-    optionsWithoutRelations.take = 1
+    optionsWithoutRelations.take = 1;
 
     const result = await this.findWithRelations(
       relations,
       optionsWithoutRelations
-    )
-    return result[0]
+    );
+    return result[0];
   }
 }

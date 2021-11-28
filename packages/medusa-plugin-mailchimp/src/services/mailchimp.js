@@ -1,5 +1,5 @@
-import { BaseService } from "medusa-interfaces"
-import Mailchimp from "mailchimp-api-v3"
+import { BaseService } from "medusa-interfaces";
+import Mailchimp from "mailchimp-api-v3";
 
 class MailchimpService extends BaseService {
   /**
@@ -11,11 +11,11 @@ class MailchimpService extends BaseService {
    *    }
    */
   constructor({}, options) {
-    super()
+    super();
 
-    this.options_ = options
+    this.options_ = options;
 
-    this.mailchimp_ = new Mailchimp(options.api_key)
+    this.mailchimp_ = new Mailchimp(options.api_key);
   }
 
   /**
@@ -32,8 +32,8 @@ class MailchimpService extends BaseService {
         status: "subscribed",
         ...data,
       }
-    )
+    );
   }
 }
 
-export default MailchimpService
+export default MailchimpService;

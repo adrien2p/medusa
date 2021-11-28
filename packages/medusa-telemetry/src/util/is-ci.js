@@ -1,4 +1,4 @@
-import ci from "ci-info"
+import ci from "ci-info";
 
 const CI_DEFINITIONS = [
   getEnvDetect({ key: `NOW_BUILDER_ANNOTATE`, name: `ZEIT Now` }),
@@ -14,22 +14,22 @@ const CI_DEFINITIONS = [
   herokuDetect,
   getEnvFromCIInfo,
   envFromCIWithNoName,
-]
+];
 
 function lookupCI() {
   for (const fn of CI_DEFINITIONS) {
     try {
-      const res = fn()
+      const res = fn();
       if (res) {
-        return res
+        return res;
       }
     } catch (e) {
       // ignore
     }
   }
-  return null
+  return null;
 }
-const CIName = lookupCI()
+const CIName = lookupCI();
 
 /**
  * Determines whether the environment where the code is running is in CI
@@ -37,7 +37,7 @@ const CIName = lookupCI()
  */
 
 export function isCI() {
-  return !!CIName
+  return !!CIName;
 }
 
 /**
@@ -47,23 +47,23 @@ export function isCI() {
 
 export function getCIName() {
   if (!isCI()) {
-    return null
+    return null;
   }
-  return CIName
+  return CIName;
 }
 
 function getEnvFromCIInfo() {
-  if (ci.isCI) return ci.name || `ci-info detected w/o name`
-  return null
+  if (ci.isCI) return ci.name || `ci-info detected w/o name`;
+  return null;
 }
 
 function getEnvDetect({ key, name }) {
-  return function() {
+  return function () {
     if (process.env[key]) {
-      return name
+      return name;
     }
-    return null
-  }
+    return null;
+  };
 }
 
 function herokuDetect() {
@@ -71,19 +71,19 @@ function herokuDetect() {
     typeof process.env.NODE === `string` &&
     /\.heroku\/node\/bin\/node/.test(process.env.NODE) &&
     `Heroku`
-  )
+  );
 }
 
 function envFromCIAndCIName() {
   if (process.env.CI_NAME && process.env.CI) {
-    return process.env.CI_NAME
+    return process.env.CI_NAME;
   }
-  return null
+  return null;
 }
 
 function envFromCIWithNoName() {
   if (process.env.CI) {
-    return `CI detected without name`
+    return `CI detected without name`;
   }
-  return null
+  return null;
 }

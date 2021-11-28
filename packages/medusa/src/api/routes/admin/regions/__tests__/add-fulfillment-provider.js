@@ -1,13 +1,13 @@
-import { IdMap } from "medusa-test-utils"
-import { request } from "../../../../../helpers/test-request"
-import { RegionServiceMock } from "../../../../../services/__mocks__/region"
+import { IdMap } from "medusa-test-utils";
+import { request } from "../../../../../helpers/test-request";
+import { RegionServiceMock } from "../../../../../services/__mocks__/region";
 
 describe("POST /admin/regions/:region_id/fulfillment-providers", () => {
   describe("successful creation", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
-      const id = IdMap.getId("testRegion")
+      const id = IdMap.getId("testRegion");
       subject = await request(
         "POST",
         `/admin/regions/${id}/fulfillment-providers`,
@@ -21,19 +21,19 @@ describe("POST /admin/regions/:region_id/fulfillment-providers", () => {
             },
           },
         }
-      )
-    })
+      );
+    });
 
     it("returns 200", () => {
-      expect(subject.status).toEqual(200)
-    })
+      expect(subject.status).toEqual(200);
+    });
 
     it("calls service addCountry", () => {
-      expect(RegionServiceMock.addFulfillmentProvider).toHaveBeenCalledTimes(1)
+      expect(RegionServiceMock.addFulfillmentProvider).toHaveBeenCalledTimes(1);
       expect(RegionServiceMock.addFulfillmentProvider).toHaveBeenCalledWith(
         IdMap.getId("testRegion"),
         "default_provider"
-      )
-    })
-  })
-})
+      );
+    });
+  });
+});

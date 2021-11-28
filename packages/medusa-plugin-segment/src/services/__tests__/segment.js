@@ -1,6 +1,6 @@
-import SegmentService from "../segment"
+import SegmentService from "../segment";
 
-jest.mock("analytics-node")
+jest.mock("analytics-node");
 
 const orderFactory = (config = {}) => {
   return {
@@ -50,8 +50,8 @@ const orderFactory = (config = {}) => {
     discount_total: 0,
     gift_card_total: 0,
     ...config,
-  }
-}
+  };
+};
 
 describe("SegmentService", () => {
   const ProductService = {
@@ -61,13 +61,13 @@ describe("SegmentService", () => {
         type: { value: "Type" },
         subtitle: "Subtitle",
       }),
-  }
+  };
 
   const TotalsService = {
     getLineItemRefund: (_, item) => {
-      return item.unit_price
+      return item.unit_price;
     },
-  }
+  };
 
   describe("buildOrder", () => {
     const segmentService = new SegmentService(
@@ -76,18 +76,18 @@ describe("SegmentService", () => {
         totalsService: TotalsService,
       },
       { account: "test" }
-    )
+    );
 
     segmentService.getReportingValue = async (_, v) => {
-      const num = v
-      return Promise.resolve(Number(Math.round(num + "e2") + "e-2"))
-    }
+      const num = v;
+      return Promise.resolve(Number(Math.round(num + "e2") + "e-2"));
+    };
 
     it("successfully builds sales order", async () => {
-      jest.clearAllMocks()
+      jest.clearAllMocks();
 
-      const order = orderFactory()
-      const segmentOrder = await segmentService.buildOrder(order)
+      const order = orderFactory();
+      const segmentOrder = await segmentService.buildOrder(order);
 
       expect(segmentOrder).toEqual({
         checkout_id: "cart_13",
@@ -131,22 +131,22 @@ describe("SegmentService", () => {
         subtotal: 22,
         tax: 0,
         total: 123.99,
-      })
-    })
+      });
+    });
 
     it("successfully adds return reason and note on buildOrder", async () => {
-      jest.clearAllMocks()
+      jest.clearAllMocks();
 
-      const order = orderFactory()
+      const order = orderFactory();
       order.items = order.items.map((i) => {
-        i.note = "testing 1234"
+        i.note = "testing 1234";
         i.reason = {
           value: "test_reason",
           id: "rr_test",
-        }
-        return i
-      })
-      const segmentOrder = await segmentService.buildOrder(order)
+        };
+        return i;
+      });
+      const segmentOrder = await segmentService.buildOrder(order);
 
       expect(segmentOrder).toEqual({
         checkout_id: "cart_13",
@@ -193,14 +193,14 @@ describe("SegmentService", () => {
         subtotal: 22,
         tax: 0,
         total: 123.99,
-      })
-    })
+      });
+    });
 
     it("successfully builds order with zero decimal currency", async () => {
-      jest.clearAllMocks()
+      jest.clearAllMocks();
 
-      const order = orderFactory({ currency_code: "krw" })
-      const segmentOrder = await segmentService.buildOrder(order)
+      const order = orderFactory({ currency_code: "krw" });
+      const segmentOrder = await segmentService.buildOrder(order);
 
       expect(segmentOrder).toEqual({
         checkout_id: "cart_13",
@@ -244,7 +244,7 @@ describe("SegmentService", () => {
         subtotal: 2200,
         tax: 0,
         total: 12399,
-      })
-    })
-  })
-})
+      });
+    });
+  });
+});

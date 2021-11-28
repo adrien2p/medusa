@@ -1,4 +1,4 @@
-import CustomerService from "../../../../services/customer"
+import CustomerService from "../../../../services/customer";
 
 /**
  * @oas [get] /customers/{id}
@@ -21,11 +21,11 @@ import CustomerService from "../../../../services/customer"
  *               $ref: "#/components/schemas/customer"
  */
 export default async (req, res) => {
-  const { id } = req.params
-  const customerService: CustomerService = req.scope.resolve("customerService")
+  const { id } = req.params;
+  const customerService: CustomerService = req.scope.resolve("customerService");
   const customer = await customerService.retrieve(id, {
     relations: ["orders", "shipping_addresses"],
-  })
+  });
 
-  res.json({ customer })
-}
+  res.json({ customer });
+};

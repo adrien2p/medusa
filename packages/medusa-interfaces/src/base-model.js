@@ -1,4 +1,4 @@
-import mongoose from "mongoose"
+import mongoose from "mongoose";
 
 /**
  * Interface for data models. The default data layer uses an internal mongoose
@@ -8,7 +8,7 @@ import mongoose from "mongoose"
 class BaseModel {
   constructor() {
     /** @const the underlying mongoose model used for queries */
-    this.mongooseModel_ = this.createMongooseModel_()
+    this.mongooseModel_ = this.createMongooseModel_();
   }
 
   /**
@@ -18,9 +18,9 @@ class BaseModel {
    */
   getSchema() {
     if (!this.constructor.schema) {
-      throw new Error("Schema not defined")
+      throw new Error("Schema not defined");
     }
-    return this.constructor.schema
+    return this.constructor.schema;
   }
 
   /**
@@ -30,9 +30,9 @@ class BaseModel {
    */
   getModelName() {
     if (!this.constructor.modelName) {
-      throw new Error("Every model must have a static modelName property")
+      throw new Error("Every model must have a static modelName property");
     }
-    return this.constructor.modelName
+    return this.constructor.modelName;
   }
 
   /**
@@ -41,10 +41,10 @@ class BaseModel {
    */
   getSchemaOptions() {
     if (!this.constructor.schemaOptions) {
-      return {}
+      return {};
     }
 
-    return this.constructor.schemaOptions
+    return this.constructor.schemaOptions;
   }
 
   /**
@@ -53,18 +53,18 @@ class BaseModel {
    * @return {Mongooose.Model} the mongoose model
    */
   createMongooseModel_() {
-    const schema = this.getSchema()
-    const options = this.getSchemaOptions()
+    const schema = this.getSchema();
+    const options = this.getSchemaOptions();
 
-    const mongooseSchema = new mongoose.Schema(schema, options)
+    const mongooseSchema = new mongoose.Schema(schema, options);
 
-    return mongoose.model(this.getModelName(), mongooseSchema)
+    return mongoose.model(this.getModelName(), mongooseSchema);
   }
 
   /**
    */
   startSession() {
-    return this.mongooseModel_.startSession()
+    return this.mongooseModel_.startSession();
   }
 
   /**
@@ -74,7 +74,7 @@ class BaseModel {
    * @return {?mongoose.Document} the retreived mongoose document or null.
    */
   findOne(query, options = {}) {
-    return this.mongooseModel_.findOne(query, options).lean()
+    return this.mongooseModel_.findOne(query, options).lean();
   }
 
   /**
@@ -89,11 +89,11 @@ class BaseModel {
       .find(query, options)
       .skip(offset)
       .limit(limit)
-      .lean()
+      .lean();
   }
 
   count() {
-    return this.mongooseModel_.count({})
+    return this.mongooseModel_.count({});
   }
 
   /**
@@ -104,8 +104,8 @@ class BaseModel {
    * @return {object} mongoose result
    */
   updateOne(query, update, options = {}) {
-    options.new = true
-    return this.mongooseModel_.findOneAndUpdate(query, update, options).lean()
+    options.new = true;
+    return this.mongooseModel_.findOneAndUpdate(query, update, options).lean();
   }
 
   /**
@@ -116,7 +116,7 @@ class BaseModel {
    * @return {object} mongoose result
    */
   update(query, update, options) {
-    return this.mongooseModel_.update(query, update, options)
+    return this.mongooseModel_.update(query, update, options);
   }
 
   /**
@@ -126,7 +126,7 @@ class BaseModel {
    * @return {object} mongoose result
    */
   create(object, options) {
-    return this.mongooseModel_.create(object, options)
+    return this.mongooseModel_.create(object, options);
   }
 
   /**
@@ -136,7 +136,7 @@ class BaseModel {
    * @return {object} mongoose result
    */
   deleteOne(query, options) {
-    return this.mongooseModel_.deleteOne(query, options)
+    return this.mongooseModel_.deleteOne(query, options);
   }
 
   /**
@@ -146,8 +146,8 @@ class BaseModel {
    * @return {object} mongoose result
    */
   delete(query, options) {
-    return this.mongooseModel_.deleteMany(query, options)
+    return this.mongooseModel_.deleteMany(query, options);
   }
 }
 
-export default BaseModel
+export default BaseModel;

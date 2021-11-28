@@ -1,11 +1,11 @@
-import { createConnection } from "typeorm"
+import { createConnection } from "typeorm";
 
-import { ShortenedNamingStrategy } from "../utils/naming-strategy"
+import { ShortenedNamingStrategy } from "../utils/naming-strategy";
 
 export default async ({ container, configModule }) => {
-  const entities = container.resolve("db_entities")
+  const entities = container.resolve("db_entities");
 
-  const isSqlite = configModule.projectConfig.database_type === "sqlite"
+  const isSqlite = configModule.projectConfig.database_type === "sqlite";
 
   const connection = await createConnection({
     type: configModule.projectConfig.database_type,
@@ -15,13 +15,13 @@ export default async ({ container, configModule }) => {
     entities,
     namingStrategy: new ShortenedNamingStrategy(),
     logging: configModule.projectConfig.database_logging || false,
-  })
+  });
 
   if (isSqlite) {
-    await connection.query(`PRAGMA foreign_keys = OFF`)
-    await connection.synchronize()
-    await connection.query(`PRAGMA foreign_keys = ON`)
+    await connection.query(`PRAGMA foreign_keys = OFF`);
+    await connection.synchronize();
+    await connection.query(`PRAGMA foreign_keys = ON`);
   }
 
-  return connection
-}
+  return connection;
+};

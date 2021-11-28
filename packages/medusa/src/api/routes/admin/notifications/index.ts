@@ -1,17 +1,17 @@
-import { Router } from "express"
-import { Notification } from "./../../../../"
-import { PaginatedResponse } from "./../../../../types/common"
-import middlewares from "../../../middlewares"
+import { Router } from "express";
+import { Notification } from "./../../../../";
+import { PaginatedResponse } from "./../../../../types/common";
+import middlewares from "../../../middlewares";
 
-const route = Router()
+const route = Router();
 
 export default (app) => {
-  app.use("/notifications", route)
+  app.use("/notifications", route);
 
   /**
    * List notifications
    */
-  route.get("/", middlewares.wrap(require("./list-notifications").default))
+  route.get("/", middlewares.wrap(require("./list-notifications").default));
 
   /**
    * Resend a notification
@@ -19,13 +19,13 @@ export default (app) => {
   route.post(
     "/:id/resend",
     middlewares.wrap(require("./resend-notification").default)
-  )
+  );
 
-  return app
-}
+  return app;
+};
 
-export const defaultAdminNotificationsRelations = ["resends"]
-export const allowedAdminNotificationsRelations = ["resends"]
+export const defaultAdminNotificationsRelations = ["resends"];
+export const allowedAdminNotificationsRelations = ["resends"];
 
 export const defaultAdminNotificationsFields = [
   "id",
@@ -36,7 +36,7 @@ export const defaultAdminNotificationsFields = [
   "provider_id",
   "created_at",
   "updated_at",
-]
+];
 
 export const allowedAdminNotificationsFields = [
   "id",
@@ -47,12 +47,12 @@ export const allowedAdminNotificationsFields = [
   "to",
   "created_at",
   "updated_at",
-]
+];
 
 export type AdminNotificationsListRes = {
-  notifications: Notification[]
-}
+  notifications: Notification[];
+};
 
 export type AdminNotificationsRes = PaginatedResponse & {
-  notification: Notification
-}
+  notification: Notification;
+};

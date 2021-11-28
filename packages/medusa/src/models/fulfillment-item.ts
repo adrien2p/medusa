@@ -14,29 +14,29 @@ import {
   ManyToMany,
   JoinColumn,
   JoinTable,
-} from "typeorm"
+} from "typeorm";
 
-import { Fulfillment } from "./fulfillment"
-import { LineItem } from "./line-item"
+import { Fulfillment } from "./fulfillment";
+import { LineItem } from "./line-item";
 
 @Entity()
 export class FulfillmentItem {
   @PrimaryColumn()
-  fulfillment_id: string
+  fulfillment_id: string;
 
   @PrimaryColumn()
-  item_id: string
+  item_id: string;
 
   @ManyToOne(() => Fulfillment)
   @JoinColumn({ name: "fulfillment_id" })
-  fulfillment: Fulfillment
+  fulfillment: Fulfillment;
 
   @ManyToOne(() => LineItem)
   @JoinColumn({ name: "item_id" })
-  item: LineItem
+  item: LineItem;
 
   @Column({ type: "int" })
-  quantity: number
+  quantity: number;
 }
 
 /**

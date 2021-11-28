@@ -9,91 +9,88 @@ import {
   OneToOne,
   ManyToOne,
   JoinColumn,
-} from "typeorm"
-import { ulid } from "ulid"
-import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column"
+} from "typeorm";
+import { ulid } from "ulid";
+import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column";
 
-import { Swap } from "./swap"
-import { Currency } from "./currency"
-import { Cart } from "./cart"
-import { Order } from "./order"
-import { DraftOrder } from "./draft-order"
+import { Swap } from "./swap";
+import { Currency } from "./currency";
+import { Cart } from "./cart";
+import { Order } from "./order";
+import { DraftOrder } from "./draft-order";
 
 @Entity()
 export class Payment {
   @PrimaryColumn()
-  id: string
+  id: string;
 
   @Index()
   @Column({ nullable: true })
-  swap_id: string
+  swap_id: string;
 
   @OneToOne(() => Swap)
   @JoinColumn({ name: "swap_id" })
-  swap: Swap
+  swap: Swap;
 
   @Index()
   @Column({ nullable: true })
-  cart_id: string
+  cart_id: string;
 
   @OneToOne(() => Cart)
   @JoinColumn({ name: "cart_id" })
-  cart: Cart
+  cart: Cart;
 
   @Index()
   @Column({ nullable: true })
-  order_id: string
+  order_id: string;
 
-  @ManyToOne(
-    () => Order,
-    order => order.payments
-  )
+  @ManyToOne(() => Order, (order) => order.payments)
   @JoinColumn({ name: "order_id" })
-  order: Order
+  order: Order;
 
   @Column({ type: "int" })
-  amount: number
+  amount: number;
 
   @Column()
-  currency_code: string
+  currency_code: string;
 
   @ManyToOne(() => Currency)
   @JoinColumn({ name: "currency_code", referencedColumnName: "code" })
-  currency: Currency
+  currency: Currency;
 
   @Column({ type: "int", default: 0 })
-  amount_refunded: number
+  amount_refunded: number;
 
   @Index()
   @Column()
-  provider_id: string
+  provider_id: string;
 
   @DbAwareColumn({ type: "jsonb" })
-  data: any
+  data: any;
 
   @Column({ type: resolveDbType("timestamptz"), nullable: true })
-  captured_at: Date
+  captured_at: Date;
 
   @Column({ type: resolveDbType("timestamptz"), nullable: true })
-  canceled_at: Date
+  canceled_at: Date;
 
   @CreateDateColumn({ type: resolveDbType("timestamptz") })
-  created_at: Date
+  created_at: Date;
 
   @UpdateDateColumn({ type: resolveDbType("timestamptz") })
-  updated_at: Date
+  updated_at: Date;
 
   @DbAwareColumn({ type: "jsonb", nullable: true })
-  metadata: any
+  metadata: any;
 
   @Column({ nullable: true })
-  idempotency_key: string
+  idempotency_key: string;
 
   @BeforeInsert()
   private beforeInsert() {
-    if (this.id) return
-    const id = ulid()
-    this.id = `pay_${id}`
+    if (this.id) return;
+    const id = ulid();
+    this.id = `pay_${id}`;
   }
 }
 

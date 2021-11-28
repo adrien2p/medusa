@@ -13,24 +13,24 @@ import {
   ManyToMany,
   JoinColumn,
   JoinTable,
-} from "typeorm"
-import { ulid } from "ulid"
-import { DbAwareColumn } from "../utils/db-aware-column"
+} from "typeorm";
+import { ulid } from "ulid";
+import { DbAwareColumn } from "../utils/db-aware-column";
 
 @Entity()
 export class StagedJob {
   @PrimaryColumn()
-  id: string
+  id: string;
 
   @Column()
-  event_name: string
+  event_name: string;
 
   @DbAwareColumn({ type: "jsonb" })
-  data: any
+  data: any;
 
   @BeforeInsert()
   private beforeInsert() {
-    const id = ulid()
-    this.id = `job_${id}`
+    const id = ulid();
+    this.id = `job_${id}`;
   }
 }

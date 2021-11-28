@@ -1,12 +1,12 @@
-import { MedusaError } from "medusa-core-utils"
-import { BaseService } from "medusa-interfaces"
+import { MedusaError } from "medusa-core-utils";
+import { BaseService } from "medusa-interfaces";
 
 class ClaimItemService extends BaseService {
   static Events = {
     CREATED: "claim_item.created",
     UPDATED: "claim_item.updated",
     CANCELED: "claim_item.canceled",
-  }
+  };
 
   constructor({
     manager,
@@ -16,26 +16,26 @@ class ClaimItemService extends BaseService {
     lineItemService,
     eventBusService,
   }) {
-    super()
+    super();
 
     /** @private @constant {EntityManager} */
-    this.manager_ = manager
+    this.manager_ = manager;
 
     /** @private @constant {ClaimRepository} */
-    this.claimItemRepository_ = claimItemRepository
-    this.claimTagRepository_ = claimTagRepository
-    this.claimImageRepository_ = claimImageRepository
+    this.claimItemRepository_ = claimItemRepository;
+    this.claimTagRepository_ = claimTagRepository;
+    this.claimImageRepository_ = claimImageRepository;
 
     /** @private @constant {LineItemService} */
-    this.lineItemService_ = lineItemService
+    this.lineItemService_ = lineItemService;
 
     /** @private @constant {EventBus} */
-    this.eventBus_ = eventBusService
+    this.eventBus_ = eventBusService;
   }
 
   withTransaction(manager) {
     if (!manager) {
-      return this
+      return this;
     }
 
     const cloned = new ClaimItemService({
@@ -45,18 +45,18 @@ class ClaimItemService extends BaseService {
       claimImageRepository: this.claimImageRepository_,
       lineItemService: this.lineItemService_,
       eventBusService: this.eventBus_,
-    })
+    });
 
-    cloned.transactionManager_ = manager
+    cloned.transactionManager_ = manager;
 
-    return cloned
+    return cloned;
   }
 
   create(data) {
     return this.atomicPhase_(async (manager) => {
-      const ciRepo = manager.getCustomRepository(this.claimItemRepository_)
+      const ciRepo = manager.getCustomRepository(this.claimItemRepository_);
 
-      const { item_id, reason, quantity, tags, images, ...rest } = data
+      const { item_id, reason, quantity, tags, images, ...rest } = data;
 
       if (
         reason !== "missing_item" &&
@@ -67,47 +67,47 @@ class ClaimItemService extends BaseService {
         throw new MedusaError(
           MedusaError.Types.INVALID_DATA,
           `Claim Item reason must be one of "missing_item", "wrong_item", "production_failure" or "other".`
-        )
+        );
       }
 
       const lineItem = await this.lineItemService_
         .withTransaction(manager)
-        .retrieve(item_id)
+        .retrieve(item_id);
 
       if (lineItem.fulfilled_quantity < quantity) {
         throw new MedusaError(
           MedusaError.Types.NOT_ALLOWED,
           "Cannot claim more of an item than has been fulfilled."
-        )
+        );
       }
 
-      let tagsToAdd = []
+      let tagsToAdd = [];
       if (tags && tags.length) {
         const claimTagRepo = manager.getCustomRepository(
           this.claimTagRepository_
-        )
+        );
         tagsToAdd = await Promise.all(
           tags.map(async (t) => {
-            const normalized = t.trim().toLowerCase()
+            const normalized = t.trim().toLowerCase();
             const existing = await claimTagRepo.findOne({
               where: { value: normalized },
-            })
+            });
             if (existing) {
-              return existing
+              return existing;
             }
-            return claimTagRepo.create({ value: normalized })
+            return claimTagRepo.create({ value: normalized });
           })
-        )
+        );
       }
 
-      let imagesToAdd = []
+      let imagesToAdd = [];
       if (images && images.length) {
         const claimImgRepo = manager.getCustomRepository(
           this.claimImageRepository_
-        )
+        );
         imagesToAdd = images.map((url) => {
-          return claimImgRepo.create({ url })
-        })
+          return claimImgRepo.create({ url });
+        });
       }
 
       const created = ciRepo.create({
@@ -118,58 +118,58 @@ class ClaimItemService extends BaseService {
         item_id,
         reason,
         quantity,
-      })
+      });
 
-      const result = await ciRepo.save(created)
+      const result = await ciRepo.save(created);
 
       await this.eventBus_
         .withTransaction(manager)
         .emit(ClaimItemService.Events.CREATED, {
           id: result.id,
-        })
+        });
 
-      return result
-    })
+      return result;
+    });
   }
 
   update(id, data) {
     return this.atomicPhase_(async (manager) => {
-      const ciRepo = manager.getCustomRepository(this.claimItemRepository_)
-      const item = await this.retrieve(id, { relations: ["images", "tags"] })
+      const ciRepo = manager.getCustomRepository(this.claimItemRepository_);
+      const item = await this.retrieve(id, { relations: ["images", "tags"] });
 
-      const { tags, images, reason, note, metadata } = data
+      const { tags, images, reason, note, metadata } = data;
 
       if (note) {
-        item.note = note
+        item.note = note;
       }
 
       if (reason) {
-        item.reason = reason
+        item.reason = reason;
       }
 
       if (metadata) {
-        item.metadata = this.setMetadata_(item, metadata)
+        item.metadata = this.setMetadata_(item, metadata);
       }
 
       if (tags) {
-        item.tags = []
+        item.tags = [];
         const claimTagRepo = manager.getCustomRepository(
           this.claimTagRepository_
-        )
+        );
         for (const t of tags) {
           if (t.id) {
-            item.tags.push(t)
+            item.tags.push(t);
           } else {
-            const normalized = t.value.trim().toLowerCase()
+            const normalized = t.value.trim().toLowerCase();
 
             const existing = await claimTagRepo.findOne({
               where: { value: normalized },
-            })
+            });
 
             if (existing) {
-              item.tags.push(existing)
+              item.tags.push(existing);
             } else {
-              item.tags.push(claimTagRepo.create({ value: normalized }))
+              item.tags.push(claimTagRepo.create({ value: normalized }));
             }
           }
         }
@@ -178,35 +178,35 @@ class ClaimItemService extends BaseService {
       if (images) {
         const claimImgRepo = manager.getCustomRepository(
           this.claimImageRepository_
-        )
-        const ids = images.map((i) => i.id)
+        );
+        const ids = images.map((i) => i.id);
         for (const i of item.images) {
           if (!ids.includes(i.id)) {
-            await claimImgRepo.remove(i)
+            await claimImgRepo.remove(i);
           }
         }
 
-        item.images = []
+        item.images = [];
 
         for (const i of images) {
           if (i.id) {
-            item.images.push(i)
+            item.images.push(i);
           } else {
-            item.images.push(claimImgRepo.create({ url: i.url }))
+            item.images.push(claimImgRepo.create({ url: i.url }));
           }
         }
       }
 
-      await ciRepo.save(item)
+      await ciRepo.save(item);
 
       await this.eventBus_
         .withTransaction(manager)
         .emit(ClaimItemService.Events.UPDATED, {
           id: item.id,
-        })
+        });
 
-      return item
-    })
+      return item;
+    });
   }
 
   async cancel(id) {}
@@ -220,9 +220,9 @@ class ClaimItemService extends BaseService {
     selector,
     config = { skip: 0, take: 50, order: { created_at: "DESC" } }
   ) {
-    const ciRepo = this.manager_.getCustomRepository(this.claimItemRepository_)
-    const query = this.buildQuery_(selector, config)
-    return ciRepo.find(query)
+    const ciRepo = this.manager_.getCustomRepository(this.claimItemRepository_);
+    const query = this.buildQuery_(selector, config);
+    return ciRepo.find(query);
   }
 
   /**
@@ -234,20 +234,20 @@ class ClaimItemService extends BaseService {
   async retrieve(id, config = {}) {
     const claimItemRepo = this.manager_.getCustomRepository(
       this.claimItemRepository_
-    )
-    const validatedId = this.validateId_(id)
+    );
+    const validatedId = this.validateId_(id);
 
-    const query = this.buildQuery_({ id: validatedId }, config)
-    const item = await claimItemRepo.findOne(query)
+    const query = this.buildQuery_({ id: validatedId }, config);
+    const item = await claimItemRepo.findOne(query);
 
     if (!item) {
       throw new MedusaError(
         MedusaError.Types.NOT_FOUND,
         `Claim item with id: ${id} was not found.`
-      )
+      );
     }
 
-    return item
+    return item;
   }
 
   /**
@@ -257,22 +257,22 @@ class ClaimItemService extends BaseService {
    * @return {Promise} resolves to the updated result.
    */
   async deleteMetadata(orderId, key) {
-    const validatedId = this.validateId_(orderId)
+    const validatedId = this.validateId_(orderId);
 
     if (typeof key !== "string") {
       throw new MedusaError(
         MedusaError.Types.INVALID_ARGUMENT,
         "Key type is invalid. Metadata keys must be strings"
-      )
+      );
     }
 
-    const keyPath = `metadata.${key}`
+    const keyPath = `metadata.${key}`;
     return this.orderModel_
       .updateOne({ _id: validatedId }, { $unset: { [keyPath]: "" } })
       .catch((err) => {
-        throw new MedusaError(MedusaError.Types.DB_ERROR, err.message)
-      })
+        throw new MedusaError(MedusaError.Types.DB_ERROR, err.message);
+      });
   }
 }
 
-export default ClaimItemService
+export default ClaimItemService;

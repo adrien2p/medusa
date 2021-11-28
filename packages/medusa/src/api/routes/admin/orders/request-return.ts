@@ -1,4 +1,4 @@
-import { Type } from "class-transformer"
+import { Type } from "class-transformer";
 import {
   IsArray,
   IsBoolean,
@@ -6,16 +6,16 @@ import {
   IsOptional,
   IsString,
   ValidateNested,
-} from "class-validator"
-import { MedusaError } from "medusa-core-utils"
-import { defaultAdminOrdersRelations, defaultAdminOrdersFields } from "."
+} from "class-validator";
+import { MedusaError } from "medusa-core-utils";
+import { defaultAdminOrdersRelations, defaultAdminOrdersFields } from ".";
 import {
   EventBusService,
   OrderService,
   ReturnService,
-} from "../../../../services"
-import { OrdersReturnItem } from "../../../../types/orders"
-import { validator } from "../../../../utils/validator"
+} from "../../../../services";
+import { OrdersReturnItem } from "../../../../types/orders";
+import { validator } from "../../../../utils/validator";
 
 /**
  * @oas [post] /orders/{id}/returns
@@ -81,37 +81,37 @@ import { validator } from "../../../../utils/validator"
  *               $ref: "#/components/schemas/order"
  */
 export default async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params;
 
-  const value = await validator(AdminPostOrdersOrderReturnsReq, req.body)
+  const value = await validator(AdminPostOrdersOrderReturnsReq, req.body);
 
-  const idempotencyKeyService = req.scope.resolve("idempotencyKeyService")
+  const idempotencyKeyService = req.scope.resolve("idempotencyKeyService");
 
-  const headerKey = req.get("Idempotency-Key") || ""
+  const headerKey = req.get("Idempotency-Key") || "";
 
-  let idempotencyKey
+  let idempotencyKey;
   try {
     idempotencyKey = await idempotencyKeyService.initializeRequest(
       headerKey,
       req.method,
       req.params,
       req.path
-    )
+    );
   } catch (error) {
-    res.status(409).send("Failed to create idempotency key")
-    return
+    res.status(409).send("Failed to create idempotency key");
+    return;
   }
 
-  res.setHeader("Access-Control-Expose-Headers", "Idempotency-Key")
-  res.setHeader("Idempotency-Key", idempotencyKey.idempotency_key)
+  res.setHeader("Access-Control-Expose-Headers", "Idempotency-Key");
+  res.setHeader("Idempotency-Key", idempotencyKey.idempotency_key);
 
   try {
-    const orderService: OrderService = req.scope.resolve("orderService")
-    const returnService: ReturnService = req.scope.resolve("returnService")
-    const eventBus: EventBusService = req.scope.resolve("eventBusService")
+    const orderService: OrderService = req.scope.resolve("orderService");
+    const returnService: ReturnService = req.scope.resolve("returnService");
+    const eventBus: EventBusService = req.scope.resolve("eventBusService");
 
-    let inProgress = true
-    let err = false
+    let inProgress = true;
+    let err = false;
 
     while (inProgress) {
       switch (idempotencyKey.recovery_point) {
@@ -123,38 +123,38 @@ export default async (req, res) => {
                 order_id: id,
                 idempotency_key: idempotencyKey.idempotency_key,
                 items: value.items,
-              }
+              };
 
               if (value.return_shipping) {
-                returnObj.shipping_method = value.return_shipping
+                returnObj.shipping_method = value.return_shipping;
               }
 
               if (typeof value.refund !== "undefined" && value.refund < 0) {
-                returnObj.refund_amount = 0
+                returnObj.refund_amount = 0;
               } else {
                 if (value.refund && value.refund >= 0) {
-                  returnObj.refund_amount = value.refund
+                  returnObj.refund_amount = value.refund;
                 }
               }
 
               const order = await orderService
                 .withTransaction(manager)
-                .retrieve(id)
+                .retrieve(id);
 
               const evaluatedNoNotification =
                 value.no_notification !== undefined
                   ? value.no_notification
-                  : order.no_notification
-              returnObj.no_notification = evaluatedNoNotification
+                  : order.no_notification;
+              returnObj.no_notification = evaluatedNoNotification;
 
               const createdReturn = await returnService
                 .withTransaction(manager)
-                .create(returnObj)
+                .create(returnObj);
 
               if (value.return_shipping) {
                 await returnService
                   .withTransaction(manager)
-                  .fulfill(createdReturn.id)
+                  .fulfill(createdReturn.id);
               }
 
               await eventBus
@@ -163,21 +163,21 @@ export default async (req, res) => {
                   id,
                   return_id: createdReturn.id,
                   no_notification: evaluatedNoNotification,
-                })
+                });
 
               return {
                 recovery_point: "return_requested",
-              }
+              };
             }
-          )
+          );
 
           if (error) {
-            inProgress = false
-            err = error
+            inProgress = false;
+            err = error;
           } else {
-            idempotencyKey = key
+            idempotencyKey = key;
           }
-          break
+          break;
         }
 
         case "return_requested": {
@@ -186,7 +186,7 @@ export default async (req, res) => {
             async (manager) => {
               let order = await orderService
                 .withTransaction(manager)
-                .retrieve(id, { relations: ["returns"] })
+                .retrieve(id, { relations: ["returns"] });
 
               /**
                * If we are ready to receive immediately, we find the newly created return
@@ -195,46 +195,46 @@ export default async (req, res) => {
               if (value.receive_now) {
                 let ret = await returnService.withTransaction(manager).list({
                   idempotency_key: idempotencyKey.idempotency_key,
-                })
+                });
 
                 if (!ret.length) {
                   throw new MedusaError(
                     MedusaError.Types.INVALID_DATA,
                     `Return not found`
-                  )
+                  );
                 }
 
-                ret = ret[0]
+                ret = ret[0];
 
                 order = await returnService
                   .withTransaction(manager)
-                  .receive(ret.id, value.items, value.refund)
+                  .receive(ret.id, value.items, value.refund);
               }
 
               order = await orderService.withTransaction(manager).retrieve(id, {
                 select: defaultAdminOrdersFields,
                 relations: defaultAdminOrdersRelations,
-              })
+              });
 
               return {
                 response_code: 200,
                 response_body: { order },
-              }
+              };
             }
-          )
+          );
 
           if (error) {
-            inProgress = false
-            err = error
+            inProgress = false;
+            err = error;
           } else {
-            idempotencyKey = key
+            idempotencyKey = key;
           }
-          break
+          break;
         }
 
         case "finished": {
-          inProgress = false
-          break
+          inProgress = false;
+          break;
         }
 
         default:
@@ -245,65 +245,65 @@ export default async (req, res) => {
               response_code: 500,
               response_body: { message: "Unknown recovery point" },
             }
-          )
-          break
+          );
+          break;
       }
     }
 
     if (err) {
-      throw err
+      throw err;
     }
 
-    res.status(idempotencyKey.response_code).json(idempotencyKey.response_body)
+    res.status(idempotencyKey.response_code).json(idempotencyKey.response_body);
   } catch (err) {
-    console.log(err)
-    throw err
+    console.log(err);
+    throw err;
   }
-}
+};
 
 type ReturnObj = {
-  order_id?: string
-  idempotency_key?: string
-  items?: OrdersReturnItem[]
-  shipping_method?: ReturnShipping
-  refund_amount?: number
-  no_notification?: boolean
-}
+  order_id?: string;
+  idempotency_key?: string;
+  items?: OrdersReturnItem[];
+  shipping_method?: ReturnShipping;
+  refund_amount?: number;
+  no_notification?: boolean;
+};
 
 export class AdminPostOrdersOrderReturnsReq {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => OrdersReturnItem)
-  items: OrdersReturnItem[]
+  items: OrdersReturnItem[];
 
   @IsOptional()
   @ValidateNested()
   @Type(() => ReturnShipping)
-  return_shipping?: ReturnShipping
+  return_shipping?: ReturnShipping = {} as ReturnShipping;
 
   @IsString()
   @IsOptional()
-  note?: string
+  note?: string;
 
   @IsBoolean()
   @IsOptional()
-  receive_now?: boolean = false
+  receive_now?: boolean = false;
 
   @IsBoolean()
   @IsOptional()
-  no_notification?: boolean
+  no_notification?: boolean;
 
   @IsInt()
   @IsOptional()
-  refund?: number
+  refund?: number;
 }
 
 class ReturnShipping {
   @IsString()
   @IsOptional()
-  option_id?: string
+  option_id?: string;
 
   @IsInt()
   @IsOptional()
-  price?: number
+  price?: number;
 }

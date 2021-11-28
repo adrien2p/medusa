@@ -1,34 +1,34 @@
-import axios, { AxiosError, AxiosInstance } from "axios"
-import * as rax from "retry-axios"
-import { v4 as uuidv4 } from "uuid"
+import axios, { AxiosError, AxiosInstance } from "axios";
+import * as rax from "retry-axios";
+import { v4 as uuidv4 } from "uuid";
 
 export interface Config {
-  baseUrl: string
-  maxRetries: number
+  baseUrl: string;
+  maxRetries: number;
 }
 export interface RequestOptions {
-  apiKey?: string
-  timeout?: number
-  numberOfRetries?: number
+  apiKey?: string;
+  timeout?: number;
+  numberOfRetries?: number;
 }
 
-export type RequestMethod = "DELETE" | "POST" | "GET"
+export type RequestMethod = "DELETE" | "POST" | "GET";
 
 const defaultConfig = {
   maxRetries: 0,
   baseUrl: "http://localhost:9000",
-}
+};
 
 class Client {
-  private axiosClient: AxiosInstance
-  private config: Config
+  private axiosClient: AxiosInstance;
+  private config: Config;
 
   constructor(config: Config) {
     /** @private @constant {AxiosInstance} */
-    this.axiosClient = this.createClient({ ...defaultConfig, ...config })
+    this.axiosClient = this.createClient({ ...defaultConfig, ...config });
 
     /** @private @constant {Config} */
-    this.config = { ...defaultConfig, ...config }
+    this.config = { ...defaultConfig, ...config };
   }
 
   shouldRetryCondition(
@@ -38,39 +38,39 @@ class Client {
   ): boolean {
     // Obviously, if we have reached max. retries we stop
     if (numRetries >= maxRetries) {
-      return false
+      return false;
     }
 
     // If no response, we assume a connection error and retry
     if (!err.response) {
-      return true
+      return true;
     }
 
     // Retry on conflicts
     if (err.response.status === 409) {
-      return true
+      return true;
     }
 
     // All 5xx errors are retried
     // OBS: We are currently not retrying 500 requests, since our core needs proper error handling.
     //      At the moment, 500 will be returned on all errors, that are not of type MedusaError.
     if (err.response.status > 500 && err.response.status <= 599) {
-      return true
+      return true;
     }
 
-    return false
+    return false;
   }
 
   // Stolen from https://github.com/stripe/stripe-node/blob/fd0a597064289b8c82f374f4747d634050739043/lib/utils.js#L282
   normalizeHeaders(obj: object): object {
     if (!(obj && typeof obj === "object")) {
-      return obj
+      return obj;
     }
 
     return Object.keys(obj).reduce((result, header) => {
-      result[this.normalizeHeader(header)] = obj[header]
-      return result
-    }, {})
+      result[this.normalizeHeader(header)] = obj[header];
+      return result;
+    }, {});
   }
 
   // Stolen from https://github.com/marten-de-vries/header-case-normalizer/blob/master/index.js#L36-L41
@@ -80,7 +80,7 @@ class Client {
       .map(
         (text) => text.charAt(0).toUpperCase() + text.substr(1).toLowerCase()
       )
-      .join("-")
+      .join("-");
   }
 
   /**
@@ -99,21 +99,25 @@ class Client {
     let defaultHeaders: object = {
       Accept: "application/json",
       "Content-Type": "application/json",
-    }
+    };
 
     // TODO: if route is an authenticated route, add api key
     if (path.startsWith("/admin")) {
       defaultHeaders = {
         ...defaultHeaders,
-      }
+      };
     }
 
     // only add idempotency key, if we want to retry
     if (this.config.maxRetries > 0 && method === "POST") {
-      defaultHeaders["Idempotency-Key"] = uuidv4()
+      defaultHeaders["Idempotency-Key"] = uuidv4();
     }
 
-    return Object.assign({}, defaultHeaders, this.normalizeHeaders(userHeaders))
+    return Object.assign(
+      {},
+      defaultHeaders,
+      this.normalizeHeaders(userHeaders)
+    );
   }
 
   /**
@@ -126,29 +130,29 @@ class Client {
   createClient(config: Config): AxiosInstance {
     const client = axios.create({
       baseURL: config.baseUrl,
-    })
+    });
 
-    rax.attach(client)
+    rax.attach(client);
 
     client.defaults.raxConfig = {
       instance: client,
       retry: config.maxRetries,
       backoffType: "exponential",
       shouldRetry: (err: AxiosError): boolean => {
-        const cfg = rax.getConfig(err)
+        const cfg = rax.getConfig(err);
         if (cfg) {
           return this.shouldRetryCondition(
             err,
             cfg.currentRetryAttempt || 1,
             cfg.retry || 3
-          )
+          );
         } else {
-          return false
+          return false;
         }
       },
-    }
+    };
 
-    return client
+    return client;
   }
 
   /**
@@ -159,12 +163,12 @@ class Client {
    * @return {object}
    */
   createRawResponse(data: object, status: number): object {
-    const res = { status }
+    const res = { status };
     Object.entries(data).map(([key, value]) => {
-      res[key] = value
-    })
+      res[key] = value;
+    });
 
-    return res as any // eslint-disable-line
+    return res as any; // eslint-disable-line
   }
 
   /**
@@ -188,12 +192,12 @@ class Client {
       data: payload,
       json: true,
       headers: this.setHeaders(options, method, path),
-    }
+    };
 
-    const { data, status } = await this.axiosClient(reqOpts)
+    const { data, status } = await this.axiosClient(reqOpts);
 
-    return this.createRawResponse(data, status)
+    return this.createRawResponse(data, status);
   }
 }
 
-export default Client
+export default Client;

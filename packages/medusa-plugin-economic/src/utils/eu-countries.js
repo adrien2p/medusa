@@ -27,4 +27,4 @@ export default [
   "FI",
   "SE",
   "UK",
-]
+];

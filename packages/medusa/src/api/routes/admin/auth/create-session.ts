@@ -1,10 +1,10 @@
-import _ from "lodash"
-import jwt from "jsonwebtoken"
-import config from "../../../../config"
-import { validator } from "../../../../utils/validator"
-import { IsEmail, IsNotEmpty, IsString } from "class-validator"
-import AuthService from "../../../../services/auth"
-import { MedusaError } from "medusa-core-utils"
+import _ from "lodash";
+import jwt from "jsonwebtoken";
+import config from "../../../../config";
+import { validator } from "../../../../utils/validator";
+import { IsEmail, IsNotEmpty, IsString } from "class-validator";
+import AuthService from "../../../../services/auth";
+import { MedusaError } from "medusa-core-utils";
 
 /**
  * @oas [post] /auth
@@ -32,36 +32,36 @@ export default async (req, res) => {
     throw new MedusaError(
       MedusaError.Types.NOT_FOUND,
       "Please configure jwtSecret in your environment"
-    )
+    );
   }
-  const validated = await validator(AdminPostAuthReq, req.body)
+  const validated = await validator(AdminPostAuthReq, req.body);
 
-  const authService: AuthService = req.scope.resolve("authService")
+  const authService: AuthService = req.scope.resolve("authService");
   const result = await authService.authenticate(
     validated.email,
     validated.password
-  )
+  );
 
   if (result.success && result.user) {
     // Add JWT to cookie
     req.session.jwt = jwt.sign({ userId: result.user.id }, config.jwtSecret, {
       expiresIn: "24h",
-    })
+    });
 
-    const cleanRes = _.omit(result.user, ["password_hash"])
+    const cleanRes = _.omit(result.user, ["password_hash"]);
 
-    res.json({ user: cleanRes })
+    res.json({ user: cleanRes });
   } else {
-    res.sendStatus(401)
+    res.sendStatus(401);
   }
-}
+};
 
 export class AdminPostAuthReq {
   @IsEmail()
   @IsNotEmpty()
-  email: string
+  email: string;
 
   @IsString()
   @IsNotEmpty()
-  password: string
+  password: string;
 }

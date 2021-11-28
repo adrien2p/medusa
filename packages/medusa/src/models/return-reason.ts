@@ -7,60 +7,59 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   PrimaryColumn,
-  ManyToOne, 
+  ManyToOne,
   OneToMany,
-  JoinColumn
-} from "typeorm"
-import { ulid } from "ulid"
-import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column"
+  JoinColumn,
+} from "typeorm";
+import { ulid } from "ulid";
+import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column";
 
 @Entity()
 export class ReturnReason {
   @PrimaryColumn()
-  id: string
+  id: string;
 
   @Index({ unique: true })
   @Column()
-  value: string
+  value: string;
 
   @Column()
-  label: string
+  label: string;
 
   @Column({ nullable: true })
-  description: string
+  description: string;
 
   @Column({ nullable: true })
-  parent_return_reason_id: string
+  parent_return_reason_id: string;
 
-  @ManyToOne(() => ReturnReason, {cascade: ['soft-remove']}
-  )
+  @ManyToOne(() => ReturnReason, { cascade: ["soft-remove"] })
   @JoinColumn({ name: "parent_return_reason_id" })
-  parent_return_reason: ReturnReason
+  parent_return_reason: ReturnReason;
 
   @OneToMany(
     () => ReturnReason,
-    return_reason => return_reason.parent_return_reason,
-    { cascade: ["insert", 'soft-remove'] }
+    (return_reason) => return_reason.parent_return_reason,
+    { cascade: ["insert", "soft-remove"] }
   )
-  return_reason_children: ReturnReason[]
+  return_reason_children: ReturnReason[];
 
   @CreateDateColumn({ type: resolveDbType("timestamptz") })
-  created_at: Date
+  created_at: Date;
 
   @UpdateDateColumn({ type: resolveDbType("timestamptz") })
-  updated_at: Date
+  updated_at: Date;
 
   @DeleteDateColumn({ type: resolveDbType("timestamptz") })
-  deleted_at: Date
+  deleted_at: Date;
 
   @DbAwareColumn({ type: "jsonb", nullable: true })
-  metadata: any
+  metadata: any;
 
   @BeforeInsert()
   private beforeInsert() {
-    if (this.id) return
-    const id = ulid()
-    this.id = `rr_${id}`
+    if (this.id) return;
+    const id = ulid();
+    this.id = `rr_${id}`;
   }
 }
 

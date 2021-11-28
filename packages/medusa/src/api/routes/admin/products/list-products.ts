@@ -1,4 +1,4 @@
-import { Type } from "class-transformer"
+import { Type } from "class-transformer";
 import {
   IsArray,
   IsBoolean,
@@ -7,13 +7,13 @@ import {
   IsOptional,
   IsString,
   ValidateNested,
-} from "class-validator"
-import * as _ from "lodash"
-import { identity } from "lodash"
-import { defaultAdminProductFields, defaultAdminProductRelations } from "."
-import { ProductService } from "../../../../services"
-import { DateComparisonOperator } from "../../../../types/common"
-import { validator } from "../../../../utils/validator"
+} from "class-validator";
+import * as _ from "lodash";
+import { identity } from "lodash";
+import { defaultAdminProductFields, defaultAdminProductRelations } from ".";
+import { ProductService } from "../../../../services";
+import { DateComparisonOperator } from "../../../../types/common";
+import { validator } from "../../../../utils/validator";
 
 /**
  * @oas [get] /products
@@ -64,18 +64,18 @@ import { validator } from "../../../../utils/validator"
  *                 $ref: "#/components/schemas/product"
  */
 export default async (req, res) => {
-  const validatedParams = await validator(AdminGetProductsParams, req.query)
+  const validatedParams = await validator(AdminGetProductsParams, req.query);
 
-  const productService: ProductService = req.scope.resolve("productService")
+  const productService: ProductService = req.scope.resolve("productService");
 
-  let includeFields: string[] = []
+  let includeFields: string[] = [];
   if (validatedParams.fields) {
-    includeFields = validatedParams.fields!.split(",")
+    includeFields = validatedParams.fields!.split(",");
   }
 
-  let expandFields: string[] = []
+  let expandFields: string[] = [];
   if (validatedParams.expand) {
-    expandFields = validatedParams.expand!.split(",")
+    expandFields = validatedParams.expand!.split(",");
   }
 
   const listConfig = {
@@ -85,7 +85,7 @@ export default async (req, res) => {
       : defaultAdminProductRelations,
     skip: validatedParams.offset,
     take: validatedParams.limit,
-  }
+  };
 
   const filterableFields = _.omit(validatedParams, [
     "limit",
@@ -93,20 +93,20 @@ export default async (req, res) => {
     "expand",
     "fields",
     "order",
-  ])
+  ]);
 
   const [products, count] = await productService.listAndCount(
     _.pickBy(filterableFields, identity),
     listConfig
-  )
+  );
 
   res.json({
     products,
     count,
     offset: validatedParams.offset,
     limit: validatedParams.limit,
-  })
-}
+  });
+};
 
 export enum ProductStatus {
   DRAFT = "draft",
@@ -119,80 +119,80 @@ export class AdminGetProductsPaginationParams {
   @IsNumber()
   @IsOptional()
   @Type(() => Number)
-  offset?: number = 0
+  offset?: number = 0;
 
   @IsNumber()
   @IsOptional()
   @Type(() => Number)
-  limit?: number = 50
+  limit?: number = 50;
 
   @IsString()
   @IsOptional()
-  expand?: string
+  expand?: string;
 
   @IsString()
   @IsOptional()
-  fields?: string
+  fields?: string;
 }
 
 export class AdminGetProductsParams extends AdminGetProductsPaginationParams {
   @IsString()
   @IsOptional()
-  id?: string
+  id?: string;
 
   @IsString()
   @IsOptional()
-  q?: string
+  q?: string;
 
   @IsOptional()
   @IsEnum(ProductStatus, { each: true })
-  status?: ProductStatus[]
+  status?: ProductStatus[] = [];
 
   @IsArray()
   @IsOptional()
-  collection_id?: string[]
+  collection_id?: string[] = [];
 
   @IsArray()
   @IsOptional()
-  tags?: string[]
+  tags?: string[] = [];
 
   @IsString()
   @IsOptional()
-  title?: string
+  title?: string;
 
   @IsString()
   @IsOptional()
-  description?: string
+  description?: string;
 
   @IsString()
   @IsOptional()
-  handle?: string
+  handle?: string;
 
   @IsBoolean()
   @IsOptional()
   @Type(() => Boolean)
-  is_giftcard?: string
+  is_giftcard?: string;
 
   @IsString()
   @IsOptional()
-  type?: string
+  type?: string;
 
   @IsString()
   @IsOptional()
-  order?: string
+  order?: string;
 
   @IsOptional()
   @ValidateNested()
   @Type(() => DateComparisonOperator)
-  created_at?: DateComparisonOperator
+  created_at?: DateComparisonOperator;
 
   @IsOptional()
   @ValidateNested()
   @Type(() => DateComparisonOperator)
-  updated_at?: DateComparisonOperator
+  updated_at?: DateComparisonOperator;
 
   @ValidateNested()
   @IsOptional()
   @Type(() => DateComparisonOperator)
-  deleted_at?: DateComparisonOperator
+  deleted_at?: DateComparisonOperator;
 }

@@ -1,4 +1,4 @@
-import { Type } from "class-transformer"
+import { Type } from "class-transformer";
 import {
   IsArray,
   IsNotEmpty,
@@ -7,14 +7,14 @@ import {
   IsString,
   Min,
   ValidateNested,
-} from "class-validator"
-import { MedusaError } from "medusa-core-utils"
-import { defaultStoreSwapFields, defaultStoreSwapRelations } from "."
-import IdempotencyKeyService from "../../../../services/idempotency-key"
-import OrderService from "../../../../services/order"
-import ReturnService from "../../../../services/return"
-import SwapService from "../../../../services/swap"
-import { validator } from "../../../../utils/validator"
+} from "class-validator";
+import { MedusaError } from "medusa-core-utils";
+import { defaultStoreSwapFields, defaultStoreSwapRelations } from ".";
+import IdempotencyKeyService from "../../../../services/idempotency-key";
+import OrderService from "../../../../services/order";
+import ReturnService from "../../../../services/return";
+import SwapService from "../../../../services/swap";
+import { validator } from "../../../../utils/validator";
 
 /**
  * @oas [post] /swaps
@@ -87,36 +87,36 @@ import { validator } from "../../../../utils/validator"
  *               $ref: "#/components/schemas/swap"
  */
 export default async (req, res) => {
-  const swapDto = await validator(StorePostSwapsReq, req.body)
+  const swapDto = await validator(StorePostSwapsReq, req.body);
 
   const idempotencyKeyService: IdempotencyKeyService = req.scope.resolve(
     "idempotencyKeyService"
-  )
+  );
 
-  const headerKey = req.get("Idempotency-Key") || ""
+  const headerKey = req.get("Idempotency-Key") || "";
 
-  let idempotencyKey
+  let idempotencyKey;
   try {
     idempotencyKey = await idempotencyKeyService.initializeRequest(
       headerKey,
       req.method,
       req.params,
       req.path
-    )
+    );
   } catch (error) {
-    res.status(409).send("Failed to create idempotency key")
-    return
+    res.status(409).send("Failed to create idempotency key");
+    return;
   }
 
-  res.setHeader("Access-Control-Expose-Headers", "Idempotency-Key")
-  res.setHeader("Idempotency-Key", idempotencyKey.idempotency_key)
+  res.setHeader("Access-Control-Expose-Headers", "Idempotency-Key");
+  res.setHeader("Idempotency-Key", idempotencyKey.idempotency_key);
 
-  const orderService: OrderService = req.scope.resolve("orderService")
-  const swapService: SwapService = req.scope.resolve("swapService")
-  const returnService: ReturnService = req.scope.resolve("returnService")
+  const orderService: OrderService = req.scope.resolve("orderService");
+  const swapService: SwapService = req.scope.resolve("swapService");
+  const returnService: ReturnService = req.scope.resolve("returnService");
 
-  let inProgress = true
-  let err = false
+  let inProgress = true;
+  let err = false;
 
   while (inProgress) {
     switch (idempotencyKey.recovery_point) {
@@ -129,13 +129,13 @@ export default async (req, res) => {
               .retrieve(swapDto.order_id, {
                 select: ["refunded_total", "total"],
                 relations: ["items", "swaps", "swaps.additional_items"],
-              })
+              });
 
-            let returnShipping
+            let returnShipping;
             if (swapDto.return_shipping_option) {
               returnShipping = {
                 option_id: swapDto.return_shipping_option,
-              }
+              };
             }
 
             const swap = await swapService
@@ -149,28 +149,30 @@ export default async (req, res) => {
                   idempotency_key: idempotencyKey.idempotency_key,
                   no_notification: true,
                 }
-              )
+              );
 
-            await swapService.withTransaction(manager).createCart(swap.id)
+            await swapService.withTransaction(manager).createCart(swap.id);
             const returnOrder = await returnService
               .withTransaction(manager)
-              .retrieveBySwap(swap.id)
+              .retrieveBySwap(swap.id);
 
-            await returnService.withTransaction(manager).fulfill(returnOrder.id)
+            await returnService
+              .withTransaction(manager)
+              .fulfill(returnOrder.id);
 
             return {
               recovery_point: "swap_created",
-            }
+            };
           }
-        )
+        );
 
         if (error) {
-          inProgress = false
-          err = error
+          inProgress = false;
+          err = error;
         } else {
-          idempotencyKey = key
+          idempotencyKey = key;
         }
-        break
+        break;
       }
 
       case "swap_created": {
@@ -179,39 +181,39 @@ export default async (req, res) => {
           async (manager) => {
             const swaps = await swapService.list({
               idempotency_key: idempotencyKey.idempotency_key,
-            })
+            });
 
             if (!swaps.length) {
               throw new MedusaError(
                 MedusaError.Types.INVALID_DATA,
                 "Swap not found"
-              )
+              );
             }
 
             const swap = await swapService.retrieve(swaps[0].id, {
               select: defaultStoreSwapFields,
               relations: defaultStoreSwapRelations,
-            })
+            });
 
             return {
               response_code: 200,
               response_body: { swap },
-            }
+            };
           }
-        )
+        );
 
         if (error) {
-          inProgress = false
-          err = error
+          inProgress = false;
+          err = error;
         } else {
-          idempotencyKey = key
+          idempotencyKey = key;
         }
-        break
+        break;
       }
 
       case "finished": {
-        inProgress = false
-        break
+        inProgress = false;
+        break;
       }
 
       default:
@@ -222,62 +224,62 @@ export default async (req, res) => {
             response_code: 500,
             response_body: { message: "Unknown recovery point" },
           }
-        )
-        break
+        );
+        break;
     }
   }
 
   if (err) {
-    throw err
+    throw err;
   }
 
-  res.status(idempotencyKey.response_code).json(idempotencyKey.response_body)
-}
+  res.status(idempotencyKey.response_code).json(idempotencyKey.response_body);
+};
 
 class Item {
   @IsString()
   @IsNotEmpty()
-  item_id: string
+  item_id: string;
 
   @IsNumber()
   @Min(1)
-  quantity: number
+  quantity: number;
 
   @IsOptional()
   @IsString()
-  reason_id?: string
+  reason_id?: string;
 
   @IsOptional()
   @IsString()
-  note?: string
+  note?: string;
 }
 
 class AdditionalItem {
   @IsString()
   @IsNotEmpty()
-  variant_id: string
+  variant_id: string;
 
   @IsNumber()
   @Min(1)
-  quantity: number
+  quantity: number;
 }
 
 export class StorePostSwapsReq {
   @IsString()
   @IsNotEmpty()
-  order_id: string
+  order_id: string;
 
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => Item)
-  return_items: Item[]
+  return_items: Item[];
 
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => AdditionalItem)
-  additional_items: AdditionalItem[]
+  additional_items: AdditionalItem[];
 
   @IsOptional()
   @IsString()
-  return_shipping_option?: string
+  return_shipping_option?: string;
 }

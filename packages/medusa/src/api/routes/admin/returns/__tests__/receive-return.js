@@ -1,11 +1,11 @@
-import { IdMap } from "medusa-test-utils"
-import { request } from "../../../../../helpers/test-request"
-import { OrderServiceMock } from "../../../../../services/__mocks__/order"
-import { ReturnService } from "../../../../../services/__mocks__/return"
+import { IdMap } from "medusa-test-utils";
+import { request } from "../../../../../helpers/test-request";
+import { OrderServiceMock } from "../../../../../services/__mocks__/order";
+import { ReturnService } from "../../../../../services/__mocks__/return";
 
 describe("POST /admin/returns/:id/receive", () => {
   describe("successfully receives a return", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
       subject = await request(
@@ -26,25 +26,25 @@ describe("POST /admin/returns/:id/receive", () => {
             },
           },
         }
-      )
-    })
+      );
+    });
 
     it("returns 200", () => {
-      expect(subject.status).toEqual(200)
-    })
+      expect(subject.status).toEqual(200);
+    });
 
     it("calls ReturnService receive", () => {
-      expect(ReturnService.receive).toHaveBeenCalledTimes(1)
+      expect(ReturnService.receive).toHaveBeenCalledTimes(1);
       expect(ReturnService.receive).toHaveBeenCalledWith(
         IdMap.getId("test-return"),
         [{ item_id: IdMap.getId("test"), quantity: 2 }],
         undefined,
         true
-      )
-    })
+      );
+    });
 
     it("calls OrderService registerReturnReceived", () => {
-      expect(OrderServiceMock.registerReturnReceived).toHaveBeenCalledTimes(1)
+      expect(OrderServiceMock.registerReturnReceived).toHaveBeenCalledTimes(1);
       expect(OrderServiceMock.registerReturnReceived).toHaveBeenCalledWith(
         IdMap.getId("test-order"),
         {
@@ -52,7 +52,7 @@ describe("POST /admin/returns/:id/receive", () => {
           order_id: IdMap.getId("test-order"),
         },
         undefined
-      )
-    })
-  })
-})
+      );
+    });
+  });
+});

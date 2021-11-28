@@ -1,12 +1,12 @@
-import { Entity, Column, PrimaryColumn, OneToOne, JoinColumn } from "typeorm"
+import { Entity, Column, PrimaryColumn, OneToOne, JoinColumn } from "typeorm";
 
 @Entity()
 export class FulfillmentProvider {
   @PrimaryColumn()
-  id: string
+  id: string;
 
   @Column({ default: true })
-  is_installed: boolean
+  is_installed: boolean;
 }
 
 /**

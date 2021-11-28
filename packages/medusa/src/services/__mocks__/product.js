@@ -1,4 +1,4 @@
-import { IdMap } from "medusa-test-utils"
+import { IdMap } from "medusa-test-utils";
 
 export const products = {
   product1: {
@@ -60,20 +60,20 @@ export const products = {
       },
     ],
   },
-}
+};
 
 export const ProductServiceMock = {
   withTransaction: function () {
-    return this
+    return this;
   },
   create: jest.fn().mockImplementation((data) => {
     if (data.title === "Test Product") {
-      return Promise.resolve(products.product1)
+      return Promise.resolve(products.product1);
     }
     if (data.title === "Test Product with variants") {
-      return Promise.resolve(products.productWithOptions)
+      return Promise.resolve(products.productWithOptions);
     }
-    return Promise.resolve({ ...data })
+    return Promise.resolve({ ...data });
   }),
   count: jest.fn().mockReturnValue(4),
   publish: jest.fn().mockImplementation((_) => {
@@ -81,23 +81,23 @@ export const ProductServiceMock = {
       id: IdMap.getId("publish"),
       name: "Product 1",
       published: true,
-    })
+    });
   }),
   delete: jest.fn().mockImplementation((_) => {
-    return Promise.resolve()
+    return Promise.resolve();
   }),
   createVariant: jest.fn().mockImplementation((productId, value) => {
-    return Promise.resolve(products.productWithOptions)
+    return Promise.resolve(products.productWithOptions);
   }),
   deleteVariant: jest.fn().mockImplementation((productId, variantId) => {
-    return Promise.resolve(products.productWithOptions)
+    return Promise.resolve(products.productWithOptions);
   }),
   decorate: jest.fn().mockImplementation((product, fields) => {
-    product.decorated = true
-    return product
+    product.decorated = true;
+    return product;
   }),
   addOption: jest.fn().mockImplementation((productId, optionTitle) => {
-    return Promise.resolve(products.productWithOptions)
+    return Promise.resolve(products.productWithOptions);
   }),
   updateOption: jest
     .fn()
@@ -113,30 +113,30 @@ export const ProductServiceMock = {
     ),
   retrieve: jest.fn().mockImplementation((productId) => {
     if (productId === IdMap.getId("product1")) {
-      return Promise.resolve(products.product1)
+      return Promise.resolve(products.product1);
     }
     if (productId === IdMap.getId("product2")) {
-      return Promise.resolve(products.product2)
+      return Promise.resolve(products.product2);
     }
     if (productId === IdMap.getId("validId")) {
-      return Promise.resolve({ id: IdMap.getId("validId") })
+      return Promise.resolve({ id: IdMap.getId("validId") });
     }
     if (productId === IdMap.getId("publish")) {
-      return Promise.resolve(products.publishProduct)
+      return Promise.resolve(products.publishProduct);
     }
     if (productId === IdMap.getId("productWithOptions")) {
-      return Promise.resolve(products.productWithOptions)
+      return Promise.resolve(products.productWithOptions);
     }
     if (productId === IdMap.getId("variantsWithPrices")) {
-      return Promise.resolve(products.variantsWithPrices)
+      return Promise.resolve(products.variantsWithPrices);
     }
-    return Promise.resolve(undefined)
+    return Promise.resolve(undefined);
   }),
   update: jest.fn().mockImplementation((product, data) => {
-    return Promise.resolve(products.product1)
+    return Promise.resolve(products.product1);
   }),
   listAndCount: jest.fn().mockImplementation((data) => {
-    return Promise.resolve([[products.product1, products.product2], 2])
+    return Promise.resolve([[products.product1, products.product2], 2]);
   }),
   list: jest.fn().mockImplementation((data) => {
     // Used to retrieve a product based on a variant id see
@@ -149,7 +149,7 @@ export const ProductServiceMock = {
           is_giftcard: true,
           thumbnail: "1234",
         },
-      ])
+      ]);
     }
     if (data.variants === IdMap.getId("testVariant")) {
       return Promise.resolve([
@@ -163,7 +163,7 @@ export const ProductServiceMock = {
             },
           ],
         },
-      ])
+      ]);
     }
     if (data.variants === IdMap.getId("eur-10-us-12")) {
       return Promise.resolve([
@@ -172,21 +172,21 @@ export const ProductServiceMock = {
           title: "test",
           thumbnail: "test.1234",
         },
-      ])
+      ]);
     }
     if (data.variants === IdMap.getId("failId")) {
-      return Promise.resolve([])
+      return Promise.resolve([]);
     }
 
     return Promise.resolve([
       { ...products.product1, decorated: true },
       { ...products.product2, decorated: true },
-    ])
+    ]);
   }),
-}
+};
 
 const mock = jest.fn().mockImplementation(() => {
-  return ProductServiceMock
-})
+  return ProductServiceMock;
+});
 
-export default mock
+export default mock;

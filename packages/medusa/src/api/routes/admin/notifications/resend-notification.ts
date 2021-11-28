@@ -1,11 +1,11 @@
-import { IsString } from "class-validator"
-import { IsOptional } from "class-validator"
+import { IsString } from "class-validator";
+import { IsOptional } from "class-validator";
 import {
   defaultAdminNotificationsFields,
   defaultAdminNotificationsRelations,
-} from "."
-import { validator } from "../../../../utils/validator"
-import { NotificationService } from "../../../../services"
+} from ".";
+import { validator } from "../../../../utils/validator";
+import { NotificationService } from "../../../../services";
 
 /**
  * @oas [post] /notifications/{id}/resend
@@ -36,35 +36,35 @@ import { NotificationService } from "../../../../services"
  *               $ref: "#/components/schemas/notification"
  */
 export default async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params;
 
   const validatedBody = await validator(
     AdminPostNotificationsNotificationResendReq,
     req.body
-  )
+  );
 
   const notificationService: NotificationService = req.scope.resolve(
     "notificationService"
-  )
+  );
 
-  const config: any = {}
+  const config: any = {};
 
   if (validatedBody.to) {
-    config.to = validatedBody.to
+    config.to = validatedBody.to;
   }
 
-  await notificationService.resend(id, config)
+  await notificationService.resend(id, config);
 
   const notification = await notificationService.retrieve(id, {
     select: defaultAdminNotificationsFields,
     relations: defaultAdminNotificationsRelations,
-  })
+  });
 
-  res.json({ notification })
-}
+  res.json({ notification });
+};
 
 export class AdminPostNotificationsNotificationResendReq {
   @IsOptional()
   @IsString()
-  to?: string
+  to?: string;
 }

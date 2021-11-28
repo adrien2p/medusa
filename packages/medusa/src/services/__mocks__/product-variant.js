@@ -1,4 +1,4 @@
-import { IdMap } from "medusa-test-utils"
+import { IdMap } from "medusa-test-utils";
 
 const variant1 = {
   id: "1",
@@ -13,7 +13,7 @@ const variant1 = {
       value: "160",
     },
   ],
-}
+};
 
 const variant2 = {
   id: "2",
@@ -28,7 +28,7 @@ const variant2 = {
       value: "160",
     },
   ],
-}
+};
 
 const variant3 = {
   id: "3",
@@ -43,7 +43,7 @@ const variant3 = {
       value: "150",
     },
   ],
-}
+};
 
 const variant4 = {
   id: "4",
@@ -58,7 +58,7 @@ const variant4 = {
       value: "50",
     },
   ],
-}
+};
 
 const variant5 = {
   id: "5",
@@ -73,7 +73,7 @@ const variant5 = {
       value: "50",
     },
   ],
-}
+};
 
 const invalidVariant = {
   id: "invalid_option",
@@ -88,7 +88,7 @@ const invalidVariant = {
       value: "150",
     },
   ],
-}
+};
 
 const variantWithPrices = {
   id: "variant_with_prices",
@@ -117,28 +117,28 @@ const variantWithPrices = {
       deleted_at: null,
     },
   ],
-}
+};
 
 const testVariant = {
   id: IdMap.getId("testVariant"),
   title: "test variant",
-}
+};
 
 const emptyVariant = {
   id: "empty_option",
   title: "variant3",
   options: [],
-}
+};
 
 const eur10us12 = {
   id: IdMap.getId("eur-10-us-12"),
   title: "EUR10US-12",
-}
+};
 
 const giftCardVar = {
   id: IdMap.getId("giftCardVar"),
   title: "100 USD",
-}
+};
 
 const outOfStockBackOrder = {
   id: "bo",
@@ -146,7 +146,7 @@ const outOfStockBackOrder = {
   inventory_quantity: 0,
   allow_backorder: true,
   manage_inventory: true,
-}
+};
 
 const outOfStockNoBackOrder = {
   id: "no_bo",
@@ -154,7 +154,7 @@ const outOfStockNoBackOrder = {
   inventory_quantity: 0,
   allow_backorder: false,
   manage_inventory: true,
-}
+};
 
 const outOfStockNoManage = {
   id: "no_manage",
@@ -162,7 +162,7 @@ const outOfStockNoManage = {
   inventory_quantity: 0,
   allow_backorder: false,
   manage_inventory: false,
-}
+};
 
 const StockOf10Manage = {
   id: "10_man",
@@ -170,7 +170,7 @@ const StockOf10Manage = {
   inventory_quantity: 10,
   allow_backorder: false,
   manage_inventory: true,
-}
+};
 
 const StockOf1Manage = {
   id: "1_man",
@@ -178,7 +178,7 @@ const StockOf1Manage = {
   inventory_quantity: 1,
   allow_backorder: false,
   manage_inventory: true,
-}
+};
 
 export const variants = {
   one: variant1,
@@ -191,97 +191,97 @@ export const variants = {
   testVariant: testVariant,
   giftCard: giftCardVar,
   variantWithPrices: variantWithPrices,
-}
+};
 
 export const ProductVariantServiceMock = {
-  withTransaction: function() {
-    return this
+  withTransaction: function () {
+    return this;
   },
-  create: jest.fn().mockImplementation(data => {
-    return Promise.resolve(testVariant)
+  create: jest.fn().mockImplementation((data) => {
+    return Promise.resolve(testVariant);
   }),
-  publish: jest.fn().mockImplementation(_ => {
+  publish: jest.fn().mockImplementation((_) => {
     return Promise.resolve({
       id: IdMap.getId("publish"),
       name: "Product Variant",
       published: true,
-    })
+    });
   }),
-  retrieve: jest.fn().mockImplementation(variantId => {
+  retrieve: jest.fn().mockImplementation((variantId) => {
     if (variantId === IdMap.getId("giftCardVar")) {
-      return Promise.resolve(variants.giftCard)
+      return Promise.resolve(variants.giftCard);
     }
     if (variantId === "1") {
-      return Promise.resolve(variant1)
+      return Promise.resolve(variant1);
     }
     if (variantId === "2") {
-      return Promise.resolve(variant2)
+      return Promise.resolve(variant2);
     }
     if (variantId === "3") {
-      return Promise.resolve(variant3)
+      return Promise.resolve(variant3);
     }
     if (variantId === "4") {
-      return Promise.resolve(variant4)
+      return Promise.resolve(variant4);
     }
     if (variantId === "variant_with_prices") {
-      return Promise.resolve(variantWithPrices)
+      return Promise.resolve(variantWithPrices);
     }
     if (variantId === IdMap.getId("validId")) {
-      return Promise.resolve(variant5)
+      return Promise.resolve(variant5);
     }
     if (variantId === IdMap.getId("testVariant")) {
-      return Promise.resolve(testVariant)
+      return Promise.resolve(testVariant);
     }
     if (variantId === "invalid_option") {
-      return Promise.resolve(invalidVariant)
+      return Promise.resolve(invalidVariant);
     }
     if (variantId === "empty_option") {
-      return Promise.resolve(emptyVariant)
+      return Promise.resolve(emptyVariant);
     }
     if (variantId === IdMap.getId("eur-10-us-12")) {
-      return Promise.resolve(eur10us12)
+      return Promise.resolve(eur10us12);
     }
     if (variantId === IdMap.getId("testVariant")) {
-      return Promise.resolve(testVariant)
+      return Promise.resolve(testVariant);
     }
     if (variantId === "bo") {
-      return Promise.resolve(outOfStockBackOrder)
+      return Promise.resolve(outOfStockBackOrder);
     }
     if (variantId === "no_bo") {
-      return Promise.resolve(outOfStockNoBackOrder)
+      return Promise.resolve(outOfStockNoBackOrder);
     }
     if (variantId === "no_manage") {
-      return Promise.resolve(outOfStockNoManage)
+      return Promise.resolve(outOfStockNoManage);
     }
     if (variantId === "10_man") {
-      return Promise.resolve(StockOf10Manage)
+      return Promise.resolve(StockOf10Manage);
     }
     if (variantId === "1_man") {
-      return Promise.resolve(StockOf1Manage)
+      return Promise.resolve(StockOf1Manage);
     }
   }),
   getRegionPrice: jest.fn().mockImplementation((variantId, regionId) => {
     if (variantId === IdMap.getId("eur-10-us-12")) {
       if (regionId === IdMap.getId("region-france")) {
-        return Promise.resolve(10)
+        return Promise.resolve(10);
       } else {
-        return Promise.resolve(12)
+        return Promise.resolve(12);
       }
     }
 
     if (variantId === IdMap.getId("eur-8-us-10")) {
       if (regionId === IdMap.getId("region-france")) {
-        return Promise.resolve(8)
+        return Promise.resolve(8);
       } else {
-        return Promise.resolve(10)
+        return Promise.resolve(10);
       }
     }
 
     if (variantId === IdMap.getId("giftCardVar")) {
-      return Promise.resolve(100)
+      return Promise.resolve(100);
     }
 
-    return Promise.reject(new Error("Not found"))
+    return Promise.reject(new Error("Not found"));
   }),
   delete: jest.fn().mockReturnValue(Promise.resolve()),
   update: jest.fn().mockReturnValue(Promise.resolve()),
@@ -289,18 +289,18 @@ export const ProductVariantServiceMock = {
   setRegionPrice: jest.fn().mockReturnValue(Promise.resolve()),
   updateOptionValue: jest.fn().mockReturnValue(Promise.resolve()),
   addOptionValue: jest.fn().mockImplementation((variantId, optionId, value) => {
-    return Promise.resolve({})
+    return Promise.resolve({});
   }),
-  list: jest.fn().mockImplementation(data => {
-    return Promise.resolve([testVariant])
+  list: jest.fn().mockImplementation((data) => {
+    return Promise.resolve([testVariant]);
   }),
   deleteOptionValue: jest.fn().mockImplementation((variantId, optionId) => {
-    return Promise.resolve({})
+    return Promise.resolve({});
   }),
-}
+};
 
 const mock = jest.fn().mockImplementation(() => {
-  return ProductVariantServiceMock
-})
+  return ProductVariantServiceMock;
+});
 
-export default mock
+export default mock;

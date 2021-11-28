@@ -9,51 +9,48 @@ import {
   ManyToMany,
   Index,
   OneToMany,
-} from "typeorm"
-import { ulid } from "ulid"
-import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column"
-import _ from "lodash"
+} from "typeorm";
+import { ulid } from "ulid";
+import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column";
+import _ from "lodash";
 
-import { Product } from "./product"
+import { Product } from "./product";
 
 @Entity()
 export class ProductCollection {
   @PrimaryColumn()
-  id: string
+  id: string;
 
   @Column()
-  title: string
+  title: string;
 
   @Index({ unique: true, where: "deleted_at IS NULL" })
   @Column({ nullable: true })
-  handle: string
+  handle: string;
 
-  @OneToMany(
-    () => Product,
-    product => product.collection
-  )
-  products: Product[]
+  @OneToMany(() => Product, (product) => product.collection)
+  products: Product[];
 
   @CreateDateColumn({ type: resolveDbType("timestamptz") })
-  created_at: Date
+  created_at: Date;
 
   @UpdateDateColumn({ type: resolveDbType("timestamptz") })
-  updated_at: Date
+  updated_at: Date;
 
   @DeleteDateColumn({ type: resolveDbType("timestamptz") })
-  deleted_at: Date
+  deleted_at: Date;
 
   @DbAwareColumn({ type: "jsonb", nullable: true })
-  metadata: any
+  metadata: any;
 
   @BeforeInsert()
   private beforeInsert() {
-    if (this.id) return
-    const id = ulid()
-    this.id = `pcol_${id}`
+    if (this.id) return;
+    const id = ulid();
+    this.id = `pcol_${id}`;
 
     if (!this.handle) {
-      this.handle = _.kebabCase(this.title)
+      this.handle = _.kebabCase(this.title);
     }
   }
 }

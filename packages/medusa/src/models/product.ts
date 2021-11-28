@@ -13,18 +13,18 @@ import {
   ManyToMany,
   JoinColumn,
   JoinTable,
-} from "typeorm"
-import { ulid } from "ulid"
-import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column"
+} from "typeorm";
+import { ulid } from "ulid";
+import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column";
 
-import { Image } from "./image"
-import { ProductCollection } from "./product-collection"
-import { ProductOption } from "./product-option"
-import { ProductTag } from "./product-tag"
-import { ProductType } from "./product-type"
-import { ProductVariant } from "./product-variant"
-import { ShippingProfile } from "./shipping-profile"
-import _ from "lodash"
+import { Image } from "./image";
+import { ProductCollection } from "./product-collection";
+import { ProductOption } from "./product-option";
+import { ProductTag } from "./product-tag";
+import { ProductType } from "./product-type";
+import { ProductVariant } from "./product-variant";
+import { ShippingProfile } from "./shipping-profile";
+import _ from "lodash";
 
 export enum Status {
   DRAFT = "draft",
@@ -36,26 +36,26 @@ export enum Status {
 @Entity()
 export class Product {
   @PrimaryColumn()
-  id: string
+  id: string;
 
   @Column()
-  title: string
+  title: string;
 
   @Column({ nullable: true })
-  subtitle: string
+  subtitle: string;
 
   @Column({ nullable: true })
-  description: string
+  description: string;
 
   @Index({ unique: true, where: "deleted_at IS NULL" })
   @Column({ nullable: true })
-  handle: string
+  handle: string;
 
   @Column({ default: false })
-  is_giftcard: boolean
+  is_giftcard: boolean;
 
   @DbAwareColumn({ type: "enum", enum: Status, default: "draft" })
-  status: Status
+  status: Status;
 
   @ManyToMany(() => Image, { cascade: ["insert"] })
   @JoinTable({
@@ -69,69 +69,64 @@ export class Product {
       referencedColumnName: "id",
     },
   })
-  images: Image[]
+  images: Image[];
 
   @Column({ nullable: true })
-  thumbnail: string
+  thumbnail: string;
 
-  @OneToMany(
-    () => ProductOption,
-    productOption => productOption.product
-  )
-  options: ProductOption[]
+  @OneToMany(() => ProductOption, (productOption) => productOption.product)
+  options: ProductOption[];
 
-  @OneToMany(
-    () => ProductVariant,
-    variant => variant.product,
-    { cascade: true }
-  )
-  variants: ProductVariant[]
+  @OneToMany(() => ProductVariant, (variant) => variant.product, {
+    cascade: true,
+  })
+  variants: ProductVariant[];
 
   @Index()
   @Column()
-  profile_id: string
+  profile_id: string;
 
   @ManyToOne(() => ShippingProfile)
   @JoinColumn({ name: "profile_id" })
-  profile: ShippingProfile
+  profile: ShippingProfile;
 
   @Column({ type: "int", nullable: true })
-  weight: number
+  weight: number;
 
   @Column({ type: "int", nullable: true })
-  length: number
+  length: number;
 
   @Column({ type: "int", nullable: true })
-  height: number
+  height: number;
 
   @Column({ type: "int", nullable: true })
-  width: number
+  width: number;
 
   @Column({ nullable: true })
-  hs_code: string
+  hs_code: string;
 
   @Column({ nullable: true })
-  origin_country: string
+  origin_country: string;
 
   @Column({ nullable: true })
-  mid_code: string
+  mid_code: string;
 
   @Column({ nullable: true })
-  material: string
+  material: string;
 
   @Column({ nullable: true })
-  collection_id: string
+  collection_id: string;
 
   @ManyToOne(() => ProductCollection)
   @JoinColumn({ name: "collection_id" })
-  collection: ProductCollection
+  collection: ProductCollection;
 
   @Column({ nullable: true })
-  type_id: string
+  type_id: string;
 
   @ManyToOne(() => ProductType)
   @JoinColumn({ name: "type_id" })
-  type: ProductType
+  type: ProductType;
 
   @ManyToMany(() => ProductTag)
   @JoinTable({
@@ -145,31 +140,31 @@ export class Product {
       referencedColumnName: "id",
     },
   })
-  tags: ProductTag[]
+  tags: ProductTag[];
 
   @Column({ default: true })
-  discountable: boolean
+  discountable: boolean;
 
   @CreateDateColumn({ type: resolveDbType("timestamptz") })
-  created_at: Date
+  created_at: Date;
 
   @UpdateDateColumn({ type: resolveDbType("timestamptz") })
-  updated_at: Date
+  updated_at: Date;
 
   @DeleteDateColumn({ type: resolveDbType("timestamptz") })
-  deleted_at: Date
+  deleted_at: Date;
 
   @DbAwareColumn({ type: "jsonb", nullable: true })
-  metadata: any
+  metadata: any;
 
   @BeforeInsert()
   private beforeInsert() {
-    if (this.id) return
-    const id = ulid()
-    this.id = `prod_${id}`
+    if (this.id) return;
+    const id = ulid();
+    this.id = `prod_${id}`;
 
     if (!this.handle) {
-      this.handle = _.kebabCase(this.title)
+      this.handle = _.kebabCase(this.title);
     }
   }
 }

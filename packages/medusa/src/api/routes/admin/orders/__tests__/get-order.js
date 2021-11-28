@@ -1,6 +1,6 @@
-import { IdMap } from "medusa-test-utils"
-import { request } from "../../../../../helpers/test-request"
-import { OrderServiceMock } from "../../../../../services/__mocks__/order"
+import { IdMap } from "medusa-test-utils";
+import { request } from "../../../../../helpers/test-request";
+import { OrderServiceMock } from "../../../../../services/__mocks__/order";
 
 const defaultRelations = [
   "customer",
@@ -36,7 +36,7 @@ const defaultRelations = [
   "swaps.shipping_address",
   "swaps.additional_items",
   "swaps.fulfillments",
-]
+];
 
 const defaultFields = [
   "id",
@@ -68,11 +68,11 @@ const defaultFields = [
   "paid_total",
   "refundable_amount",
   "no_notification",
-]
+];
 
 describe("GET /admin/orders", () => {
   describe("successfully gets an order", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
       subject = await request(
@@ -85,27 +85,27 @@ describe("GET /admin/orders", () => {
             },
           },
         }
-      )
-    })
+      );
+    });
 
     afterAll(() => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     it("calls orderService retrieve", () => {
-      expect(OrderServiceMock.retrieve).toHaveBeenCalledTimes(1)
+      expect(OrderServiceMock.retrieve).toHaveBeenCalledTimes(1);
       expect(OrderServiceMock.retrieve).toHaveBeenCalledWith(
         IdMap.getId("test-order"),
         {
           select: defaultFields,
           relations: defaultRelations,
         }
-      )
-    })
+      );
+    });
 
     it("returns order", () => {
-      expect(subject.status).toEqual(200)
-      expect(subject.body.order.id).toEqual(IdMap.getId("test-order"))
-    })
-  })
-})
+      expect(subject.status).toEqual(200);
+      expect(subject.body.order.id).toEqual(IdMap.getId("test-order"));
+    });
+  });
+});

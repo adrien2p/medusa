@@ -1,13 +1,13 @@
-import { IdMap } from "medusa-test-utils"
-import { request } from "../../../../../helpers/test-request"
-import { DiscountServiceMock } from "../../../../../services/__mocks__/discount"
+import { IdMap } from "medusa-test-utils";
+import { request } from "../../../../../helpers/test-request";
+import { DiscountServiceMock } from "../../../../../services/__mocks__/discount";
 
 describe("POST /admin/discounts", () => {
   describe("successful update", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
-      jest.clearAllMocks()
+      jest.clearAllMocks();
       subject = await request(
         "POST",
         `/admin/discounts/${IdMap.getId("total10")}`,
@@ -27,15 +27,15 @@ describe("POST /admin/discounts", () => {
             },
           },
         }
-      )
-    })
+      );
+    });
 
     it("returns 200", () => {
-      expect(subject.status).toEqual(200)
-    })
+      expect(subject.status).toEqual(200);
+    });
 
     it("calls service method", () => {
-      expect(DiscountServiceMock.update).toHaveBeenCalledTimes(1)
+      expect(DiscountServiceMock.update).toHaveBeenCalledTimes(1);
       expect(DiscountServiceMock.update).toHaveBeenCalledWith(
         IdMap.getId("total10"),
         {
@@ -47,15 +47,15 @@ describe("POST /admin/discounts", () => {
             allocation: "total",
           },
         }
-      )
-    })
-  })
+      );
+    });
+  });
 
   describe("unsuccessful update with dynamic discount using an invalid iso8601 duration", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
-      jest.clearAllMocks()
+      jest.clearAllMocks();
       subject = await request(
         "POST",
         `/admin/discounts/${IdMap.getId("total10")}`,
@@ -78,25 +78,25 @@ describe("POST /admin/discounts", () => {
             },
           },
         }
-      )
-    })
+      );
+    });
 
     it("returns 400", () => {
-      expect(subject.status).toEqual(400)
-    })
+      expect(subject.status).toEqual(400);
+    });
 
     it("returns error", () => {
       expect(subject.body.message).toEqual(
         `"valid_duration" must be a valid ISO 8601 duration`
-      )
-    })
-  })
+      );
+    });
+  });
 
   describe("successful update with dynamic discount", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
-      jest.clearAllMocks()
+      jest.clearAllMocks();
       subject = await request(
         "POST",
         `/admin/discounts/${IdMap.getId("total10")}`,
@@ -119,15 +119,15 @@ describe("POST /admin/discounts", () => {
             },
           },
         }
-      )
-    })
+      );
+    });
 
     it("returns 200", () => {
-      expect(subject.status).toEqual(200)
-    })
+      expect(subject.status).toEqual(200);
+    });
 
     it("calls service update", () => {
-      expect(DiscountServiceMock.update).toHaveBeenCalledTimes(1)
+      expect(DiscountServiceMock.update).toHaveBeenCalledTimes(1);
       expect(DiscountServiceMock.update).toHaveBeenCalledWith(
         IdMap.getId("total10"),
         {
@@ -142,15 +142,15 @@ describe("POST /admin/discounts", () => {
           is_dynamic: true,
           valid_duration: "P1Y2M03DT04H05M",
         }
-      )
-    })
-  })
+      );
+    });
+  });
 
   describe("fails on invalid date intervals", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
-      jest.clearAllMocks()
+      jest.clearAllMocks();
       subject = await request(
         "POST",
         `/admin/discounts/${IdMap.getId("total10")}`,
@@ -172,17 +172,17 @@ describe("POST /admin/discounts", () => {
             },
           },
         }
-      )
-    })
+      );
+    });
 
     it("returns 400", () => {
-      expect(subject.status).toEqual(400)
-    })
+      expect(subject.status).toEqual(400);
+    });
 
     it("returns error", () => {
       expect(subject.body.message).toEqual(
         `"ends_at" must be greater than "starts_at"`
-      )
-    })
-  })
-})
+      );
+    });
+  });
+});

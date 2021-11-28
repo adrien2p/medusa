@@ -5,13 +5,13 @@ export const StripeMock = {
         return Promise.resolve({
           id: "cus_vvd",
           email: "virg@vvd.com",
-        })
+        });
       }
       if (data.email === "lebron@james.com") {
         return Promise.resolve({
           id: "cus_lebron",
           email: "lebron@james.com",
-        })
+        });
       }
     }),
   },
@@ -22,21 +22,21 @@ export const StripeMock = {
           id: "pi_lebron",
           amount: 100,
           customer: "cus_123456789_new",
-        })
+        });
       }
       if (data.customer === "cus_lebron") {
         return Promise.resolve({
           id: "pi_lebron",
           amount: 100,
           customer: "cus_lebron",
-        })
+        });
       }
     }),
     retrieve: jest.fn().mockImplementation((data) => {
       return Promise.resolve({
         id: "pi_lebron",
         customer: "cus_lebron",
-      })
+      });
     }),
     update: jest.fn().mockImplementation((pi, data) => {
       if (data.customer === "cus_lebron_2") {
@@ -44,13 +44,13 @@ export const StripeMock = {
           id: "pi_lebron",
           customer: "cus_lebron_2",
           amount: 1000,
-        })
+        });
       }
       return Promise.resolve({
         id: "pi_lebron",
         customer: "cus_lebron",
         amount: 1000,
-      })
+      });
     }),
     capture: jest.fn().mockImplementation((data) => {
       return Promise.resolve({
@@ -58,14 +58,14 @@ export const StripeMock = {
         customer: "cus_lebron",
         amount: 1000,
         status: "succeeded",
-      })
+      });
     }),
     cancel: jest.fn().mockImplementation((data) => {
       return Promise.resolve({
         id: "pi_lebron",
         customer: "cus_lebron",
         status: "cancelled",
-      })
+      });
     }),
   },
   refunds: {
@@ -75,11 +75,11 @@ export const StripeMock = {
         payment_intent: "pi_lebron",
         amount: 1000,
         status: "succeeded",
-      })
+      });
     }),
   },
-}
+};
 
-const stripe = jest.fn(() => StripeMock)
+const stripe = jest.fn(() => StripeMock);
 
-export default stripe
+export default stripe;

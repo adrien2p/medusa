@@ -7,7 +7,12 @@ export const countries = [
   { alpha2: "AO", name: "Angola", alpha3: "AGO", numeric: "024" },
   { alpha2: "AI", name: "Anguilla", alpha3: "AIA", numeric: "660" },
   { alpha2: "AQ", name: "Antarctica", alpha3: "ATA", numeric: "010" },
-  { alpha2: "AG", name: "Antigua and Barbuda", alpha3: "ATG", numeric: "028" },
+  {
+    alpha2: "AG",
+    name: "Antigua and Barbuda",
+    alpha3: "ATG",
+    numeric: "028",
+  },
   { alpha2: "AR", name: "Argentina", alpha3: "ARG", numeric: "032" },
   { alpha2: "AM", name: "Armenia", alpha3: "ARM", numeric: "051" },
   { alpha2: "AW", name: "Aruba", alpha3: "ABW", numeric: "533" },
@@ -224,7 +229,12 @@ export const countries = [
     alpha3: "FSM",
     numeric: "583",
   },
-  { alpha2: "MD", name: "Moldova, Republic of", alpha3: "MDA", numeric: "498" },
+  {
+    alpha2: "MD",
+    name: "Moldova, Republic of",
+    alpha3: "MDA",
+    numeric: "498",
+  },
   { alpha2: "MC", name: "Monaco", alpha3: "MCO", numeric: "492" },
   { alpha2: "MN", name: "Mongolia", alpha3: "MNG", numeric: "496" },
   { alpha2: "ME", name: "Montenegro", alpha3: "MNE", numeric: "499" },
@@ -341,7 +351,12 @@ export const countries = [
   { alpha2: "SZ", name: "Swaziland", alpha3: "SWZ", numeric: "748" },
   { alpha2: "SE", name: "Sweden", alpha3: "SWE", numeric: "752" },
   { alpha2: "CH", name: "Switzerland", alpha3: "CHE", numeric: "756" },
-  { alpha2: "SY", name: "Syrian Arab Republic", alpha3: "SYR", numeric: "760" },
+  {
+    alpha2: "SY",
+    name: "Syrian Arab Republic",
+    alpha3: "SYR",
+    numeric: "760",
+  },
   {
     alpha2: "TW",
     name: "Taiwan, Province of China",
@@ -360,7 +375,12 @@ export const countries = [
   { alpha2: "TG", name: "Togo", alpha3: "TGO", numeric: "768" },
   { alpha2: "TK", name: "Tokelau", alpha3: "TKL", numeric: "772" },
   { alpha2: "TO", name: "Tonga", alpha3: "TON", numeric: "776" },
-  { alpha2: "TT", name: "Trinidad and Tobago", alpha3: "TTO", numeric: "780" },
+  {
+    alpha2: "TT",
+    name: "Trinidad and Tobago",
+    alpha3: "TTO",
+    numeric: "780",
+  },
   { alpha2: "TN", name: "Tunisia", alpha3: "TUN", numeric: "788" },
   { alpha2: "TR", name: "Turkey", alpha3: "TUR", numeric: "792" },
   { alpha2: "TM", name: "Turkmenistan", alpha3: "TKM", numeric: "795" },
@@ -373,7 +393,12 @@ export const countries = [
   { alpha2: "TV", name: "Tuvalu", alpha3: "TUV", numeric: "798" },
   { alpha2: "UG", name: "Uganda", alpha3: "UGA", numeric: "800" },
   { alpha2: "UA", name: "Ukraine", alpha3: "UKR", numeric: "804" },
-  { alpha2: "AE", name: "United Arab Emirates", alpha3: "ARE", numeric: "784" },
+  {
+    alpha2: "AE",
+    name: "United Arab Emirates",
+    alpha3: "ARE",
+    numeric: "784",
+  },
   { alpha2: "GB", name: "United Kingdom", alpha3: "GBR", numeric: "826" },
   { alpha2: "US", name: "United States", alpha3: "USA", numeric: "840" },
   {
@@ -393,39 +418,44 @@ export const countries = [
     alpha3: "VGB",
     numeric: "092",
   },
-  { alpha2: "VI", name: "Virgin Islands, U.S.", alpha3: "VIR", numeric: "850" },
+  {
+    alpha2: "VI",
+    name: "Virgin Islands, U.S.",
+    alpha3: "VIR",
+    numeric: "850",
+  },
   { alpha2: "WF", name: "Wallis and Futuna", alpha3: "WLF", numeric: "876" },
   { alpha2: "EH", name: "Western Sahara", alpha3: "ESH", numeric: "732" },
   { alpha2: "YE", name: "Yemen", alpha3: "YEM", numeric: "887" },
   { alpha2: "ZM", name: "Zambia", alpha3: "ZMB", numeric: "894" },
   { alpha2: "ZW", name: "Zimbabwe", alpha3: "ZWE", numeric: "716" },
   { alpha2: "AX", name: "Åland Islands", alpha3: "ALA", numeric: "248" },
-]
+];
 
 export function isoCountryLookup(country) {
-  const normalizedCountry = country.toUpperCase()
+  const normalizedCountry = country.toUpperCase();
 
-  let isoRecord = countries.find(record => {
-    return record.name === normalizedCountry
-  })
+  let isoRecord = countries.find((record) => {
+    return record.name === normalizedCountry;
+  });
 
   // Try alpha2 instead
   if (!isoRecord) {
-    isoRecord = countries.find(record => {
-      return record.alpha2 === normalizedCountry
-    })
+    isoRecord = countries.find((record) => {
+      return record.alpha2 === normalizedCountry;
+    });
   }
 
   // Try alpha3
   if (!isoRecord) {
-    isoRecord = countries.find(record => {
-      return record.alpha3 === normalizedCountry
-    })
+    isoRecord = countries.find((record) => {
+      return record.alpha3 === normalizedCountry;
+    });
   }
 
   if (!isoRecord) {
-    throw new Error("Invalid country name")
+    throw new Error("Invalid country name");
   }
 
-  return isoRecord.alpha2
+  return isoRecord.alpha2;
 }

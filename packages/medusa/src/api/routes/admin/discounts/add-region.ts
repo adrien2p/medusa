@@ -1,6 +1,6 @@
-import { defaultAdminDiscountsFields, defaultAdminDiscountsRelations } from "."
-import { Discount } from "../../../.."
-import DiscountService from "../../../../services/discount"
+import { defaultAdminDiscountsFields, defaultAdminDiscountsRelations } from ".";
+import { Discount } from "../../../..";
+import DiscountService from "../../../../services/discount";
 /**
  * @oas [post] /discounts/{id}/regions/{region_id}
  * operationId: "PostDiscountsDiscountRegionsRegion"
@@ -23,15 +23,15 @@ import DiscountService from "../../../../services/discount"
  *               $ref: "#/components/schemas/discount"
  */
 export default async (req, res) => {
-  const { discount_id, region_id } = req.params
+  const { discount_id, region_id } = req.params;
 
-  const discountService: DiscountService = req.scope.resolve("discountService")
-  await discountService.addRegion(discount_id, region_id)
+  const discountService: DiscountService = req.scope.resolve("discountService");
+  await discountService.addRegion(discount_id, region_id);
 
   const discount: Discount = await discountService.retrieve(discount_id, {
     select: defaultAdminDiscountsFields,
     relations: defaultAdminDiscountsRelations,
-  })
+  });
 
-  res.status(200).json({ discount })
-}
+  res.status(200).json({ discount });
+};

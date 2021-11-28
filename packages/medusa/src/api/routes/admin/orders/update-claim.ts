@@ -1,4 +1,4 @@
-import { Type } from "class-transformer"
+import { Type } from "class-transformer";
 import {
   IsArray,
   ValidateNested,
@@ -8,10 +8,10 @@ import {
   IsInt,
   IsNotEmpty,
   IsObject,
-} from "class-validator"
-import { defaultAdminOrdersRelations, defaultAdminOrdersFields } from "."
-import { ClaimService, OrderService } from "../../../../services"
-import { validator } from "../../../../utils/validator"
+} from "class-validator";
+import { defaultAdminOrdersRelations, defaultAdminOrdersFields } from ".";
+import { ClaimService, OrderService } from "../../../../services";
+import { validator } from "../../../../utils/validator";
 
 /**
  * @oas [post] /order/{id}/claims/{claim_id}
@@ -94,106 +94,106 @@ import { validator } from "../../../../utils/validator"
  *               $ref: "#/components/schemas/order"
  */
 export default async (req, res) => {
-  const { id, claim_id } = req.params
+  const { id, claim_id } = req.params;
 
   const validated = await validator(
     AdminPostOrdersOrderClaimsClaimReq,
     req.body
-  )
+  );
 
-  const orderService: OrderService = req.scope.resolve("orderService")
-  const claimService: ClaimService = req.scope.resolve("claimService")
+  const orderService: OrderService = req.scope.resolve("orderService");
+  const claimService: ClaimService = req.scope.resolve("claimService");
 
-  await claimService.update(claim_id, validated)
+  await claimService.update(claim_id, validated);
 
   const data = await orderService.retrieve(id, {
     select: defaultAdminOrdersFields,
     relations: defaultAdminOrdersRelations,
-  })
+  });
 
-  res.json({ order: data })
-}
+  res.json({ order: data });
+};
 
 export class AdminPostOrdersOrderClaimsClaimReq {
   @IsArray()
   @IsOptional()
   @Type(() => Item)
   @ValidateNested({ each: true })
-  claim_items?: Item[]
+  claim_items?: Item[] = [];
 
   @IsArray()
   @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => ShippingMethod)
-  shipping_methods?: ShippingMethod[]
+  shipping_methods?: ShippingMethod[] = [];
 
   @IsBoolean()
   @IsOptional()
-  no_notification?: boolean
+  no_notification?: boolean;
 
   @IsObject()
   @IsOptional()
-  metadata?: object
+  metadata?: object = {};
 }
 
 class ShippingMethod {
   @IsString()
   @IsOptional()
-  id?: string
+  id?: string;
 
   @IsString()
   @IsOptional()
-  option_id?: string
+  option_id?: string;
 
   @IsInt()
   @IsOptional()
-  price?: number
+  price?: number;
 }
 
 class Item {
   @IsString()
   @IsNotEmpty()
-  id: string
+  id: string;
 
   @IsString()
   @IsOptional()
-  note?: string
+  note?: string;
 
   @IsString()
   @IsOptional()
-  reason?: string
+  reason?: string;
 
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => Image)
-  images: Image[]
+  images: Image[];
 
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => Tag)
-  tags: Tag[]
+  tags: Tag[];
 
   @IsObject()
   @IsOptional()
-  metadata?: object
+  metadata?: object = {};
 }
 
 class Image {
   @IsString()
   @IsOptional()
-  id?: string
+  id?: string;
 
   @IsString()
   @IsOptional()
-  url?: string
+  url?: string;
 }
 
 class Tag {
   @IsString()
   @IsOptional()
-  id?: string
+  id?: string;
 
   @IsString()
   @IsOptional()
-  value?: string
+  value?: string;
 }

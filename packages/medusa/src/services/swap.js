@@ -1,5 +1,5 @@
-import { BaseService } from "medusa-interfaces"
-import { MedusaError } from "medusa-core-utils"
+import { BaseService } from "medusa-interfaces";
+import { MedusaError } from "medusa-core-utils";
 
 /**
  * Handles swaps
@@ -16,7 +16,7 @@ class SwapService extends BaseService {
     PROCESS_REFUND_FAILED: "swap.process_refund_failed",
     REFUND_PROCESSED: "swap.refund_processed",
     FULFILLMENT_CREATED: "swap.fulfillment_created",
-  }
+  };
 
   constructor({
     manager,
@@ -33,51 +33,51 @@ class SwapService extends BaseService {
     inventoryService,
     customShippingOptionService,
   }) {
-    super()
+    super();
 
     /** @private @const {EntityManager} */
-    this.manager_ = manager
+    this.manager_ = manager;
 
     /** @private @const {SwapModel} */
-    this.swapRepository_ = swapRepository
+    this.swapRepository_ = swapRepository;
 
     /** @private @const {TotalsService} */
-    this.totalsService_ = totalsService
+    this.totalsService_ = totalsService;
 
     /** @private @const {LineItemService} */
-    this.lineItemService_ = lineItemService
+    this.lineItemService_ = lineItemService;
 
     /** @private @const {ReturnService} */
-    this.returnService_ = returnService
+    this.returnService_ = returnService;
 
     /** @private @const {PaymentProviderService} */
-    this.paymentProviderService_ = paymentProviderService
+    this.paymentProviderService_ = paymentProviderService;
 
     /** @private @const {CartService} */
-    this.cartService_ = cartService
+    this.cartService_ = cartService;
 
     /** @private @const {FulfillmentService} */
-    this.fulfillmentService_ = fulfillmentService
+    this.fulfillmentService_ = fulfillmentService;
 
     /** @private @const {OrderService} */
-    this.orderService_ = orderService
+    this.orderService_ = orderService;
 
     /** @private @const {ShippingOptionService} */
-    this.shippingOptionService_ = shippingOptionService
+    this.shippingOptionService_ = shippingOptionService;
 
     /** @private @const {InventoryService} */
-    this.inventoryService_ = inventoryService
+    this.inventoryService_ = inventoryService;
 
     /** @private @const {EventBusService} */
-    this.eventBus_ = eventBusService
+    this.eventBus_ = eventBusService;
 
     /** @private @const {CustomShippingOptionService} */
-    this.customShippingOptionService_ = customShippingOptionService
+    this.customShippingOptionService_ = customShippingOptionService;
   }
 
   withTransaction(transactionManager) {
     if (!transactionManager) {
-      return this
+      return this;
     }
 
     const cloned = new SwapService({
@@ -94,21 +94,21 @@ class SwapService extends BaseService {
       inventoryService: this.inventoryService_,
       fulfillmentService: this.fulfillmentService_,
       customShippingOptionService: this.customShippingOptionService_,
-    })
+    });
 
-    cloned.transactionManager_ = transactionManager
+    cloned.transactionManager_ = transactionManager;
 
-    return cloned
+    return cloned;
   }
 
   transformQueryForTotals_(config) {
-    let { select, relations } = config
+    let { select, relations } = config;
 
     if (!select) {
       return {
         ...config,
         totalsToSelect: [],
-      }
+      };
     }
 
     const totalFields = [
@@ -118,22 +118,22 @@ class SwapService extends BaseService {
       "cart.discount_total",
       "cart.gift_card_total",
       "cart.total",
-    ]
+    ];
 
-    const totalsToSelect = select.filter((v) => totalFields.includes(v))
+    const totalsToSelect = select.filter((v) => totalFields.includes(v));
     if (totalsToSelect.length > 0) {
-      const relationSet = new Set(relations)
-      relationSet.add("cart")
-      relationSet.add("cart.items")
-      relationSet.add("cart.gift_cards")
-      relationSet.add("cart.discounts")
-      relationSet.add("cart.discounts.rule")
-      relationSet.add("cart.discounts.rule.valid_for")
-      relationSet.add("cart.shipping_methods")
-      relationSet.add("cart.region")
-      relations = [...relationSet]
+      const relationSet = new Set(relations);
+      relationSet.add("cart");
+      relationSet.add("cart.items");
+      relationSet.add("cart.gift_cards");
+      relationSet.add("cart.discounts");
+      relationSet.add("cart.discounts.rule");
+      relationSet.add("cart.discounts.rule.valid_for");
+      relationSet.add("cart.shipping_methods");
+      relationSet.add("cart.region");
+      relations = [...relationSet];
 
-      select = select.filter((v) => !totalFields.includes(v))
+      select = select.filter((v) => !totalFields.includes(v));
     }
 
     return {
@@ -141,29 +141,29 @@ class SwapService extends BaseService {
       relations,
       select,
       totalsToSelect,
-    }
+    };
   }
 
   async decorateTotals_(cart, totalsFields = []) {
     if (totalsFields.includes("cart.shipping_total")) {
-      cart.shipping_total = await this.totalsService_.getShippingTotal(cart)
+      cart.shipping_total = await this.totalsService_.getShippingTotal(cart);
     }
     if (totalsFields.includes("cart.discount_total")) {
-      cart.discount_total = await this.totalsService_.getDiscountTotal(cart)
+      cart.discount_total = await this.totalsService_.getDiscountTotal(cart);
     }
     if (totalsFields.includes("cart.tax_total")) {
-      cart.tax_total = await this.totalsService_.getTaxTotal(cart)
+      cart.tax_total = await this.totalsService_.getTaxTotal(cart);
     }
     if (totalsFields.includes("cart.gift_card_total")) {
-      cart.gift_card_total = await this.totalsService_.getGiftCardTotal(cart)
+      cart.gift_card_total = await this.totalsService_.getGiftCardTotal(cart);
     }
     if (totalsFields.includes("cart.subtotal")) {
-      cart.subtotal = await this.totalsService_.getSubtotal(cart)
+      cart.subtotal = await this.totalsService_.getSubtotal(cart);
     }
     if (totalsFields.includes("cart.total")) {
-      cart.total = await this.totalsService_.getTotal(cart)
+      cart.total = await this.totalsService_.getTotal(cart);
     }
-    return cart
+    return cart;
   }
 
   /**
@@ -173,29 +173,29 @@ class SwapService extends BaseService {
    * @return {Promise<Swap>} the swap
    */
   async retrieve(id, config = {}) {
-    const swapRepo = this.manager_.getCustomRepository(this.swapRepository_)
+    const swapRepo = this.manager_.getCustomRepository(this.swapRepository_);
 
-    const validatedId = this.validateId_(id)
+    const validatedId = this.validateId_(id);
 
     const { totalsToSelect, ...newConfig } =
-      this.transformQueryForTotals_(config)
+      this.transformQueryForTotals_(config);
 
-    const query = this.buildQuery_({ id: validatedId }, newConfig)
+    const query = this.buildQuery_({ id: validatedId }, newConfig);
 
-    const rels = query.relations
-    delete query.relations
-    const swap = await swapRepo.findOneWithRelations(rels, query)
+    const rels = query.relations;
+    delete query.relations;
+    const swap = await swapRepo.findOneWithRelations(rels, query);
 
     if (!swap) {
-      throw new MedusaError(MedusaError.Types.NOT_FOUND, "Swap was not found")
+      throw new MedusaError(MedusaError.Types.NOT_FOUND, "Swap was not found");
     }
 
     if (rels && rels.includes("cart")) {
-      const cart = await this.decorateTotals_(swap.cart, totalsToSelect)
-      swap.cart = cart
+      const cart = await this.decorateTotals_(swap.cart, totalsToSelect);
+      swap.cart = cart;
     }
 
-    return swap
+    return swap;
   }
 
   /**
@@ -205,20 +205,20 @@ class SwapService extends BaseService {
    * @return {Promise<Swap>} the swap
    */
   async retrieveByCartId(cartId, relations = []) {
-    const swapRepo = this.manager_.getCustomRepository(this.swapRepository_)
+    const swapRepo = this.manager_.getCustomRepository(this.swapRepository_);
 
     const swap = await swapRepo.findOne({
       where: {
         cart_id: cartId,
       },
       relations,
-    })
+    });
 
     if (!swap) {
-      throw new MedusaError(MedusaError.Types.NOT_FOUND, "Swap was not found")
+      throw new MedusaError(MedusaError.Types.NOT_FOUND, "Swap was not found");
     }
 
-    return swap
+    return swap;
   }
 
   /**
@@ -230,12 +230,12 @@ class SwapService extends BaseService {
     selector,
     config = { skip: 0, take: 50, order: { created_at: "DESC" } }
   ) {
-    const swapRepo = this.manager_.getCustomRepository(this.swapRepository_)
-    const query = this.buildQuery_(selector, config)
+    const swapRepo = this.manager_.getCustomRepository(this.swapRepository_);
+    const query = this.buildQuery_(selector, config);
 
-    const rels = query.relations
-    delete query.relations
-    return swapRepo.findWithRelations(rels, query)
+    const rels = query.relations;
+    delete query.relations;
+    return swapRepo.findWithRelations(rels, query);
   }
 
   /**
@@ -259,14 +259,14 @@ class SwapService extends BaseService {
    */
   validateReturnItems_(order, returnItems) {
     return returnItems.map(({ item_id, quantity }) => {
-      const item = order.items.find((i) => i.id === item_id)
+      const item = order.items.find((i) => i.id === item_id);
 
       // The item must exist in the order
       if (!item) {
         throw new MedusaError(
           MedusaError.Types.INVALID_DATA,
           "Item does not exist on order"
-        )
+        );
       }
 
       // Item's cannot be returned multiple times
@@ -274,11 +274,11 @@ class SwapService extends BaseService {
         throw new MedusaError(
           MedusaError.Types.INVALID_DATA,
           "Cannot return more items than have been ordered"
-        )
+        );
       }
 
-      return { item_id, quantity }
-    })
+      return { item_id, quantity };
+    });
   }
 
   /**
@@ -310,7 +310,7 @@ class SwapService extends BaseService {
       no_notification: undefined,
     }
   ) {
-    const { no_notification, ...rest } = custom
+    const { no_notification, ...rest } = custom;
     return this.atomicPhase_(async (manager) => {
       if (
         order.fulfillment_status === "not_fulfilled" ||
@@ -319,13 +319,13 @@ class SwapService extends BaseService {
         throw new MedusaError(
           MedusaError.Types.NOT_ALLOWED,
           "Order cannot be swapped"
-        )
+        );
       }
 
       for (const item of returnItems) {
         const line = await this.lineItemService_.retrieve(item.item_id, {
           relations: ["order", "swap", "claim_order"],
-        })
+        });
 
         if (
           line.order?.canceled_at ||
@@ -335,7 +335,7 @@ class SwapService extends BaseService {
           throw new MedusaError(
             MedusaError.Types.INVALID_DATA,
             `Cannot create a swap on a canceled item.`
-          )
+          );
         }
       }
 
@@ -345,14 +345,14 @@ class SwapService extends BaseService {
             variant_id,
             order.region_id,
             quantity
-          )
+          );
         })
-      )
+      );
 
       const evaluatedNoNotification =
-        no_notification !== undefined ? no_notification : order.no_notification
+        no_notification !== undefined ? no_notification : order.no_notification;
 
-      const swapRepo = manager.getCustomRepository(this.swapRepository_)
+      const swapRepo = manager.getCustomRepository(this.swapRepository_);
       const created = swapRepo.create({
         ...rest,
         fulfillment_status: "not_fulfilled",
@@ -360,9 +360,9 @@ class SwapService extends BaseService {
         order_id: order.id,
         additional_items: newItems,
         no_notification: evaluatedNoNotification,
-      })
+      });
 
-      const result = await swapRepo.save(created)
+      const result = await swapRepo.save(created);
 
       await this.returnService_.withTransaction(manager).create({
         swap_id: result.id,
@@ -370,43 +370,43 @@ class SwapService extends BaseService {
         items: returnItems,
         shipping_method: returnShipping,
         no_notification: evaluatedNoNotification,
-      })
+      });
 
       await this.eventBus_
         .withTransaction(manager)
         .emit(SwapService.Events.CREATED, {
           id: result.id,
           no_notification: evaluatedNoNotification,
-        })
+        });
 
-      return result
-    })
+      return result;
+    });
   }
 
   async processDifference(swapId) {
     return this.atomicPhase_(async (manager) => {
       const swap = await this.retrieve(swapId, {
         relations: ["payment", "order", "order.payments"],
-      })
+      });
 
       if (swap.canceled_at) {
         throw new MedusaError(
           MedusaError.Types.NOT_ALLOWED,
           "Canceled swap cannot be processed"
-        )
+        );
       }
 
       if (!swap.confirmed_at) {
         throw new MedusaError(
           MedusaError.Types.NOT_ALLOWED,
           "Cannot process a swap that hasn't been confirmed by the customer"
-        )
+        );
       }
 
-      const swapRepo = manager.getCustomRepository(this.swapRepository_)
+      const swapRepo = manager.getCustomRepository(this.swapRepository_);
       if (swap.difference_due < 0) {
         if (swap.payment_status === "difference_refunded") {
-          return swap
+          return swap;
         }
 
         try {
@@ -416,109 +416,109 @@ class SwapService extends BaseService {
               swap.order.payments,
               -1 * swap.difference_due,
               "swap"
-            )
+            );
         } catch (err) {
-          swap.payment_status = "requires_action"
-          const result = await swapRepo.save(swap)
+          swap.payment_status = "requires_action";
+          const result = await swapRepo.save(swap);
 
           await this.eventBus_
             .withTransaction(manager)
             .emit(SwapService.Events.PROCESS_REFUND_FAILED, {
               id: result.id,
               no_notification: swap.no_notification,
-            })
+            });
 
-          return result
+          return result;
         }
 
-        swap.payment_status = "difference_refunded"
+        swap.payment_status = "difference_refunded";
 
-        const result = await swapRepo.save(swap)
+        const result = await swapRepo.save(swap);
 
         await this.eventBus_
           .withTransaction(manager)
           .emit(SwapService.Events.REFUND_PROCESSED, {
             id: result.id,
             no_notification: swap.no_notification,
-          })
+          });
 
-        return result
+        return result;
       } else if (swap.difference_due === 0) {
         if (swap.payment_status === "difference_refunded") {
-          return swap
+          return swap;
         }
 
-        swap.payment_status = "difference_refunded"
+        swap.payment_status = "difference_refunded";
 
-        const result = await swapRepo.save(swap)
+        const result = await swapRepo.save(swap);
 
         await this.eventBus_
           .withTransaction(manager)
           .emit(SwapService.Events.REFUND_PROCESSED, {
             id: result.id,
             no_notification: swap.no_notification,
-          })
+          });
 
-        return result
+        return result;
       }
 
       try {
         if (swap.payment_status === "captured") {
-          return swap
+          return swap;
         }
 
         await this.paymentProviderService_
           .withTransaction(manager)
-          .capturePayment(swap.payment)
+          .capturePayment(swap.payment);
       } catch (err) {
-        swap.payment_status = "requires_action"
-        const result = await swapRepo.save(swap)
+        swap.payment_status = "requires_action";
+        const result = await swapRepo.save(swap);
 
         await this.eventBus_
           .withTransaction(manager)
           .emit(SwapService.Events.PAYMENT_CAPTURE_FAILED, {
             id: swap.id,
             no_notification: swap.no_notification,
-          })
+          });
 
-        return result
+        return result;
       }
 
-      swap.payment_status = "captured"
+      swap.payment_status = "captured";
 
-      const result = await swapRepo.save(swap)
+      const result = await swapRepo.save(swap);
 
       await this.eventBus_
         .withTransaction(manager)
         .emit(SwapService.Events.PAYMENT_CAPTURED, {
           id: result.id,
           no_notification: swap.no_notification,
-        })
+        });
 
-      return result
-    })
+      return result;
+    });
   }
 
   async update(swapId, update) {
     return this.atomicPhase_(async (manager) => {
-      const swap = await this.retrieve(swapId)
+      const swap = await this.retrieve(swapId);
 
       if ("metadata" in update) {
-        swap.metadata = this.setMetadata_(swap, update.metadata)
+        swap.metadata = this.setMetadata_(swap, update.metadata);
       }
 
       if ("no_notification" in update) {
-        swap.no_notification = update.no_notification
+        swap.no_notification = update.no_notification;
       }
 
       if ("shipping_address" in update) {
-        await this.updateShippingAddress_(swap, update.shipping_address)
+        await this.updateShippingAddress_(swap, update.shipping_address);
       }
 
-      const swapRepo = manager.getCustomRepository(this.swapRepository_)
-      const result = await swapRepo.save(swap)
-      return result
-    })
+      const swapRepo = manager.getCustomRepository(this.swapRepository_);
+      const result = await swapRepo.save(swap);
+      return result;
+    });
   }
 
   /**
@@ -549,28 +549,28 @@ class SwapService extends BaseService {
           "return_order.items",
           "return_order.shipping_method",
         ],
-      })
+      });
 
       if (swap.canceled_at) {
         throw new MedusaError(
           MedusaError.Types.NOT_ALLOWED,
           "Canceled swap cannot be used to create a cart"
-        )
+        );
       }
 
       if (swap.cart_id) {
         throw new MedusaError(
           MedusaError.Types.DUPLICATE_ERROR,
           "A cart has already been created for the swap"
-        )
+        );
       }
 
-      const order = swap.order
+      const order = swap.order;
 
       // filter out free shipping discounts
       const discounts =
         order?.discounts?.filter(({ rule }) => rule.type !== "free_shipping") ||
-        undefined
+        undefined;
 
       const cart = await this.cartService_.withTransaction(manager).create({
         discounts,
@@ -584,7 +584,7 @@ class SwapService extends BaseService {
           swap_id: swap.id,
           parent_order_id: order.id,
         },
-      })
+      });
 
       for (const customShippingOption of customShippingOptions) {
         await this.customShippingOptionService_
@@ -593,13 +593,13 @@ class SwapService extends BaseService {
             cart_id: cart.id,
             shipping_option_id: customShippingOption.option_id,
             price: customShippingOption.price,
-          })
+          });
       }
 
       for (const item of swap.additional_items) {
         await this.lineItemService_.withTransaction(manager).update(item.id, {
           cart_id: cart.id,
-        })
+        });
       }
 
       // If the swap has a return shipping method the price has to be added to the
@@ -615,25 +615,25 @@ class SwapService extends BaseService {
           metadata: {
             is_return_line: true,
           },
-        })
+        });
       }
 
       for (const r of swap.return_order.items) {
-        let allItems = [...order.items]
+        let allItems = [...order.items];
 
         if (order.swaps && order.swaps.length) {
           for (const s of order.swaps) {
-            allItems = [...allItems, ...s.additional_items]
+            allItems = [...allItems, ...s.additional_items];
           }
         }
 
         if (order.claims && order.claims.length) {
           for (const c of order.claims) {
-            allItems = [...allItems, ...c.additional_items]
+            allItems = [...allItems, ...c.additional_items];
           }
         }
 
-        const lineItem = allItems.find((i) => i.id === r.item_id)
+        const lineItem = allItems.find((i) => i.id === r.item_id);
 
         const toCreate = {
           cart_id: cart.id,
@@ -647,17 +647,17 @@ class SwapService extends BaseService {
             ...lineItem.metadata,
             is_return_line: true,
           },
-        }
+        };
 
-        await this.lineItemService_.withTransaction(manager).create(toCreate)
+        await this.lineItemService_.withTransaction(manager).create(toCreate);
       }
 
-      swap.cart_id = cart.id
+      swap.cart_id = cart.id;
 
-      const swapRepo = manager.getCustomRepository(this.swapRepository_)
-      const result = await swapRepo.save(swap)
-      return result
-    })
+      const swapRepo = manager.getCustomRepository(this.swapRepository_);
+      const result = await swapRepo.save(swap);
+      return result;
+    });
   }
 
   /**
@@ -677,65 +677,65 @@ class SwapService extends BaseService {
           "cart.payment",
           "cart.gift_cards",
         ],
-      })
+      });
 
       // If we already registered the cart completion we just return
       if (swap.confirmed_at) {
-        return swap
+        return swap;
       }
 
       if (swap.canceled_at) {
         throw new MedusaError(
           MedusaError.Types.NOT_ALLOWED,
           "Cart related to canceled swap cannot be completed"
-        )
+        );
       }
 
-      const cart = swap.cart
-      const { payment } = cart
+      const cart = swap.cart;
+      const { payment } = cart;
 
-      const items = swap.cart.items
+      const items = swap.cart.items;
 
       if (!swap.allow_backorder) {
         for (const item of items) {
           try {
             await this.inventoryService_
               .withTransaction(manager)
-              .confirmInventory(item.variant_id, item.quantity)
+              .confirmInventory(item.variant_id, item.quantity);
           } catch (err) {
             if (payment) {
               await this.paymentProviderService_
                 .withTransaction(manager)
-                .cancelPayment(payment)
+                .cancelPayment(payment);
             }
             await this.cartService_
               .withTransaction(manager)
-              .update(cart.id, { payment_authorized_at: null })
-            throw err
+              .update(cart.id, { payment_authorized_at: null });
+            throw err;
           }
         }
       }
 
-      const total = await this.totalsService_.getTotal(cart)
+      const total = await this.totalsService_.getTotal(cart);
 
       if (total > 0) {
         if (!payment) {
           throw new MedusaError(
             MedusaError.Types.INVALID_ARGUMENT,
             "Cart does not contain a payment"
-          )
+          );
         }
 
         const paymentStatus = await this.paymentProviderService_
           .withTransaction(manager)
-          .getStatus(payment)
+          .getStatus(payment);
 
         // If payment status is not authorized, we throw
         if (paymentStatus !== "authorized" && paymentStatus !== "succeeded") {
           throw new MedusaError(
             MedusaError.Types.INVALID_ARGUMENT,
             "Payment method is not authorized"
-          )
+          );
         }
 
         await this.paymentProviderService_
@@ -743,31 +743,31 @@ class SwapService extends BaseService {
           .updatePayment(payment.id, {
             swap_id: swapId,
             order_id: swap.order_id,
-          })
+          });
 
         for (const item of items) {
           await this.inventoryService_
             .withTransaction(manager)
-            .adjustInventory(item.variant_id, -item.quantity)
+            .adjustInventory(item.variant_id, -item.quantity);
         }
       }
 
-      const now = new Date()
-      swap.difference_due = total
-      swap.shipping_address_id = cart.shipping_address_id
-      swap.shipping_methods = cart.shipping_methods
-      swap.confirmed_at = now.toISOString()
-      swap.payment_status = total === 0 ? "confirmed" : "awaiting"
+      const now = new Date();
+      swap.difference_due = total;
+      swap.shipping_address_id = cart.shipping_address_id;
+      swap.shipping_methods = cart.shipping_methods;
+      swap.confirmed_at = now.toISOString();
+      swap.payment_status = total === 0 ? "confirmed" : "awaiting";
 
-      const swapRepo = manager.getCustomRepository(this.swapRepository_)
-      const result = await swapRepo.save(swap)
+      const swapRepo = manager.getCustomRepository(this.swapRepository_);
+      const result = await swapRepo.save(swap);
 
       for (const method of cart.shipping_methods) {
         await this.shippingOptionService_
           .withTransaction(manager)
           .updateShippingMethod(method.id, {
             swap_id: result.id,
-          })
+          });
       }
 
       this.eventBus_
@@ -775,14 +775,14 @@ class SwapService extends BaseService {
         .emit(SwapService.Events.PAYMENT_COMPLETED, {
           id: swap.id,
           no_notification: swap.no_notification,
-        })
+        });
 
       await this.cartService_
         .withTransaction(manager)
-        .update(cart.id, { completed_at: new Date() })
+        .update(cart.id, { completed_at: new Date() });
 
-      return result
-    })
+      return result;
+    });
   }
 
   /**
@@ -796,36 +796,36 @@ class SwapService extends BaseService {
    */
   async receiveReturn(swapId, returnItems) {
     return this.atomicPhase_(async (manager) => {
-      const swap = await this.retrieve(swapId, { relations: ["return_order"] })
+      const swap = await this.retrieve(swapId, { relations: ["return_order"] });
 
       if (swap.canceled_at) {
         throw new MedusaError(
           MedusaError.Types.NOT_ALLOWED,
           "Canceled swap cannot be registered as received"
-        )
+        );
       }
 
-      const returnId = swap.return_order && swap.return_order.id
+      const returnId = swap.return_order && swap.return_order.id;
       if (!returnId) {
         throw new MedusaError(
           MedusaError.Types.INVALID_DATA,
           "Swap has no return request"
-        )
+        );
       }
 
       const updatedRet = await this.returnService_
         .withTransaction(manager)
-        .receiveReturn(returnId, returnItems, undefined, false)
+        .receiveReturn(returnId, returnItems, undefined, false);
 
       if (updatedRet.status === "requires_action") {
-        const swapRepo = manager.getCustomRepository(this.swapRepository_)
-        swap.fulfillment_status = "requires_action"
-        const result = await swapRepo.save(swap)
-        return result
+        const swapRepo = manager.getCustomRepository(this.swapRepository_);
+        swap.fulfillment_status = "requires_action";
+        const result = await swapRepo.save(swap);
+        return result;
       }
 
-      return this.retrieve(swapId)
-    })
+      return this.retrieve(swapId);
+    });
   }
 
   /**
@@ -839,7 +839,7 @@ class SwapService extends BaseService {
     return this.atomicPhase_(async (manager) => {
       const swap = await this.retrieve(swapId, {
         relations: ["payment", "fulfillments", "return_order"],
-      })
+      });
 
       if (
         swap.payment_status === "difference_refunded" ||
@@ -849,7 +849,7 @@ class SwapService extends BaseService {
         throw new MedusaError(
           MedusaError.Types.NOT_ALLOWED,
           "Swap with a refund cannot be canceled"
-        )
+        );
       }
 
       if (swap.fulfillments) {
@@ -858,7 +858,7 @@ class SwapService extends BaseService {
             throw new MedusaError(
               MedusaError.Types.NOT_ALLOWED,
               "All fulfillments must be canceled before the swap can be canceled"
-            )
+            );
           }
         }
       }
@@ -867,23 +867,23 @@ class SwapService extends BaseService {
         throw new MedusaError(
           MedusaError.Types.NOT_ALLOWED,
           "Return must be canceled before the swap can be canceled"
-        )
+        );
       }
 
-      swap.payment_status = "canceled"
-      swap.fulfillment_status = "canceled"
-      swap.canceled_at = new Date()
+      swap.payment_status = "canceled";
+      swap.fulfillment_status = "canceled";
+      swap.canceled_at = new Date();
 
       if (swap.payment) {
         await this.paymentProviderService_
           .withTransaction(manager)
-          .cancelPayment(swap.payment)
+          .cancelPayment(swap.payment);
       }
 
-      const swapRepo = manager.getCustomRepository(this.swapRepository_)
-      const result = await swapRepo.save(swap)
-      return result
-    })
+      const swapRepo = manager.getCustomRepository(this.swapRepository_);
+      const result = await swapRepo.save(swap);
+      return result;
+    });
   }
 
   /**
@@ -900,7 +900,7 @@ class SwapService extends BaseService {
       no_notification: undefined,
     }
   ) {
-    const { metadata, no_notification } = config
+    const { metadata, no_notification } = config;
 
     return this.atomicPhase_(async (manager) => {
       const swap = await this.retrieve(swapId, {
@@ -915,14 +915,14 @@ class SwapService extends BaseService {
           "order.discounts.rule",
           "order.payments",
         ],
-      })
-      const order = swap.order
+      });
+      const order = swap.order;
 
       if (swap.canceled_at) {
         throw new MedusaError(
           MedusaError.Types.NOT_ALLOWED,
           "Canceled swap cannot be fulfilled"
-        )
+        );
       }
 
       if (
@@ -932,18 +932,18 @@ class SwapService extends BaseService {
         throw new MedusaError(
           MedusaError.Types.NOT_ALLOWED,
           "The swap was already fulfilled"
-        )
+        );
       }
 
       if (!swap.shipping_methods?.length) {
         throw new MedusaError(
           MedusaError.Types.NOT_ALLOWED,
           "Cannot fulfill an swap that doesn't have shipping methods"
-        )
+        );
       }
 
       const evaluatedNoNotification =
-        no_notification !== undefined ? no_notification : swap.no_notification
+        no_notification !== undefined ? no_notification : swap.no_notification;
 
       swap.fulfillments = await this.fulfillmentService_
         .withTransaction(manager)
@@ -968,42 +968,42 @@ class SwapService extends BaseService {
             quantity: i.quantity,
           })),
           { swap_id: swapId, metadata }
-        )
+        );
 
-      let successfullyFulfilled = []
+      let successfullyFulfilled = [];
       for (const f of swap.fulfillments) {
-        successfullyFulfilled = successfullyFulfilled.concat(f.items)
+        successfullyFulfilled = successfullyFulfilled.concat(f.items);
       }
 
-      swap.fulfillment_status = "fulfilled"
+      swap.fulfillment_status = "fulfilled";
 
       // Update all line items to reflect fulfillment
       for (const item of swap.additional_items) {
         const fulfillmentItem = successfullyFulfilled.find(
           (f) => item.id === f.item_id
-        )
+        );
 
         if (fulfillmentItem) {
           const fulfilledQuantity =
-            (item.fulfilled_quantity || 0) + fulfillmentItem.quantity
+            (item.fulfilled_quantity || 0) + fulfillmentItem.quantity;
 
           // Update the fulfilled quantity
           await this.lineItemService_.withTransaction(manager).update(item.id, {
             fulfilled_quantity: fulfilledQuantity,
-          })
+          });
 
           if (item.quantity !== fulfilledQuantity) {
-            swap.fulfillment_status = "requires_action"
+            swap.fulfillment_status = "requires_action";
           }
         } else {
           if (item.quantity !== item.fulfilled_quantity) {
-            swap.fulfillment_status = "requires_action"
+            swap.fulfillment_status = "requires_action";
           }
         }
       }
 
-      const swapRepo = manager.getCustomRepository(this.swapRepository_)
-      const result = await swapRepo.save(swap)
+      const swapRepo = manager.getCustomRepository(this.swapRepository_);
+      const result = await swapRepo.save(swap);
 
       await this.eventBus_.withTransaction(manager).emit(
         SwapService.Events.FULFILLMENT_CREATED,
@@ -1013,10 +1013,10 @@ class SwapService extends BaseService {
           fulfillment_id: result.id,
           no_notification: evaluatedNoNotification,
         }
-      )
+      );
 
-      return result
-    })
+      return result;
+    });
   }
 
   /**
@@ -1028,23 +1028,23 @@ class SwapService extends BaseService {
     return this.atomicPhase_(async (manager) => {
       const canceled = await this.fulfillmentService_
         .withTransaction(manager)
-        .cancelFulfillment(fulfillmentId)
+        .cancelFulfillment(fulfillmentId);
 
       if (!canceled.swap_id) {
         throw new MedusaError(
           MedusaError.Types.NOT_ALLOWED,
           `Fufillment not related to a swap`
-        )
+        );
       }
 
-      const swap = await this.retrieve(canceled.swap_id)
+      const swap = await this.retrieve(canceled.swap_id);
 
-      swap.fulfillment_status = "canceled"
+      swap.fulfillment_status = "canceled";
 
-      const swapRepo = manager.getCustomRepository(this.swapRepository_)
-      const updated = await swapRepo.save(swap)
-      return updated
-    })
+      const swapRepo = manager.getCustomRepository(this.swapRepository_);
+      const updated = await swapRepo.save(swap);
+      return updated;
+    });
   }
 
   /**
@@ -1066,21 +1066,21 @@ class SwapService extends BaseService {
       no_notification: undefined,
     }
   ) {
-    const { metadata, no_notification } = config
+    const { metadata, no_notification } = config;
 
     return this.atomicPhase_(async (manager) => {
       const swap = await this.retrieve(swapId, {
         relations: ["additional_items"],
-      })
+      });
 
       if (swap.canceled_at) {
         throw new MedusaError(
           MedusaError.Types.NOT_ALLOWED,
           "Canceled swap cannot be fulfilled as shipped"
-        )
+        );
       }
       const evaluatedNoNotification =
-        no_notification !== undefined ? no_notification : swap.no_notification
+        no_notification !== undefined ? no_notification : swap.no_notification;
 
       // Update the fulfillment to register
       const shipment = await this.fulfillmentService_
@@ -1088,40 +1088,40 @@ class SwapService extends BaseService {
         .createShipment(fulfillmentId, trackingLinks, {
           metadata,
           no_notification: evaluatedNoNotification,
-        })
+        });
 
-      swap.fulfillment_status = "shipped"
+      swap.fulfillment_status = "shipped";
 
       // Go through all the additional items in the swap
       for (const i of swap.additional_items) {
-        const shipped = shipment.items.find((si) => si.item_id === i.id)
+        const shipped = shipment.items.find((si) => si.item_id === i.id);
         if (shipped) {
-          const shippedQty = (i.shipped_quantity || 0) + shipped.quantity
+          const shippedQty = (i.shipped_quantity || 0) + shipped.quantity;
           await this.lineItemService_.withTransaction(manager).update(i.id, {
             shipped_quantity: shippedQty,
-          })
+          });
 
           if (shippedQty !== i.quantity) {
-            swap.fulfillment_status = "partially_shipped"
+            swap.fulfillment_status = "partially_shipped";
           }
         } else {
           if (i.shipped_quantity !== i.quantity) {
-            swap.fulfillment_status = "partially_shipped"
+            swap.fulfillment_status = "partially_shipped";
           }
         }
       }
 
-      const swapRepo = manager.getCustomRepository(this.swapRepository_)
-      const result = await swapRepo.save(swap)
+      const swapRepo = manager.getCustomRepository(this.swapRepository_);
+      const result = await swapRepo.save(swap);
       await this.eventBus_
         .withTransaction(manager)
         .emit(SwapService.Events.SHIPMENT_CREATED, {
           id: swapId,
           fulfillment_id: shipment.id,
           no_notification: swap.no_notification,
-        })
-      return result
-    })
+        });
+      return result;
+    });
   }
 
   /**
@@ -1131,21 +1131,21 @@ class SwapService extends BaseService {
    * @return {Promise} resolves to the updated result.
    */
   async deleteMetadata(swapId, key) {
-    const validatedId = this.validateId_(swapId)
+    const validatedId = this.validateId_(swapId);
 
     if (typeof key !== "string") {
       throw new MedusaError(
         MedusaError.Types.INVALID_ARGUMENT,
         "Key type is invalid. Metadata keys must be strings"
-      )
+      );
     }
 
-    const keyPath = `metadata.${key}`
+    const keyPath = `metadata.${key}`;
     return this.swapModel_
       .updateOne({ _id: validatedId }, { $unset: { [keyPath]: "" } })
       .catch((err) => {
-        throw new MedusaError(MedusaError.Types.DB_ERROR, err.message)
-      })
+        throw new MedusaError(MedusaError.Types.DB_ERROR, err.message);
+      });
   }
 
   /**
@@ -1159,23 +1159,23 @@ class SwapService extends BaseService {
     return this.atomicPhase_(async (manager) => {
       const swap = await this.retrieve(id, {
         relations: ["return_order", "return_order.items"],
-      })
+      });
 
       if (swap.canceled_at) {
         throw new MedusaError(
           MedusaError.Types.NOT_ALLOWED,
           "Canceled swap cannot be registered as received"
-        )
+        );
       }
 
       if (swap.return_order.status !== "received") {
         throw new MedusaError(
           MedusaError.Types.NOT_ALLOWED,
           "Swap is not received"
-        )
+        );
       }
 
-      const result = await this.retrieve(id)
+      const result = await this.retrieve(id);
 
       await this.eventBus_
         .withTransaction(manager)
@@ -1183,11 +1183,11 @@ class SwapService extends BaseService {
           id: id,
           order_id: result.order_id,
           no_notification: swap.no_notification,
-        })
+        });
 
-      return result
-    })
+      return result;
+    });
   }
 }
 
-export default SwapService
+export default SwapService;

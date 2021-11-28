@@ -1,17 +1,17 @@
-import { IsInt, IsObject, IsOptional, IsString } from "class-validator"
-import { MedusaError } from "medusa-core-utils"
-import { EntityManager } from "typeorm"
+import { IsInt, IsObject, IsOptional, IsString } from "class-validator";
+import { MedusaError } from "medusa-core-utils";
+import { EntityManager } from "typeorm";
 import {
   defaultAdminDraftOrdersCartFields,
   defaultAdminDraftOrdersCartRelations,
   defaultAdminDraftOrdersFields,
-} from "."
+} from ".";
 import {
   CartService,
   DraftOrderService,
   LineItemService,
-} from "../../../../services"
-import { validator } from "../../../../utils/validator"
+} from "../../../../services";
+import { validator } from "../../../../utils/validator";
 /**
  * @oas [post] /draft-orders/{id}/line-items
  * operationId: "PostDraftOrdersDraftOrderLineItems"
@@ -54,18 +54,18 @@ import { validator } from "../../../../utils/validator"
  */
 
 export default async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params;
 
   const validated = await validator(
     AdminPostDraftOrdersDraftOrderLineItemsReq,
     req.body
-  )
+  );
 
   const draftOrderService: DraftOrderService =
-    req.scope.resolve("draftOrderService")
-  const cartService: CartService = req.scope.resolve("cartService")
-  const lineItemService: LineItemService = req.scope.resolve("lineItemService")
-  const entityManager: EntityManager = req.scope.resolve("manager")
+    req.scope.resolve("draftOrderService");
+  const cartService: CartService = req.scope.resolve("cartService");
+  const lineItemService: LineItemService = req.scope.resolve("lineItemService");
+  const entityManager: EntityManager = req.scope.resolve("manager");
 
   await entityManager.transaction(async (manager) => {
     const draftOrder = await draftOrderService
@@ -73,13 +73,13 @@ export default async (req, res) => {
       .retrieve(id, {
         select: defaultAdminDraftOrdersFields,
         relations: ["cart"],
-      })
+      });
 
     if (draftOrder.status === "completed") {
       throw new MedusaError(
         MedusaError.Types.NOT_ALLOWED,
         "You are only allowed to update open draft orders"
-      )
+      );
     }
 
     if (validated.variant_id) {
@@ -88,11 +88,11 @@ export default async (req, res) => {
         draftOrder.cart.region_id,
         validated.quantity,
         { metadata: validated.metadata, unit_price: validated.unit_price }
-      )
+      );
 
       await cartService
         .withTransaction(manager)
-        .addLineItem(draftOrder.cart_id, line)
+        .addLineItem(draftOrder.cart_id, line);
     } else {
       // custom line items can be added to a draft order
       await lineItemService.withTransaction(manager).create({
@@ -102,7 +102,7 @@ export default async (req, res) => {
         allow_discounts: false,
         unit_price: validated.unit_price || 0,
         quantity: validated.quantity,
-      })
+      });
     }
 
     draftOrder.cart = await cartService
@@ -110,29 +110,29 @@ export default async (req, res) => {
       .retrieve(draftOrder.cart_id, {
         relations: defaultAdminDraftOrdersCartRelations,
         select: defaultAdminDraftOrdersCartFields,
-      })
+      });
 
-    res.status(200).json({ draft_order: draftOrder })
-  })
-}
+    res.status(200).json({ draft_order: draftOrder });
+  });
+};
 
 export class AdminPostDraftOrdersDraftOrderLineItemsReq {
   @IsString()
   @IsOptional()
-  title?: string = "Custom item"
+  title?: string = "Custom item";
 
   @IsInt()
   @IsOptional()
-  unit_price?: number
+  unit_price?: number;
 
   @IsString()
   @IsOptional()
-  variant_id?: string
+  variant_id?: string;
 
   @IsInt()
-  quantity: number
+  quantity: number;
 
   @IsObject()
   @IsOptional()
-  metadata?: object = {}
+  metadata?: object = {};
 }

@@ -1,4 +1,4 @@
-import { IdMap } from "medusa-test-utils"
+import { IdMap } from "medusa-test-utils";
 
 export const regions = {
   testRegion: {
@@ -10,19 +10,19 @@ export const regions = {
     fulfillment_providers: ["test_shipper"],
     currency_code: "DKK",
   },
-}
+};
 
 export const RegionServiceMock = {
   retrieve: jest.fn().mockImplementation((regionId) => {
     if (regionId === IdMap.getId("world")) {
-      return Promise.resolve(regions.testRegion)
+      return Promise.resolve(regions.testRegion);
     }
-    throw Error(regionId + "not found")
+    throw Error(regionId + "not found");
   }),
-}
+};
 
 const mock = jest.fn().mockImplementation(() => {
-  return RegionServiceMock
-})
+  return RegionServiceMock;
+});
 
-export default mock
+export default mock;

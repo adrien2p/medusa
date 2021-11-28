@@ -11,17 +11,17 @@ import {
   ManyToOne,
   OneToMany,
   JoinColumn,
-} from "typeorm"
-import { ulid } from "ulid"
-import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column"
+} from "typeorm";
+import { ulid } from "ulid";
+import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column";
 
-import { Fulfillment } from "./fulfillment"
-import { LineItem } from "./line-item"
-import { ClaimItem } from "./claim-item"
-import { Order } from "./order"
-import { Return } from "./return"
-import { ShippingMethod } from "./shipping-method"
-import { Address } from "./address"
+import { Fulfillment } from "./fulfillment";
+import { LineItem } from "./line-item";
+import { ClaimItem } from "./claim-item";
+import { Order } from "./order";
+import { Return } from "./return";
+import { ShippingMethod } from "./shipping-method";
+import { Address } from "./address";
 
 export enum ClaimType {
   REFUND = "refund",
@@ -49,106 +49,89 @@ export enum ClaimFulfillmentStatus {
 @Entity()
 export class ClaimOrder {
   @PrimaryColumn()
-  id: string
+  id: string;
 
   @DbAwareColumn({
     type: "enum",
     enum: ClaimPaymentStatus,
     default: ClaimPaymentStatus.NA,
   })
-  payment_status: ClaimPaymentStatus
+  payment_status: ClaimPaymentStatus;
 
   @DbAwareColumn({
     type: "enum",
     enum: ClaimFulfillmentStatus,
     default: ClaimFulfillmentStatus.NOT_FULFILLED,
   })
-  fulfillment_status: ClaimFulfillmentStatus
+  fulfillment_status: ClaimFulfillmentStatus;
 
-  @OneToMany(
-    () => ClaimItem,
-    ci => ci.claim_order
-  )
-  claim_items: ClaimItem[]
+  @OneToMany(() => ClaimItem, (ci) => ci.claim_order)
+  claim_items: ClaimItem[];
 
-  @OneToMany(
-    () => LineItem,
-    li => li.claim_order,
-    { cascade: ["insert"] }
-  )
-  additional_items: LineItem[]
+  @OneToMany(() => LineItem, (li) => li.claim_order, { cascade: ["insert"] })
+  additional_items: LineItem[];
 
   @DbAwareColumn({ type: "enum", enum: ClaimType })
-  type: ClaimType
+  type: ClaimType;
 
   @Index()
   @Column()
-  order_id: string
+  order_id: string;
 
-  @ManyToOne(
-    () => Order,
-    o => o.claims
-  )
+  @ManyToOne(() => Order, (o) => o.claims)
   @JoinColumn({ name: "order_id" })
-  order: Order
+  order: Order;
 
-  @OneToOne(
-    () => Return,
-    ret => ret.claim_order
-  )
-  return_order: Return
+  @OneToOne(() => Return, (ret) => ret.claim_order)
+  return_order: Return;
 
   @Index()
   @Column({ nullable: true })
-  shipping_address_id: string
+  shipping_address_id: string;
 
   @ManyToOne(() => Address, { cascade: ["insert"] })
   @JoinColumn({ name: "shipping_address_id" })
-  shipping_address: Address
+  shipping_address: Address;
 
-  @OneToMany(
-    () => ShippingMethod,
-    method => method.claim_order,
-    { cascade: ["insert"] }
-  )
-  shipping_methods: ShippingMethod[]
+  @OneToMany(() => ShippingMethod, (method) => method.claim_order, {
+    cascade: ["insert"],
+  })
+  shipping_methods: ShippingMethod[];
 
-  @OneToMany(
-    () => Fulfillment,
-    fulfillment => fulfillment.claim_order,
-    { cascade: ["insert"] }
-  )
-  fulfillments: Fulfillment[]
+  @OneToMany(() => Fulfillment, (fulfillment) => fulfillment.claim_order, {
+    cascade: ["insert"],
+  })
+  fulfillments: Fulfillment[];
 
   @Column({ type: "int", nullable: true })
-  refund_amount: number
+  refund_amount: number;
 
   @Column({ type: resolveDbType("timestamptz"), nullable: true })
-  canceled_at: Date
+  canceled_at: Date;
 
   @CreateDateColumn({ type: resolveDbType("timestamptz") })
-  created_at: Date
+  created_at: Date;
 
   @UpdateDateColumn({ type: resolveDbType("timestamptz") })
-  updated_at: Date
+  updated_at: Date;
 
   @DeleteDateColumn({ type: resolveDbType("timestamptz") })
-  deleted_at: Date
+  deleted_at: Date;
 
   @Column({ type: "boolean", nullable: true })
-  no_notification: Boolean
+  no_notification: Boolean;
 
   @DbAwareColumn({ type: "jsonb", nullable: true })
-  metadata: any
+  metadata: any;
 
   @Column({ nullable: true })
-  idempotency_key: string
+  idempotency_key: string;
 
   @BeforeInsert()
   private beforeInsert() {
-    if (this.id) return
-    const id = ulid()
-    this.id = `claim_${id}`
+    if (this.id) return;
+    const id = ulid();
+    this.id = `claim_${id}`;
   }
 }
 

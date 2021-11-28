@@ -4,9 +4,9 @@ import {
   IsObject,
   IsOptional,
   IsString,
-} from "class-validator"
-import DiscountService from "../../../../services/discount"
-import { validator } from "../../../../utils/validator"
+} from "class-validator";
+import DiscountService from "../../../../services/discount";
+import { validator } from "../../../../utils/validator";
 /**
  * @oas [post] /discounts/{id}/dynamic-codes
  * operationId: "PostDiscountsDiscountDynamicCodes"
@@ -30,36 +30,36 @@ import { validator } from "../../../../utils/validator"
  *               $ref: "#/components/schemas/discount"
  */
 export default async (req, res) => {
-  const { discount_id } = req.params
+  const { discount_id } = req.params;
 
   const validated = await validator(
     AdminPostDiscountsDiscountDynamicCodesReq,
     req.body
-  )
+  );
 
-  const discountService: DiscountService = req.scope.resolve("discountService")
+  const discountService: DiscountService = req.scope.resolve("discountService");
   const created = await discountService.createDynamicCode(
     discount_id,
     validated
-  )
+  );
 
   const discount = await discountService.retrieve(created.id, {
     relations: ["rule", "rule.valid_for", "regions"],
-  })
+  });
 
-  res.status(200).json({ discount })
-}
+  res.status(200).json({ discount });
+};
 
 export class AdminPostDiscountsDiscountDynamicCodesReq {
   @IsString()
   @IsNotEmpty()
-  code: string
+  code: string;
 
   @IsNumber()
   @IsOptional()
-  usage_limit = 1
+  usage_limit = 1;
 
   @IsObject()
   @IsOptional()
-  metadata?: object
+  metadata?: object;
 }

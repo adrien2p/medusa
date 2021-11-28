@@ -9,13 +9,13 @@ import {
   OneToOne,
   ManyToOne,
   JoinColumn,
-} from "typeorm"
-import { ulid } from "ulid"
-import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column"
+} from "typeorm";
+import { ulid } from "ulid";
+import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column";
 
-import { Currency } from "./currency"
-import { Cart } from "./cart"
-import { Order } from "./order"
+import { Currency } from "./currency";
+import { Cart } from "./cart";
+import { Order } from "./order";
 
 export enum RefundReason {
   DISCOUNT = "discount",
@@ -28,44 +28,41 @@ export enum RefundReason {
 @Entity()
 export class Refund {
   @PrimaryColumn()
-  id: string
+  id: string;
 
   @Index()
   @Column()
-  order_id: string
+  order_id: string;
 
-  @ManyToOne(
-    () => Order,
-    order => order.payments
-  )
+  @ManyToOne(() => Order, (order) => order.payments)
   @JoinColumn({ name: "order_id" })
-  order: Order
+  order: Order;
 
   @Column({ type: "int" })
-  amount: number
+  amount: number;
 
   @Column({ nullable: true })
-  note: string
+  note: string;
 
   @DbAwareColumn({ type: "enum", enum: RefundReason })
-  reason: string
+  reason: string;
 
   @CreateDateColumn({ type: resolveDbType("timestamptz") })
-  created_at: Date
+  created_at: Date;
 
   @UpdateDateColumn({ type: resolveDbType("timestamptz") })
-  updated_at: Date
+  updated_at: Date;
 
   @DbAwareColumn({ type: "jsonb", nullable: true })
-  metadata: any
+  metadata: any;
 
   @Column({ nullable: true })
-  idempotency_key: string
+  idempotency_key: string;
 
   @BeforeInsert()
   private beforeInsert() {
-    const id = ulid()
-    this.id = `ref_${id}`
+    const id = ulid();
+    this.id = `ref_${id}`;
   }
 }
 

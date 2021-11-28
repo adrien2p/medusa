@@ -399,4 +399,4 @@ export const countries = [
   { alpha2: "ZM", name: "Zambia", alpha3: "ZMB", numeric: "894" },
   { alpha2: "ZW", name: "Zimbabwe", alpha3: "ZWE", numeric: "716" },
   { alpha2: "AX", name: "Åland Islands", alpha3: "ALA", numeric: "248" },
-]
+];

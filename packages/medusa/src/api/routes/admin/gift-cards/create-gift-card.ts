@@ -1,8 +1,14 @@
-import { Type } from "class-transformer"
-import { IsBoolean, IsDate, IsInt, IsOptional, IsString } from "class-validator"
-import { defaultAdminGiftCardFields, defaultAdminGiftCardRelations } from "."
-import { GiftCardService } from "../../../../services"
-import { validator } from "../../../../utils/validator"
+import { Type } from "class-transformer";
+import {
+  IsBoolean,
+  IsDate,
+  IsInt,
+  IsOptional,
+  IsString,
+} from "class-validator";
+import { defaultAdminGiftCardFields, defaultAdminGiftCardRelations } from ".";
+import { GiftCardService } from "../../../../services";
+import { validator } from "../../../../utils/validator";
 
 /**
  * @oas [post] /gift-cards
@@ -46,41 +52,41 @@ import { validator } from "../../../../utils/validator"
  *               $ref: "#/components/schemas/gift_card"
  */
 export default async (req, res) => {
-  const validated = await validator(AdminPostGiftCardsReq, req.body)
+  const validated = await validator(AdminPostGiftCardsReq, req.body);
 
-  const giftCardService: GiftCardService = req.scope.resolve("giftCardService")
+  const giftCardService: GiftCardService = req.scope.resolve("giftCardService");
 
   const newly = await giftCardService.create({
     ...validated,
     balance: validated.value,
-  })
+  });
 
   const giftCard = await giftCardService.retrieve(newly.id, {
     select: defaultAdminGiftCardFields,
     relations: defaultAdminGiftCardRelations,
-  })
+  });
 
-  res.status(200).json({ gift_card: giftCard })
-}
+  res.status(200).json({ gift_card: giftCard });
+};
 
 export class AdminPostGiftCardsReq {
   @IsOptional()
   @IsInt()
-  value?: number
+  value?: number;
 
   @IsOptional()
   @IsDate()
   @Type(() => Date)
-  ends_at?: Date
+  ends_at?: Date;
 
   @IsOptional()
   @IsBoolean()
-  is_disabled?: boolean
+  is_disabled?: boolean;
 
   @IsOptional()
   @IsString()
-  region_id?: string
+  region_id?: string;
 
   @IsOptional()
-  metadata?: object
+  metadata?: object;
 }

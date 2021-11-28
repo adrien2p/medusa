@@ -1,15 +1,15 @@
-import { Type } from "class-transformer"
+import { Type } from "class-transformer";
 import {
   IsArray,
   IsInt,
   IsNotEmpty,
   IsString,
   ValidateNested,
-} from "class-validator"
-import { EntityManager } from "typeorm"
-import { defaultAdminOrdersFields, defaultAdminOrdersRelations } from "."
-import { OrderService, SwapService } from "../../../../services"
-import { validator } from "../../../../utils/validator"
+} from "class-validator";
+import { EntityManager } from "typeorm";
+import { defaultAdminOrdersFields, defaultAdminOrdersRelations } from ".";
+import { OrderService, SwapService } from "../../../../services";
+import { validator } from "../../../../utils/validator";
 /**
  * @oas [post] /orders/{id}/swaps/{swap_id}/receive
  * operationId: "PostOrdersOrderSwapsSwapReceive"
@@ -48,48 +48,48 @@ import { validator } from "../../../../utils/validator"
  *               $ref: "#/components/schemas/order"
  */
 export default async (req, res) => {
-  const { id, swap_id } = req.params
+  const { id, swap_id } = req.params;
 
   const validated = await validator(
     AdminPostOrdersOrderSwapsSwapReceiveReq,
     req.body
-  )
+  );
 
-  const orderService: OrderService = req.scope.resolve("orderService")
-  const swapService: SwapService = req.scope.resolve("swapService")
-  const entityManager: EntityManager = req.scope.resolve("manager")
+  const orderService: OrderService = req.scope.resolve("orderService");
+  const swapService: SwapService = req.scope.resolve("swapService");
+  const entityManager: EntityManager = req.scope.resolve("manager");
 
   await entityManager.transaction(async (manager) => {
     await swapService
       .withTransaction(manager)
-      .receiveReturn(swap_id, validated.items)
+      .receiveReturn(swap_id, validated.items);
 
     await orderService
       .withTransaction(manager)
-      .registerSwapReceived(id, swap_id)
-  })
+      .registerSwapReceived(id, swap_id);
+  });
 
   const order = await orderService.retrieve(id, {
     select: defaultAdminOrdersFields,
     relations: defaultAdminOrdersRelations,
-  })
+  });
 
-  res.status(200).json({ order })
-}
+  res.status(200).json({ order });
+};
 
 export class AdminPostOrdersOrderSwapsSwapReceiveReq {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => Item)
-  items: Item[]
+  items: Item[];
 }
 
 class Item {
   @IsString()
   @IsNotEmpty()
-  item_id: string
+  item_id: string;
 
   @IsInt()
   @IsNotEmpty()
-  quantity: number
+  quantity: number;
 }

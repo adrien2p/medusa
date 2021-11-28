@@ -1,11 +1,11 @@
-import { Type } from "class-transformer"
-import { IsNumber, IsOptional } from "class-validator"
+import { Type } from "class-transformer";
+import { IsNumber, IsOptional } from "class-validator";
 import {
   defaultAdminCollectionsFields,
   defaultAdminCollectionsRelations,
-} from "."
-import ProductCollectionService from "../../../../services/product-collection"
-import { validator } from "../../../../utils/validator"
+} from ".";
+import ProductCollectionService from "../../../../services/product-collection";
+import { validator } from "../../../../utils/validator";
 /**
  * @oas [get] /collections
  * operationId: "GetCollections"
@@ -28,40 +28,40 @@ import { validator } from "../../../../utils/validator"
  *              $ref: "#/components/schemas/product_collection"
  */
 export default async (req, res) => {
-  const validated = await validator(AdminGetCollectionsParams, req.query)
+  const validated = await validator(AdminGetCollectionsParams, req.query);
 
   const productCollectionService: ProductCollectionService = req.scope.resolve(
     "productCollectionService"
-  )
+  );
 
   const listConfig = {
     select: defaultAdminCollectionsFields,
     relations: defaultAdminCollectionsRelations,
     skip: validated.offset,
     take: validated.limit,
-  }
+  };
 
   const [collections, count] = await productCollectionService.listAndCount(
     {},
     listConfig
-  )
+  );
 
   res.status(200).json({
     collections,
     count,
     offset: validated.offset,
     limit: validated.limit,
-  })
-}
+  });
+};
 
 export class AdminGetCollectionsParams {
   @IsNumber()
   @IsOptional()
   @Type(() => Number)
-  limit = 10
+  limit = 10;
 
   @IsNumber()
   @IsOptional()
   @Type(() => Number)
-  offset = 0
+  offset = 0;
 }

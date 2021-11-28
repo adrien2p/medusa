@@ -1,10 +1,10 @@
-import { IdMap } from "medusa-test-utils"
-import { request } from "../../../../../helpers/test-request"
-import { SwapServiceMock } from "../../../../../services/__mocks__/swap"
+import { IdMap } from "medusa-test-utils";
+import { request } from "../../../../../helpers/test-request";
+import { SwapServiceMock } from "../../../../../services/__mocks__/swap";
 
 describe("POST /admin/orders/:id/swaps/:swap_id/fulfillments/:fulfillment_id/cancel", () => {
   describe("successfully cancels a fulfillment", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
       subject = await request(
@@ -19,23 +19,23 @@ describe("POST /admin/orders/:id/swaps/:swap_id/fulfillments/:fulfillment_id/can
             },
           },
         }
-      )
-    })
+      );
+    });
 
     afterAll(() => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     it("calls SwapService cancelFulfillment", () => {
-      expect(SwapServiceMock.cancelFulfillment).toHaveBeenCalledTimes(1)
+      expect(SwapServiceMock.cancelFulfillment).toHaveBeenCalledTimes(1);
       expect(SwapServiceMock.cancelFulfillment).toHaveBeenCalledWith(
         IdMap.getId("swap-fulfillment")
-      )
-    })
-  })
+      );
+    });
+  });
 
   describe("Trying to cancel a fulfillment unrelated to the swap fails", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
       subject = await request(
@@ -50,20 +50,20 @@ describe("POST /admin/orders/:id/swaps/:swap_id/fulfillments/:fulfillment_id/can
             },
           },
         }
-      )
-    })
+      );
+    });
 
     afterAll(() => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     it("returns error", () => {
-      expect(subject.status).toEqual(404)
-    })
-  })
+      expect(subject.status).toEqual(404);
+    });
+  });
 
   describe("Trying to cancel a fulfillment, where swap and order are unrelated", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
       subject = await request(
@@ -78,15 +78,15 @@ describe("POST /admin/orders/:id/swaps/:swap_id/fulfillments/:fulfillment_id/can
             },
           },
         }
-      )
-    })
+      );
+    });
 
     afterAll(() => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     it("returns error", () => {
-      expect(subject.status).toEqual(404)
-    })
-  })
-})
+      expect(subject.status).toEqual(404);
+    });
+  });
+});

@@ -1,5 +1,5 @@
-import { defaultAdminOrdersFields, defaultAdminOrdersRelations } from "."
-import { OrderService } from "../../../../services"
+import { defaultAdminOrdersFields, defaultAdminOrdersRelations } from ".";
+import { OrderService } from "../../../../services";
 
 /**
  * @oas [post] /orders/{id}/cancel
@@ -22,15 +22,15 @@ import { OrderService } from "../../../../services"
  *               $ref: "#/components/schemas/order"
  */
 export default async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params;
 
-  const orderService: OrderService = req.scope.resolve("orderService")
-  await orderService.cancel(id)
+  const orderService: OrderService = req.scope.resolve("orderService");
+  await orderService.cancel(id);
 
   const order = await orderService.retrieve(id, {
     select: defaultAdminOrdersFields,
     relations: defaultAdminOrdersRelations,
-  })
+  });
 
-  res.json({ order })
-}
+  res.json({ order });
+};

@@ -1,13 +1,13 @@
 class WebshipperSubscriber {
   constructor({ eventBusService, webshipperFulfillmentService }) {
-    this.webshipperService_ = webshipperFulfillmentService
+    this.webshipperService_ = webshipperFulfillmentService;
 
-    eventBusService.subscribe("webshipper.shipment", this.handleShipment)
+    eventBusService.subscribe("webshipper.shipment", this.handleShipment);
   }
 
   handleShipment = async ({ headers, body }) => {
-    return this.webshipperService_.handleWebhook(headers, body)
-  }
+    return this.webshipperService_.handleWebhook(headers, body);
+  };
 }
 
-export default WebshipperSubscriber
+export default WebshipperSubscriber;

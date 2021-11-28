@@ -1,4 +1,4 @@
-import { ReturnReasonService } from "../../../../services"
+import { ReturnReasonService } from "../../../../services";
 
 /**
  * @oas [delete] /return-reason/{id}
@@ -27,16 +27,16 @@ import { ReturnReasonService } from "../../../../services"
  *               type: boolean
  */
 export default async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params;
 
   const returnReasonService: ReturnReasonService = req.scope.resolve(
     "returnReasonService"
-  )
-  await returnReasonService.delete(id)
+  );
+  await returnReasonService.delete(id);
 
   res.json({
     id: id,
     object: "return_reason",
     deleted: true,
-  })
-}
+  });
+};

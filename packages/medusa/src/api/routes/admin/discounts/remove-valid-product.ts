@@ -1,5 +1,5 @@
-import DiscountService from "../../../../services/discount"
-import { defaultAdminDiscountsFields, defaultAdminDiscountsRelations } from "."
+import DiscountService from "../../../../services/discount";
+import { defaultAdminDiscountsFields, defaultAdminDiscountsRelations } from ".";
 /**
  * @oas [post] /discounts/{id}/products/{product_id}
  * operationId: "DeleteDiscountsDiscountProductsProduct"
@@ -22,15 +22,15 @@ import { defaultAdminDiscountsFields, defaultAdminDiscountsRelations } from "."
  *               $ref: "#/components/schemas/discount"
  */
 export default async (req, res) => {
-  const { discount_id, variant_id } = req.params
+  const { discount_id, variant_id } = req.params;
 
-  const discountService: DiscountService = req.scope.resolve("discountService")
-  await discountService.removeValidProduct(discount_id, variant_id)
+  const discountService: DiscountService = req.scope.resolve("discountService");
+  await discountService.removeValidProduct(discount_id, variant_id);
 
   const discount = await discountService.retrieve(discount_id, {
     select: defaultAdminDiscountsFields,
     relations: defaultAdminDiscountsRelations,
-  })
+  });
 
-  res.status(200).json({ discount })
-}
+  res.status(200).json({ discount });
+};

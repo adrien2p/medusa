@@ -1,4 +1,4 @@
-import { Type } from "class-transformer"
+import { Type } from "class-transformer";
 import {
   IsArray,
   IsBoolean,
@@ -10,16 +10,16 @@ import {
   IsOptional,
   IsString,
   ValidateNested,
-} from "class-validator"
-import { transformIdableFields } from "medusa-core-utils"
+} from "class-validator";
+import { transformIdableFields } from "medusa-core-utils";
 import {
   defaultAdminDraftOrdersFields,
   defaultAdminDraftOrdersRelations,
-} from "."
-import { DraftOrder } from "../../../.."
-import { DraftOrderService } from "../../../../services"
-import { AddressPayload } from "../../../../types/common"
-import { validator } from "../../../../utils/validator"
+} from ".";
+import { DraftOrder } from "../../../..";
+import { DraftOrderService } from "../../../../services";
+import { AddressPayload } from "../../../../types/common";
+import { validator } from "../../../../utils/validator";
 /**
  * @oas [post] /draft-orders
  * operationId: "PostDraftOrders"
@@ -118,24 +118,24 @@ import { validator } from "../../../../utils/validator"
  */
 
 export default async (req, res) => {
-  const validated = await validator(AdminPostDraftOrdersReq, req.body)
+  const validated = await validator(AdminPostDraftOrdersReq, req.body);
 
   const value = transformIdableFields(validated, [
     "shipping_address",
     "billing_address",
-  ])
+  ]);
 
   const draftOrderService: DraftOrderService =
-    req.scope.resolve("draftOrderService")
-  let draftOrder: DraftOrder = await draftOrderService.create(value)
+    req.scope.resolve("draftOrderService");
+  let draftOrder: DraftOrder = await draftOrderService.create(value);
 
   draftOrder = await draftOrderService.retrieve(draftOrder.id, {
     relations: defaultAdminDraftOrdersRelations,
     select: defaultAdminDraftOrdersFields,
-  })
+  });
 
-  res.status(200).json({ draft_order: draftOrder })
-}
+  res.status(200).json({ draft_order: draftOrder });
+};
 
 enum Status {
   open = "open",
@@ -145,88 +145,88 @@ enum Status {
 export class AdminPostDraftOrdersReq {
   @IsEnum(Status)
   @IsOptional()
-  status?: string
+  status?: string;
 
   @IsEmail()
-  email: string
+  email: string;
 
   @IsOptional()
   @Type(() => AddressPayload)
-  billing_address?: AddressPayload
+  billing_address?: AddressPayload = {} as AddressPayload;
 
   @IsOptional()
   @Type(() => AddressPayload)
-  shipping_address?: AddressPayload
+  shipping_address?: AddressPayload = {} as AddressPayload;
 
   @IsArray()
   @Type(() => Item)
   @IsNotEmpty()
   @ValidateNested({ each: true })
-  items: Item[]
+  items: Item[] = [];
 
   @IsString()
-  region_id: string
+  region_id: string;
 
   @IsArray()
   @IsOptional()
   @Type(() => Discount)
   @ValidateNested({ each: true })
-  discounts?: Discount[]
+  discounts?: Discount[] = [];
 
   @IsString()
   @IsOptional()
-  customer_id?: string
+  customer_id?: string;
 
   @IsBoolean()
   @IsOptional()
-  no_notification_order?: boolean
+  no_notification_order?: boolean;
 
   @IsArray()
   @Type(() => ShippingMethod)
   @IsNotEmpty()
   @ValidateNested({ each: true })
-  shipping_methods: ShippingMethod[]
+  shipping_methods: ShippingMethod[] = [];
 
   @IsObject()
   @IsOptional()
-  metadata?: object = {}
+  metadata?: object = {};
 }
 
 class ShippingMethod {
   @IsString()
-  option_id: string
+  option_id: string;
 
   @IsObject()
   @IsOptional()
-  data?: object = {}
+  data?: object = {};
 
   @IsNumber()
   @IsOptional()
-  price?: number
+  price?: number;
 }
 
 class Discount {
   @IsString()
-  code: string
+  code: string;
 }
 
 class Item {
   @IsString()
   @IsOptional()
-  title?: string
+  title?: string;
 
   @IsNumber()
   @IsOptional()
-  unit_price?: number
+  unit_price?: number;
 
   @IsString()
   @IsOptional()
-  variant_id?: string
+  variant_id?: string;
 
   @IsNumber()
-  quantity: number
+  quantity: number;
 
   @IsObject()
   @IsOptional()
-  metadata?: object = {}
+  metadata?: object = {};
 }

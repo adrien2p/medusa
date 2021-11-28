@@ -1,4 +1,4 @@
-import { IdMap } from "medusa-test-utils"
+import { IdMap } from "medusa-test-utils";
 
 export const orders = {
   testOrder: {
@@ -454,61 +454,61 @@ export const orders = {
       cart_id: IdMap.getId("test-cart"),
     },
   },
-}
+};
 
 export const OrderModelMock = {
-  create: jest.fn().mockImplementation(data => Promise.resolve(data)),
+  create: jest.fn().mockImplementation((data) => Promise.resolve(data)),
   updateOne: jest.fn().mockImplementation((query, update) => {
     if (query._id === IdMap.getId("returned-order")) {
-      return Promise.resolve(orders.returnedOrder)
+      return Promise.resolve(orders.returnedOrder);
     }
     if (query._id === IdMap.getId("order-refund")) {
-      orders.orderToRefund.payment_status = "captured"
-      return Promise.resolve(orders.orderToRefund)
+      orders.orderToRefund.payment_status = "captured";
+      return Promise.resolve(orders.orderToRefund);
     }
-    return Promise.resolve({ fulfillments: [] })
+    return Promise.resolve({ fulfillments: [] });
   }),
   deleteOne: jest.fn().mockReturnValue(Promise.resolve()),
   startSession: jest.fn().mockReturnValue(
     Promise.resolve({
-      withTransaction: fn => fn(),
+      withTransaction: (fn) => fn(),
     })
   ),
-  findOne: jest.fn().mockImplementation(query => {
+  findOne: jest.fn().mockImplementation((query) => {
     if (query._id === IdMap.getId("test-order")) {
-      orders.testOrder.payment_status = "awaiting"
-      return Promise.resolve(orders.testOrder)
+      orders.testOrder.payment_status = "awaiting";
+      return Promise.resolve(orders.testOrder);
     }
     if (query._id === IdMap.getId("not-fulfilled-order")) {
-      orders.testOrder.fulfillment_status = "not_fulfilled"
-      orders.testOrder.payment_status = "awaiting"
-      return Promise.resolve(orders.testOrder)
+      orders.testOrder.fulfillment_status = "not_fulfilled";
+      orders.testOrder.payment_status = "awaiting";
+      return Promise.resolve(orders.testOrder);
     }
     if (query._id === IdMap.getId("fulfilled-order")) {
-      orders.testOrder.fulfillment_status = "fulfilled"
-      return Promise.resolve(orders.testOrder)
+      orders.testOrder.fulfillment_status = "fulfilled";
+      return Promise.resolve(orders.testOrder);
     }
     if (query._id === IdMap.getId("payed-order")) {
-      orders.testOrder.fulfillment_status = "not_fulfilled"
-      orders.testOrder.payment_status = "captured"
-      return Promise.resolve(orders.testOrder)
+      orders.testOrder.fulfillment_status = "not_fulfilled";
+      orders.testOrder.payment_status = "captured";
+      return Promise.resolve(orders.testOrder);
     }
     if (query._id === IdMap.getId("processed-order")) {
-      return Promise.resolve(orders.processedOrder)
+      return Promise.resolve(orders.processedOrder);
     }
     if (query._id === IdMap.getId("returned-order")) {
-      return Promise.resolve(orders.returnedOrder)
+      return Promise.resolve(orders.returnedOrder);
     }
     if (query._id === IdMap.getId("order-refund")) {
-      orders.orderToRefund.payment_status = "captured"
-      return Promise.resolve(orders.orderToRefund)
+      orders.orderToRefund.payment_status = "captured";
+      return Promise.resolve(orders.orderToRefund);
     }
     if (query.cart_id === IdMap.getId("test-cart")) {
-      return Promise.resolve(orders.testOrder)
+      return Promise.resolve(orders.testOrder);
     }
     if (query._id === IdMap.getId("shippedOrder")) {
-      return Promise.resolve(orders.shippedOrder)
+      return Promise.resolve(orders.shippedOrder);
     }
-    return Promise.resolve(undefined)
+    return Promise.resolve(undefined);
   }),
-}
+};

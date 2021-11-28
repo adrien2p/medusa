@@ -1,18 +1,19 @@
-import { Type } from "class-transformer"
+import { Type } from "class-transformer";
 import {
   IsArray,
   IsInt,
   IsNotEmpty,
+  IsObject,
   IsOptional,
   IsString,
   ValidateNested,
-} from "class-validator"
-import { MedusaError } from "medusa-core-utils"
-import reqIp from "request-ip"
-import { EntityManager } from "typeorm"
-import { defaultStoreCartFields, defaultStoreCartRelations } from "."
-import { CartService, LineItemService } from "../../../../services"
-import { validator } from "../../../../utils/validator"
+} from "class-validator";
+import { MedusaError } from "medusa-core-utils";
+import reqIp from "request-ip";
+import { EntityManager } from "typeorm";
+import { defaultStoreCartFields, defaultStoreCartRelations } from ".";
+import { CartService, LineItemService } from "../../../../services";
+import { validator } from "../../../../utils/validator";
 
 /**
  * @oas [post] /carts
@@ -60,65 +61,65 @@ import { validator } from "../../../../utils/validator"
  *               $ref: "#/components/schemas/cart"
  */
 export default async (req, res) => {
-  const validated = await validator(StorePostCartReq, req.body)
+  const validated = await validator(StorePostCartReq, req.body);
 
   const reqContext = {
     ip: reqIp.getClientIp(req),
     user_agent: req.get("user-agent"),
-  }
+  };
 
-  const lineItemService: LineItemService = req.scope.resolve("lineItemService")
-  const cartService: CartService = req.scope.resolve("cartService")
+  const lineItemService: LineItemService = req.scope.resolve("lineItemService");
+  const cartService: CartService = req.scope.resolve("cartService");
 
-  const entityManager: EntityManager = req.scope.resolve("manager")
+  const entityManager: EntityManager = req.scope.resolve("manager");
 
   await entityManager.transaction(async (manager) => {
     // Add a default region if no region has been specified
-    let regionId = validated.region_id
+    let regionId = validated.region_id;
     if (!validated.region_id) {
-      const regionService = req.scope.resolve("regionService")
-      const regions = await regionService.withTransaction(manager).list({})
+      const regionService = req.scope.resolve("regionService");
+      const regions = await regionService.withTransaction(manager).list({});
 
       if (!regions?.length) {
         throw new MedusaError(
           MedusaError.Types.INVALID_DATA,
           `A region is required to create a cart`
-        )
+        );
       }
 
-      regionId = regions[0].id
+      regionId = regions[0].id;
     }
 
     const toCreate: {
-      region_id: string | undefined
-      context: object
-      customer_id?: string
-      email?: string
-      shipping_address?: object
+      region_id: string | undefined;
+      context: object;
+      customer_id?: string;
+      email?: string;
+      shipping_address?: object;
     } = {
       region_id: regionId,
       context: {
         ...reqContext,
         ...validated.context,
       },
-    }
+    };
 
     if (req.user && req.user.customer_id) {
-      const customerService = req.scope.resolve("customerService")
+      const customerService = req.scope.resolve("customerService");
       const customer = await customerService
         .withTransaction(manager)
-        .retrieve(req.user.customer_id)
-      toCreate["customer_id"] = customer.id
-      toCreate["email"] = customer.email
+        .retrieve(req.user.customer_id);
+      toCreate["customer_id"] = customer.id;
+      toCreate["email"] = customer.email;
     }
 
     if (validated.country_code) {
       toCreate["shipping_address"] = {
         country_code: validated.country_code.toLowerCase(),
-      }
+      };
     }
 
-    let cart = await cartService.withTransaction(manager).create(toCreate)
+    let cart = await cartService.withTransaction(manager).create(toCreate);
     if (validated.items) {
       await Promise.all(
         validated.items.map(async (i) => {
@@ -127,44 +128,45 @@ export default async (req, res) => {
             variant_id: i.variant_id,
             quantity: i.quantity,
             region_id: validated.region_id,
-          })
+          });
         })
-      )
+      );
     }
 
     cart = await cartService.withTransaction(manager).retrieve(cart.id, {
       select: defaultStoreCartFields,
       relations: defaultStoreCartRelations,
-    })
+    });
 
-    res.status(200).json({ cart })
-  })
-}
+    res.status(200).json({ cart });
+  });
+};
 
 export class Item {
   @IsNotEmpty()
   @IsString()
-  variant_id: string
+  variant_id: string;
 
   @IsNotEmpty()
   @IsInt()
-  quantity: number
+  quantity: number;
 }
 export class StorePostCartReq {
   @IsOptional()
   @IsString()
-  region_id?: string
+  region_id?: string;
 
   @IsOptional()
   @IsString()
-  country_code?: string
+  country_code?: string;
 
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => Item)
-  items?: Item[]
+  items?: Item[] = [];
 
+  @IsObject()
   @IsOptional()
-  context?: object
+  context?: object = {};
 }

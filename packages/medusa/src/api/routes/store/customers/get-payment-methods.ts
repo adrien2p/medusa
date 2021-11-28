@@ -1,7 +1,7 @@
-import { Customer } from "../../../.."
-import CustomerService from "../../../../services/customer"
-import PaymentProviderService from "../../../../services/payment-provider"
-import StoreService from "../../../../services/store"
+import { Customer } from "../../../..";
+import CustomerService from "../../../../services/customer";
+import PaymentProviderService from "../../../../services/payment-provider";
+import StoreService from "../../../../services/store";
 
 /**
  * @oas [get] /customers/me/payment-methods
@@ -30,33 +30,33 @@ import StoreService from "../../../../services/store"
  *                     description: The data needed for the Payment Provider to use the saved payment method.
  */
 export default async (req, res) => {
-  const id = req.user.customer_id
+  const id = req.user.customer_id;
 
-  const storeService: StoreService = req.scope.resolve("storeService")
+  const storeService: StoreService = req.scope.resolve("storeService");
 
   const paymentProviderService: PaymentProviderService = req.scope.resolve(
     "paymentProviderService"
-  )
+  );
 
-  const customerService: CustomerService = req.scope.resolve("customerService")
+  const customerService: CustomerService = req.scope.resolve("customerService");
 
-  const customer: Customer = await customerService.retrieve(id)
+  const customer: Customer = await customerService.retrieve(id);
 
-  const store = await storeService.retrieve(["payment_providers"])
+  const store = await storeService.retrieve(["payment_providers"]);
 
   const methods = await Promise.all(
     store.payment_providers.map(async (next: string) => {
-      const provider = paymentProviderService.retrieveProvider(next)
+      const provider = paymentProviderService.retrieveProvider(next);
 
-      const pMethods = await provider.retrieveSavedMethods(customer)
+      const pMethods = await provider.retrieveSavedMethods(customer);
       return pMethods.map((m) => ({
         provider_id: next,
         data: m,
-      }))
+      }));
     })
-  )
+  );
 
   res.json({
     payment_methods: methods.flat(),
-  })
-}
+  });
+};

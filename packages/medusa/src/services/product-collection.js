@@ -1,5 +1,5 @@
-import { BaseService } from "medusa-interfaces"
-import { MedusaError } from "medusa-core-utils"
+import { BaseService } from "medusa-interfaces";
+import { MedusaError } from "medusa-core-utils";
 
 /**
  * Provides layer to manipulate product collections.
@@ -12,24 +12,24 @@ class ProductCollectionService extends BaseService {
     productRepository,
     eventBusService,
   }) {
-    super()
+    super();
 
     /** @private @const {EntityManager} */
-    this.manager_ = manager
+    this.manager_ = manager;
 
     /** @private @const {ProductCollectionRepository} */
-    this.productCollectionRepository_ = productCollectionRepository
+    this.productCollectionRepository_ = productCollectionRepository;
 
     /** @private @const {ProductRepository} */
-    this.productRepository_ = productRepository
+    this.productRepository_ = productRepository;
 
     /** @private @const {EventBus} */
-    this.eventBus_ = eventBusService
+    this.eventBus_ = eventBusService;
   }
 
   withTransaction(transactionManager) {
     if (!transactionManager) {
-      return this
+      return this;
     }
 
     const cloned = new ProductCollectionService({
@@ -37,11 +37,11 @@ class ProductCollectionService extends BaseService {
       productCollectionRepository: this.productCollectionRepository_,
       productRepository: this.productRepository_,
       eventBusService: this.eventBus_,
-    })
+    });
 
-    cloned.transactionManager_ = transactionManager
+    cloned.transactionManager_ = transactionManager;
 
-    return cloned
+    return cloned;
   }
 
   /**
@@ -53,21 +53,21 @@ class ProductCollectionService extends BaseService {
   async retrieve(collectionId, config = {}) {
     const collectionRepo = this.manager_.getCustomRepository(
       this.productCollectionRepository_
-    )
+    );
 
-    const validatedId = this.validateId_(collectionId)
+    const validatedId = this.validateId_(collectionId);
 
-    const query = this.buildQuery_({ id: validatedId }, config)
-    const collection = await collectionRepo.findOne(query)
+    const query = this.buildQuery_({ id: validatedId }, config);
+    const collection = await collectionRepo.findOne(query);
 
     if (!collection) {
       throw new MedusaError(
         MedusaError.Types.NOT_FOUND,
         `Product collection with id: ${collectionId} was not found`
-      )
+      );
     }
 
-    return collection
+    return collection;
   }
 
   /**
@@ -79,11 +79,11 @@ class ProductCollectionService extends BaseService {
     return this.atomicPhase_(async (manager) => {
       const collectionRepo = manager.getCustomRepository(
         this.productCollectionRepository_
-      )
+      );
 
-      const productCollection = collectionRepo.create(collection)
-      return collectionRepo.save(productCollection)
-    })
+      const productCollection = collectionRepo.create(collection);
+      return collectionRepo.save(productCollection);
+    });
   }
 
   /**
@@ -96,22 +96,22 @@ class ProductCollectionService extends BaseService {
     return this.atomicPhase_(async (manager) => {
       const collectionRepo = manager.getCustomRepository(
         this.productCollectionRepository_
-      )
+      );
 
-      const collection = await this.retrieve(collectionId)
+      const collection = await this.retrieve(collectionId);
 
-      const { metadata, ...rest } = update
+      const { metadata, ...rest } = update;
 
       if (metadata) {
-        collection.metadata = this.setMetadata_(collection, metadata)
+        collection.metadata = this.setMetadata_(collection, metadata);
       }
 
       for (const [key, value] of Object.entries(rest)) {
-        collection[key] = value
+        collection[key] = value;
       }
 
-      return collectionRepo.save(collection)
-    })
+      return collectionRepo.save(collection);
+    });
   }
 
   /**
@@ -123,18 +123,18 @@ class ProductCollectionService extends BaseService {
     return this.atomicPhase_(async (manager) => {
       const productCollectionRepo = manager.getCustomRepository(
         this.productCollectionRepository_
-      )
+      );
 
-      const collection = await this.retrieve(collectionId)
+      const collection = await this.retrieve(collectionId);
 
       if (!collection) {
-        return Promise.resolve()
+        return Promise.resolve();
       }
 
-      await productCollectionRepo.softRemove(collection)
+      await productCollectionRepo.softRemove(collection);
 
-      return Promise.resolve()
-    })
+      return Promise.resolve();
+    });
   }
 
   /**
@@ -146,10 +146,10 @@ class ProductCollectionService extends BaseService {
   async list(selector = {}, config = { skip: 0, take: 20 }) {
     const productCollectionRepo = this.manager_.getCustomRepository(
       this.productCollectionRepository_
-    )
+    );
 
-    const query = this.buildQuery_(selector, config)
-    return await productCollectionRepo.find(query)
+    const query = this.buildQuery_(selector, config);
+    return await productCollectionRepo.find(query);
   }
 
   /**
@@ -161,11 +161,11 @@ class ProductCollectionService extends BaseService {
   async listAndCount(selector = {}, config = { skip: 0, take: 20 }) {
     const productCollectionRepo = this.manager_.getCustomRepository(
       this.productCollectionRepository_
-    )
+    );
 
-    const query = this.buildQuery_(selector, config)
-    return await productCollectionRepo.findAndCount(query)
+    const query = this.buildQuery_(selector, config);
+    return await productCollectionRepo.findAndCount(query);
   }
 }
 
-export default ProductCollectionService
+export default ProductCollectionService;

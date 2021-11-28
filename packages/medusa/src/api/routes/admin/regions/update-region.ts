@@ -1,7 +1,7 @@
-import { IsArray, IsNumber, IsOptional, IsString } from "class-validator"
-import { defaultAdminRegionRelations, defaultAdminRegionFields } from "."
-import { validator } from "../../../../utils/validator"
-import RegionService from "../../../../services/region"
+import { IsArray, IsNumber, IsOptional, IsString } from "class-validator";
+import { defaultAdminRegionRelations, defaultAdminRegionFields } from ".";
+import { validator } from "../../../../utils/validator";
+import RegionService from "../../../../services/region";
 
 /**
  * @oas [post] /regions/{id}
@@ -56,49 +56,49 @@ import RegionService from "../../../../services/region"
  *               $ref: "#/components/schemas/region"
  */
 export default async (req, res) => {
-  const { region_id } = req.params
-  const validated = await validator(AdminPostRegionsRegionReq, req.body)
+  const { region_id } = req.params;
+  const validated = await validator(AdminPostRegionsRegionReq, req.body);
 
-  const regionService: RegionService = req.scope.resolve("regionService")
-  await regionService.update(region_id, validated)
+  const regionService: RegionService = req.scope.resolve("regionService");
+  await regionService.update(region_id, validated);
   const region = await regionService.retrieve(region_id, {
     select: defaultAdminRegionFields,
     relations: defaultAdminRegionRelations,
-  })
+  });
 
-  res.status(200).json({ region })
-}
+  res.status(200).json({ region });
+};
 
 export class AdminPostRegionsRegionReq {
   @IsString()
   @IsOptional()
-  name?: string
+  name?: string;
 
   @IsString()
   @IsOptional()
-  currency_code?: string
+  currency_code?: string;
 
   @IsString()
   @IsOptional()
-  tax_code?: string
+  tax_code?: string;
 
   @IsNumber()
   @IsOptional()
-  tax_rate?: number
+  tax_rate?: number;
 
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
-  payment_providers?: string[]
+  payment_providers?: string[] = [];
 
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
-  fulfillment_providers?: string[]
+  fulfillment_providers?: string[] = [];
 
   // iso_2 country codes
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
-  countries?: string[]
+  countries?: string[] = [];
 }

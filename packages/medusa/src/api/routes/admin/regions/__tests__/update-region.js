@@ -1,13 +1,13 @@
-import { IdMap } from "medusa-test-utils"
-import { request } from "../../../../../helpers/test-request"
-import { RegionServiceMock } from "../../../../../services/__mocks__/region"
+import { IdMap } from "medusa-test-utils";
+import { request } from "../../../../../helpers/test-request";
+import { RegionServiceMock } from "../../../../../services/__mocks__/region";
 
 describe("POST /admin/regions/:region_id", () => {
   describe("successful deletion", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
-      const id = IdMap.getId("region")
+      const id = IdMap.getId("region");
       subject = await request("POST", `/admin/regions/${id}`, {
         payload: {
           name: "Updated Region",
@@ -22,15 +22,15 @@ describe("POST /admin/regions/:region_id", () => {
             userId: IdMap.getId("admin_user"),
           },
         },
-      })
-    })
+      });
+    });
 
     it("returns 200", () => {
-      expect(subject.status).toEqual(200)
-    })
+      expect(subject.status).toEqual(200);
+    });
 
     it("calls service addCountry", () => {
-      expect(RegionServiceMock.update).toHaveBeenCalledTimes(1)
+      expect(RegionServiceMock.update).toHaveBeenCalledTimes(1);
       expect(RegionServiceMock.update).toHaveBeenCalledWith(
         IdMap.getId("region"),
         {
@@ -41,7 +41,7 @@ describe("POST /admin/regions/:region_id", () => {
           payment_providers: ["default_provider"],
           fulfillment_providers: ["default_provider"],
         }
-      )
-    })
-  })
-})
+      );
+    });
+  });
+});

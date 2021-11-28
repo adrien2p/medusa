@@ -1,10 +1,10 @@
-import { IdMap } from "medusa-test-utils"
-import { request } from "../../../../../helpers/test-request"
-import { UserServiceMock } from "../../../../../services/__mocks__/user"
+import { IdMap } from "medusa-test-utils";
+import { request } from "../../../../../helpers/test-request";
+import { UserServiceMock } from "../../../../../services/__mocks__/user";
 
 describe("GET /admin/users/:id", () => {
   describe("successfully gets a user", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
       subject = await request(
@@ -17,26 +17,26 @@ describe("GET /admin/users/:id", () => {
             },
           },
         }
-      )
-    })
+      );
+    });
 
     afterAll(() => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     it("calls UserService retrieve", () => {
-      expect(UserServiceMock.retrieve).toHaveBeenCalledTimes(1)
+      expect(UserServiceMock.retrieve).toHaveBeenCalledTimes(1);
       expect(UserServiceMock.retrieve).toHaveBeenCalledWith(
         IdMap.getId("test-user")
-      )
-    })
+      );
+    });
 
     it("returns 200", () => {
-      expect(subject.status).toEqual(200)
-    })
+      expect(subject.status).toEqual(200);
+    });
 
     it("returns the user", () => {
-      expect(subject.body.user.id).toEqual(IdMap.getId("test-user"))
-    })
-  })
-})
+      expect(subject.body.user.id).toEqual(IdMap.getId("test-user"));
+    });
+  });
+});

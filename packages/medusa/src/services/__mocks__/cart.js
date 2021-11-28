@@ -1,5 +1,5 @@
-import { MedusaError } from "medusa-core-utils"
-import { IdMap } from "medusa-test-utils"
+import { MedusaError } from "medusa-core-utils";
+import { IdMap } from "medusa-test-utils";
 
 export const carts = {
   emptyCart: {
@@ -204,14 +204,14 @@ export const carts = {
       },
     ],
   },
-}
+};
 
 export const CartServiceMock = {
-  withTransaction: function() {
-    return this
+  withTransaction: function () {
+    return this;
   },
-  updatePaymentSession: jest.fn().mockImplementation(data => {
-    return Promise.resolve()
+  updatePaymentSession: jest.fn().mockImplementation((data) => {
+    return Promise.resolve();
   }),
   authorizePayment: jest.fn().mockImplementation((id, data) => {
     if (id === IdMap.getId("test-cart2")) {
@@ -219,135 +219,135 @@ export const CartServiceMock = {
         ...carts.testCart,
         payment_session: { status: "requires_more" },
         id: IdMap.getId("test-cart2"),
-      })
+      });
     }
-    return Promise.resolve(carts.testCart)
+    return Promise.resolve(carts.testCart);
   }),
-  refreshPaymentSession: jest.fn().mockImplementation(data => {
-    return Promise.resolve()
+  refreshPaymentSession: jest.fn().mockImplementation((data) => {
+    return Promise.resolve();
   }),
-  update: jest.fn().mockImplementation(data => {
-    return Promise.resolve()
+  update: jest.fn().mockImplementation((data) => {
+    return Promise.resolve();
   }),
-  create: jest.fn().mockImplementation(data => {
+  create: jest.fn().mockImplementation((data) => {
     if (data.region_id === IdMap.getId("testRegion")) {
-      return Promise.resolve(carts.regionCart)
+      return Promise.resolve(carts.regionCart);
     }
     if (data.region_id === IdMap.getId("fail")) {
-      throw new MedusaError(MedusaError.Types.INVALID_DATA, "Region not found")
+      throw new MedusaError(MedusaError.Types.INVALID_DATA, "Region not found");
     }
-    return Promise.resolve(carts.regionCart)
+    return Promise.resolve(carts.regionCart);
   }),
-  retrieve: jest.fn().mockImplementation(cartId => {
+  retrieve: jest.fn().mockImplementation((cartId) => {
     if (cartId === IdMap.getId("fr-cart")) {
-      return Promise.resolve(carts.frCart)
+      return Promise.resolve(carts.frCart);
     }
     if (cartId === IdMap.getId("swap-cart")) {
-      return Promise.resolve(carts.testSwapCart)
+      return Promise.resolve(carts.testSwapCart);
     }
     if (cartId === IdMap.getId("test-cart")) {
-      return Promise.resolve(carts.testCart)
+      return Promise.resolve(carts.testCart);
     }
     if (cartId === IdMap.getId("cartLineItemMetadata")) {
-      return Promise.resolve(carts.cartWithMetadataLineItem)
+      return Promise.resolve(carts.cartWithMetadataLineItem);
     }
     if (cartId === IdMap.getId("regionCart")) {
-      return Promise.resolve(carts.regionCart)
+      return Promise.resolve(carts.regionCart);
     }
     if (cartId === IdMap.getId("emptyCart")) {
-      return Promise.resolve(carts.emptyCart)
+      return Promise.resolve(carts.emptyCart);
     }
     if (cartId === IdMap.getId("cartWithPaySessions")) {
-      return Promise.resolve(carts.cartWithPaySessions)
+      return Promise.resolve(carts.cartWithPaySessions);
     }
     if (cartId === IdMap.getId("test-cart2")) {
-      return Promise.resolve(carts.testCart)
+      return Promise.resolve(carts.testCart);
     }
-    throw new MedusaError(MedusaError.Types.NOT_FOUND, "cart not found")
+    throw new MedusaError(MedusaError.Types.NOT_FOUND, "cart not found");
   }),
   addLineItem: jest.fn().mockImplementation((cartId, lineItem) => {
-    return Promise.resolve()
+    return Promise.resolve();
   }),
   setPaymentMethod: jest.fn().mockImplementation((cartId, method) => {
     if (method.provider_id === "default_provider") {
-      return Promise.resolve(carts.cartWithPaySessions)
+      return Promise.resolve(carts.cartWithPaySessions);
     }
 
-    throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "Not allowed")
+    throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "Not allowed");
   }),
   removeLineItem: jest.fn().mockImplementation((cartId, lineItem) => {
     if (cartId === IdMap.getId("fr-cart")) {
-      return Promise.resolve(carts.frCart)
+      return Promise.resolve(carts.frCart);
     }
     if (cartId === IdMap.getId("regionCart")) {
-      return Promise.resolve(carts.regionCart)
+      return Promise.resolve(carts.regionCart);
     }
     if (cartId === IdMap.getId("emptyCart")) {
-      return Promise.resolve(carts.emptyCart)
+      return Promise.resolve(carts.emptyCart);
     }
     if (cartId === IdMap.getId("cartWithPaySessions")) {
-      return Promise.resolve(carts.cartWithPaySessions)
+      return Promise.resolve(carts.cartWithPaySessions);
     }
-    throw new MedusaError(MedusaError.Types.NOT_FOUND, "cart not found")
+    throw new MedusaError(MedusaError.Types.NOT_FOUND, "cart not found");
   }),
   updateLineItem: jest.fn().mockImplementation((cartId, lineItem) => {
     if (cartId === IdMap.getId("fr-cart")) {
-      return Promise.resolve(carts.frCart)
+      return Promise.resolve(carts.frCart);
     }
     if (cartId === IdMap.getId("cartLineItemMetadata")) {
-      return Promise.resolve(carts.cartWithMetadataLineItem)
+      return Promise.resolve(carts.cartWithMetadataLineItem);
     }
     if (cartId === IdMap.getId("regionCart")) {
-      return Promise.resolve(carts.regionCart)
+      return Promise.resolve(carts.regionCart);
     }
     if (cartId === IdMap.getId("emptyCart")) {
-      return Promise.resolve(carts.emptyCart)
+      return Promise.resolve(carts.emptyCart);
     }
     if (cartId === IdMap.getId("cartWithPaySessions")) {
-      return Promise.resolve(carts.cartWithPaySessions)
+      return Promise.resolve(carts.cartWithPaySessions);
     }
-    throw new MedusaError(MedusaError.Types.NOT_FOUND, "cart not found")
+    throw new MedusaError(MedusaError.Types.NOT_FOUND, "cart not found");
   }),
   setRegion: jest.fn().mockImplementation((cartId, regionId) => {
     if (regionId === IdMap.getId("fail")) {
-      throw new MedusaError(MedusaError.Types.NOT_FOUND, "Region not found")
+      throw new MedusaError(MedusaError.Types.NOT_FOUND, "Region not found");
     }
-    return Promise.resolve()
+    return Promise.resolve();
   }),
   updateEmail: jest.fn().mockImplementation((cartId, email) => {
-    return Promise.resolve()
+    return Promise.resolve();
   }),
   updateShippingAddress: jest.fn().mockImplementation((cartId, address) => {
-    return Promise.resolve()
+    return Promise.resolve();
   }),
   updateBillingAddress: jest.fn().mockImplementation((cartId, address) => {
-    return Promise.resolve()
+    return Promise.resolve();
   }),
   applyDiscount: jest.fn().mockImplementation((cartId, code) => {
-    return Promise.resolve()
+    return Promise.resolve();
   }),
-  setPaymentSession: jest.fn().mockImplementation(cartId => {
-    return Promise.resolve()
+  setPaymentSession: jest.fn().mockImplementation((cartId) => {
+    return Promise.resolve();
   }),
-  setPaymentSessions: jest.fn().mockImplementation(cartId => {
-    return Promise.resolve()
+  setPaymentSessions: jest.fn().mockImplementation((cartId) => {
+    return Promise.resolve();
   }),
-  setShippingOptions: jest.fn().mockImplementation(cartId => {
-    return Promise.resolve()
+  setShippingOptions: jest.fn().mockImplementation((cartId) => {
+    return Promise.resolve();
   }),
-  decorate: jest.fn().mockImplementation(cart => {
-    cart.decorated = true
-    return cart
+  decorate: jest.fn().mockImplementation((cart) => {
+    cart.decorated = true;
+    return cart;
   }),
-  addShippingMethod: jest.fn().mockImplementation(cartId => {
-    return Promise.resolve()
+  addShippingMethod: jest.fn().mockImplementation((cartId) => {
+    return Promise.resolve();
   }),
   retrieveShippingOption: jest.fn().mockImplementation((cartId, optionId) => {
     if (optionId === IdMap.getId("freeShipping")) {
       return {
         id: IdMap.getId("freeShipping"),
         profile_id: "default_profile",
-      }
+      };
     }
     if (optionId === IdMap.getId("withData")) {
       return {
@@ -356,7 +356,7 @@ export const CartServiceMock = {
         data: {
           some_data: "yes",
         },
-      }
+      };
     }
   }),
   retrievePaymentSession: jest.fn().mockImplementation((cartId, providerId) => {
@@ -366,7 +366,7 @@ export const CartServiceMock = {
         data: {
           money_id: "success",
         },
-      }
+      };
     }
 
     if (providerId === "nono") {
@@ -375,13 +375,13 @@ export const CartServiceMock = {
         data: {
           money_id: "fail",
         },
-      }
+      };
     }
   }),
-}
+};
 
 const mock = jest.fn().mockImplementation(() => {
-  return CartServiceMock
-})
+  return CartServiceMock;
+});
 
-export default mock
+export default mock;

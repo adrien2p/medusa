@@ -1,7 +1,7 @@
-import { BaseService } from "medusa-interfaces"
-import { Validator, MedusaError } from "medusa-core-utils"
-import { parse, toSeconds } from "iso8601-duration"
-import { Brackets, ILike } from "typeorm"
+import { BaseService } from "medusa-interfaces";
+import { Validator, MedusaError } from "medusa-core-utils";
+import { parse, toSeconds } from "iso8601-duration";
+import { Brackets, ILike } from "typeorm";
 
 /**
  * Provides layer to manipulate discounts.
@@ -18,36 +18,36 @@ class DiscountService extends BaseService {
     regionService,
     eventBusService,
   }) {
-    super()
+    super();
 
     /** @private @const {EntityManager} */
-    this.manager_ = manager
+    this.manager_ = manager;
 
     /** @private @const {DiscountRepository} */
-    this.discountRepository_ = discountRepository
+    this.discountRepository_ = discountRepository;
 
     /** @private @const {DiscountRuleRepository} */
-    this.discountRuleRepository_ = discountRuleRepository
+    this.discountRuleRepository_ = discountRuleRepository;
 
     /** @private @const {GiftCardRepository} */
-    this.giftCardRepository_ = giftCardRepository
+    this.giftCardRepository_ = giftCardRepository;
 
     /** @private @const {TotalsService} */
-    this.totalsService_ = totalsService
+    this.totalsService_ = totalsService;
 
     /** @private @const {ProductService} */
-    this.productService_ = productService
+    this.productService_ = productService;
 
     /** @private @const {RegionService} */
-    this.regionService_ = regionService
+    this.regionService_ = regionService;
 
     /** @private @const {EventBus} */
-    this.eventBus_ = eventBusService
+    this.eventBus_ = eventBusService;
   }
 
   withTransaction(transactionManager) {
     if (!transactionManager) {
-      return this
+      return this;
     }
 
     const cloned = new DiscountService({
@@ -59,11 +59,11 @@ class DiscountService extends BaseService {
       productService: this.productService_,
       regionService: this.regionService_,
       eventBusService: this.eventBus_,
-    })
+    });
 
-    cloned.transactionManager_ = transactionManager
+    cloned.transactionManager_ = transactionManager;
 
-    return cloned
+    return cloned;
   }
 
   /**
@@ -83,24 +83,24 @@ class DiscountService extends BaseService {
       updated_at: Validator.date().allow(null).optional(),
       deleted_at: Validator.date().allow(null).optional(),
       metadata: Validator.object().allow(null).optional(),
-    })
+    });
 
-    const { value, error } = schema.validate(discountRule)
+    const { value, error } = schema.validate(discountRule);
     if (error) {
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
         error.details[0].message
-      )
+      );
     }
 
     if (value.type === "percentage" && value.value > 100) {
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
         "Discount value above 100 is not allowed when type is percentage"
-      )
+      );
     }
 
-    return value
+    return value;
   }
 
   /**
@@ -111,10 +111,10 @@ class DiscountService extends BaseService {
   async list(selector = {}, config = { relations: [], skip: 0, take: 10 }) {
     const discountRepo = this.manager_.getCustomRepository(
       this.discountRepository_
-    )
+    );
 
-    const query = this.buildQuery_(selector, config)
-    return discountRepo.find(query)
+    const query = this.buildQuery_(selector, config);
+    return discountRepo.find(query);
   }
 
   /**
@@ -128,35 +128,35 @@ class DiscountService extends BaseService {
   ) {
     const discountRepo = this.manager_.getCustomRepository(
       this.discountRepository_
-    )
+    );
 
-    let q
+    let q;
     if ("q" in selector) {
-      q = selector.q
-      delete selector.q
+      q = selector.q;
+      delete selector.q;
     }
 
-    const query = this.buildQuery_(selector, config)
+    const query = this.buildQuery_(selector, config);
 
     if (q) {
-      const where = query.where
+      const where = query.where;
 
-      delete where.code
+      delete where.code;
 
       query.where = (qb) => {
-        qb.where(where)
+        qb.where(where);
 
         qb.andWhere(
           new Brackets((qb) => {
-            qb.where({ code: ILike(`%${q}%`) })
+            qb.where({ code: ILike(`%${q}%`) });
           })
-        )
-      }
+        );
+      };
     }
 
-    const [discounts, count] = await discountRepo.findAndCount(query)
+    const [discounts, count] = await discountRepo.findAndCount(query);
 
-    return [discounts, count]
+    return [discounts, count];
   }
 
   /**
@@ -167,20 +167,24 @@ class DiscountService extends BaseService {
    */
   async create(discount) {
     return this.atomicPhase_(async (manager) => {
-      const discountRepo = manager.getCustomRepository(this.discountRepository_)
-      const ruleRepo = manager.getCustomRepository(this.discountRuleRepository_)
+      const discountRepo = manager.getCustomRepository(
+        this.discountRepository_
+      );
+      const ruleRepo = manager.getCustomRepository(
+        this.discountRuleRepository_
+      );
 
       if (discount.rule?.valid_for) {
-        discount.rule.valid_for = discount.rule.valid_for.map((id) => ({ id }))
+        discount.rule.valid_for = discount.rule.valid_for.map((id) => ({ id }));
       }
 
-      const validatedRule = this.validateDiscountRule_(discount.rule)
+      const validatedRule = this.validateDiscountRule_(discount.rule);
 
       if (discount.regions?.length > 1 && discount.rule.type === "fixed") {
         throw new MedusaError(
           MedusaError.Types.INVALID_DATA,
           "Fixed discounts can have one region"
-        )
+        );
       }
 
       if (discount.regions) {
@@ -188,19 +192,19 @@ class DiscountService extends BaseService {
           discount.regions.map((regionId) =>
             this.regionService_.withTransaction(manager).retrieve(regionId)
           )
-        )
+        );
       }
 
-      const discountRule = await ruleRepo.create(validatedRule)
-      const createdDiscountRule = await ruleRepo.save(discountRule)
+      const discountRule = await ruleRepo.create(validatedRule);
+      const createdDiscountRule = await ruleRepo.save(discountRule);
 
-      discount.code = discount.code.toUpperCase()
-      discount.rule = createdDiscountRule
+      discount.code = discount.code.toUpperCase();
+      discount.rule = createdDiscountRule;
 
-      const created = await discountRepo.create(discount)
-      const result = await discountRepo.save(created)
-      return result
-    })
+      const created = await discountRepo.create(discount);
+      const result = await discountRepo.save(created);
+      return result;
+    });
   }
 
   /**
@@ -212,20 +216,20 @@ class DiscountService extends BaseService {
   async retrieve(discountId, config = {}) {
     const discountRepo = this.manager_.getCustomRepository(
       this.discountRepository_
-    )
+    );
 
-    const validatedId = this.validateId_(discountId)
-    const query = this.buildQuery_({ id: validatedId }, config)
-    const discount = await discountRepo.findOne(query)
+    const validatedId = this.validateId_(discountId);
+    const query = this.buildQuery_({ id: validatedId }, config);
+    const discount = await discountRepo.findOne(query);
 
     if (!discount) {
       throw new MedusaError(
         MedusaError.Types.NOT_FOUND,
         `Discount with ${discountId} was not found`
-      )
+      );
     }
 
-    return discount
+    return discount;
   }
 
   /**
@@ -237,28 +241,28 @@ class DiscountService extends BaseService {
   async retrieveByCode(discountCode, relations = []) {
     const discountRepo = this.manager_.getCustomRepository(
       this.discountRepository_
-    )
+    );
 
     let discount = await discountRepo.findOne({
       where: { code: discountCode.toUpperCase(), is_dynamic: false },
       relations,
-    })
+    });
 
     if (!discount) {
       discount = await discountRepo.findOne({
         where: { code: discountCode.toUpperCase(), is_dynamic: true },
         relations,
-      })
+      });
 
       if (!discount) {
         throw new MedusaError(
           MedusaError.Types.NOT_FOUND,
           `Discount with code ${discountCode} was not found`
-        )
+        );
       }
     }
 
-    return discount
+    return discount;
   }
 
   /**
@@ -269,20 +273,22 @@ class DiscountService extends BaseService {
    */
   async update(discountId, update) {
     return this.atomicPhase_(async (manager) => {
-      const discountRepo = manager.getCustomRepository(this.discountRepository_)
+      const discountRepo = manager.getCustomRepository(
+        this.discountRepository_
+      );
 
       const discount = await this.retrieve(discountId, {
         relations: ["rule"],
-      })
+      });
 
-      const { rule, metadata, regions, ...rest } = update
+      const { rule, metadata, regions, ...rest } = update;
 
       if (rest.ends_at) {
         if (discount.starts_at >= new Date(update.ends_at)) {
           throw new MedusaError(
             MedusaError.Types.INVALID_DATA,
             `"ends_at" must be greater than "starts_at"`
-          )
+          );
         }
       }
 
@@ -290,39 +296,39 @@ class DiscountService extends BaseService {
         throw new MedusaError(
           MedusaError.Types.INVALID_DATA,
           "Fixed discounts can have one region"
-        )
+        );
       }
 
       if (regions) {
         discount.regions = await Promise.all(
           regions.map((regionId) => this.regionService_.retrieve(regionId))
-        )
+        );
       }
 
       if (metadata) {
-        discount.metadata = await this.setMetadata_(discount.id, metadata)
+        discount.metadata = await this.setMetadata_(discount.id, metadata);
       }
 
       if (rule) {
-        discount.rule = this.validateDiscountRule_(rule)
+        discount.rule = this.validateDiscountRule_(rule);
         if (rule.valid_for) {
           discount.rule.valid_for = discount.rule.valid_for.map((id) => ({
             id,
-          }))
+          }));
         }
       }
 
       for (const key of Object.keys(rest).filter(
         (k) => rest[k] !== undefined
       )) {
-        discount[key] = rest[key]
+        discount[key] = rest[key];
       }
 
-      discount.code = discount.code.toUpperCase()
+      discount.code = discount.code.toUpperCase();
 
-      const updated = await discountRepo.save(discount)
-      return updated
-    })
+      const updated = await discountRepo.save(discount);
+      return updated;
+    });
   }
 
   /**
@@ -333,22 +339,24 @@ class DiscountService extends BaseService {
    */
   async createDynamicCode(discountId, data) {
     return this.atomicPhase_(async (manager) => {
-      const discountRepo = manager.getCustomRepository(this.discountRepository_)
+      const discountRepo = manager.getCustomRepository(
+        this.discountRepository_
+      );
 
-      const discount = await this.retrieve(discountId)
+      const discount = await this.retrieve(discountId);
 
       if (!discount.is_dynamic) {
         throw new MedusaError(
           MedusaError.Types.NOT_ALLOWED,
           "Discount must be set to dynamic"
-        )
+        );
       }
 
       if (!data.code) {
         throw new MedusaError(
           MedusaError.Types.INVALID_DATA,
           "Discount must have a code"
-        )
+        );
       }
 
       const toCreate = {
@@ -359,19 +367,19 @@ class DiscountService extends BaseService {
         code: data.code.toUpperCase(),
         parent_discount_id: discount.id,
         usage_limit: discount.usage_limit,
-      }
+      };
 
       if (discount.valid_duration) {
-        const lastValidDate = new Date()
+        const lastValidDate = new Date();
         lastValidDate.setSeconds(
           lastValidDate.getSeconds() + toSeconds(parse(discount.valid_duration))
-        )
-        toCreate.ends_at = lastValidDate
+        );
+        toCreate.ends_at = lastValidDate;
       }
-      const created = await discountRepo.create(toCreate)
-      const result = await discountRepo.save(created)
-      return result
-    })
+      const created = await discountRepo.create(toCreate);
+      const result = await discountRepo.save(created);
+      return result;
+    });
   }
 
   /**
@@ -382,19 +390,21 @@ class DiscountService extends BaseService {
    */
   async deleteDynamicCode(discountId, code) {
     return this.atomicPhase_(async (manager) => {
-      const discountRepo = manager.getCustomRepository(this.discountRepository_)
+      const discountRepo = manager.getCustomRepository(
+        this.discountRepository_
+      );
       const discount = await discountRepo.findOne({
         where: { parent_discount_id: discountId, code },
-      })
+      });
 
       if (!discount) {
-        return Promise.resolve()
+        return Promise.resolve();
       }
 
-      await discountRepo.softRemove(discount)
+      await discountRepo.softRemove(discount);
 
-      return Promise.resolve()
-    })
+      return Promise.resolve();
+    });
   }
 
   /**
@@ -407,27 +417,27 @@ class DiscountService extends BaseService {
     return this.atomicPhase_(async (manager) => {
       const discountRuleRepo = manager.getCustomRepository(
         this.discountRuleRepository_
-      )
+      );
 
       const discount = await this.retrieve(discountId, {
         relations: ["rule", "rule.valid_for"],
-      })
+      });
 
-      const { rule } = discount
+      const { rule } = discount;
 
-      const exists = rule.valid_for.find((p) => p.id === productId)
+      const exists = rule.valid_for.find((p) => p.id === productId);
       // If product is already present, we return early
       if (exists) {
-        return rule
+        return rule;
       }
 
-      const product = await this.productService_.retrieve(productId)
+      const product = await this.productService_.retrieve(productId);
 
-      rule.valid_for = [...rule.valid_for, product]
+      rule.valid_for = [...rule.valid_for, product];
 
-      const updated = await discountRuleRepo.save(rule)
-      return updated
-    })
+      const updated = await discountRuleRepo.save(rule);
+      return updated;
+    });
   }
 
   /**
@@ -440,25 +450,25 @@ class DiscountService extends BaseService {
     return this.atomicPhase_(async (manager) => {
       const discountRuleRepo = manager.getCustomRepository(
         this.discountRuleRepository_
-      )
+      );
 
       const discount = await this.retrieve(discountId, {
         relations: ["rule", "rule.valid_for"],
-      })
+      });
 
-      const { rule } = discount
+      const { rule } = discount;
 
-      const exists = rule.valid_for.find((p) => p.id === productId)
+      const exists = rule.valid_for.find((p) => p.id === productId);
       // If product is not present, we return early
       if (!exists) {
-        return rule
+        return rule;
       }
 
-      rule.valid_for = rule.valid_for.filter((p) => p.id !== productId)
+      rule.valid_for = rule.valid_for.filter((p) => p.id !== productId);
 
-      const updated = await discountRuleRepo.save(rule)
-      return updated
-    })
+      const updated = await discountRuleRepo.save(rule);
+      return updated;
+    });
   }
 
   /**
@@ -469,32 +479,34 @@ class DiscountService extends BaseService {
    */
   async addRegion(discountId, regionId) {
     return this.atomicPhase_(async (manager) => {
-      const discountRepo = manager.getCustomRepository(this.discountRepository_)
+      const discountRepo = manager.getCustomRepository(
+        this.discountRepository_
+      );
 
       const discount = await this.retrieve(discountId, {
         relations: ["regions", "rule"],
-      })
+      });
 
-      const exists = discount.regions.find((r) => r.id === regionId)
+      const exists = discount.regions.find((r) => r.id === regionId);
       // If region is already present, we return early
       if (exists) {
-        return discount
+        return discount;
       }
 
       if (discount.regions?.length === 1 && discount.rule.type === "fixed") {
         throw new MedusaError(
           MedusaError.Types.INVALID_DATA,
           "Fixed discounts can have one region"
-        )
+        );
       }
 
-      const region = await this.regionService_.retrieve(regionId)
+      const region = await this.regionService_.retrieve(regionId);
 
-      discount.regions = [...discount.regions, region]
+      discount.regions = [...discount.regions, region];
 
-      const updated = await discountRepo.save(discount)
-      return updated
-    })
+      const updated = await discountRepo.save(discount);
+      return updated;
+    });
   }
 
   /**
@@ -505,23 +517,25 @@ class DiscountService extends BaseService {
    */
   async removeRegion(discountId, regionId) {
     return this.atomicPhase_(async (manager) => {
-      const discountRepo = manager.getCustomRepository(this.discountRepository_)
+      const discountRepo = manager.getCustomRepository(
+        this.discountRepository_
+      );
 
       const discount = await this.retrieve(discountId, {
         relations: ["regions"],
-      })
+      });
 
-      const exists = discount.regions.find((r) => r.id === regionId)
+      const exists = discount.regions.find((r) => r.id === regionId);
       // If region is not present, we return early
       if (!exists) {
-        return discount
+        return discount;
       }
 
-      discount.regions = discount.regions.filter((r) => r.id !== regionId)
+      discount.regions = discount.regions.filter((r) => r.id !== regionId);
 
-      const updated = await discountRepo.save(discount)
-      return updated
-    })
+      const updated = await discountRepo.save(discount);
+      return updated;
+    });
   }
 
   /**
@@ -531,18 +545,22 @@ class DiscountService extends BaseService {
    */
   async delete(discountId) {
     return this.atomicPhase_(async (manager) => {
-      const discountRepo = manager.getCustomRepository(this.discountRepository_)
+      const discountRepo = manager.getCustomRepository(
+        this.discountRepository_
+      );
 
-      const discount = await discountRepo.findOne({ where: { id: discountId } })
+      const discount = await discountRepo.findOne({
+        where: { id: discountId },
+      });
 
       if (!discount) {
-        return Promise.resolve()
+        return Promise.resolve();
       }
 
-      await discountRepo.softRemove(discount)
+      await discountRepo.softRemove(discount);
 
-      return Promise.resolve()
-    })
+      return Promise.resolve();
+    });
   }
 
   /**
@@ -553,18 +571,18 @@ class DiscountService extends BaseService {
    * @return {Discount} return the decorated discount.
    */
   async decorate(discountId, fields = [], expandFields = []) {
-    const requiredFields = ["id", "code", "is_dynamic", "metadata"]
+    const requiredFields = ["id", "code", "is_dynamic", "metadata"];
 
-    fields = fields.concat(requiredFields)
+    fields = fields.concat(requiredFields);
 
     const discount = await this.retrieve(discountId, {
       select: fields,
       relations: expandFields,
-    })
+    });
 
     // const final = await this.runDecorators_(decorated)
-    return discount
+    return discount;
   }
 }
 
-export default DiscountService
+export default DiscountService;

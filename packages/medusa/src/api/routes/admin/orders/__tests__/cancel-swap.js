@@ -1,10 +1,10 @@
-import { IdMap } from "medusa-test-utils"
-import { request } from "../../../../../helpers/test-request"
-import { SwapServiceMock } from "../../../../../services/__mocks__/swap"
+import { IdMap } from "medusa-test-utils";
+import { request } from "../../../../../helpers/test-request";
+import { SwapServiceMock } from "../../../../../services/__mocks__/swap";
 
 describe("POST /admin/orders/:id/swaps/:swap_id/cancel", () => {
   describe("successfully cancels a claim", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
       subject = await request(
@@ -19,23 +19,23 @@ describe("POST /admin/orders/:id/swaps/:swap_id/cancel", () => {
             },
           },
         }
-      )
-    })
+      );
+    });
 
     afterAll(() => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     it("calls SwapService cancel", () => {
-      expect(SwapServiceMock.cancel).toHaveBeenCalledTimes(1)
+      expect(SwapServiceMock.cancel).toHaveBeenCalledTimes(1);
       expect(SwapServiceMock.cancel).toHaveBeenCalledWith(
         IdMap.getId("test-swap")
-      )
-    })
-  })
+      );
+    });
+  });
 
   describe("Trying to cancel a claim unrelated to the order fails", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
       subject = await request(
@@ -50,15 +50,15 @@ describe("POST /admin/orders/:id/swaps/:swap_id/cancel", () => {
             },
           },
         }
-      )
-    })
+      );
+    });
 
     afterAll(() => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     it("returns error", () => {
-      expect(subject.status).toEqual(404)
-    })
-  })
-})
+      expect(subject.status).toEqual(404);
+    });
+  });
+});

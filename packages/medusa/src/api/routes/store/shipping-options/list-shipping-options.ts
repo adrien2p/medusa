@@ -1,5 +1,5 @@
-import CartService from "../../../../services/cart"
-import ShippingProfileService from "../../../../services/shipping-profile"
+import CartService from "../../../../services/cart";
+import ShippingProfileService from "../../../../services/shipping-profile";
 
 /**
  * @oas [get] /shipping-options/{cart_id}
@@ -23,19 +23,19 @@ import ShippingProfileService from "../../../../services/shipping-profile"
  *                 $ref: "#/components/schemas/shipping_option"
  */
 export default async (req, res) => {
-  const { cart_id } = req.params
+  const { cart_id } = req.params;
 
-  const cartService: CartService = req.scope.resolve("cartService")
+  const cartService: CartService = req.scope.resolve("cartService");
   const shippingProfileService: ShippingProfileService = req.scope.resolve(
     "shippingProfileService"
-  )
+  );
 
   const cart = await cartService.retrieve(cart_id, {
     select: ["subtotal"],
     relations: ["region", "items", "items.variant", "items.variant.product"],
-  })
+  });
 
-  const options = await shippingProfileService.fetchCartOptions(cart)
+  const options = await shippingProfileService.fetchCartOptions(cart);
 
-  res.status(200).json({ shipping_options: options })
-}
+  res.status(200).json({ shipping_options: options });
+};

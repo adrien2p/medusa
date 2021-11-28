@@ -11,43 +11,43 @@ import {
   OneToMany,
   JoinTable,
   JoinColumn,
-} from "typeorm"
-import { ulid } from "ulid"
-import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column"
+} from "typeorm";
+import { ulid } from "ulid";
+import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column";
 
-import { Currency } from "./currency"
-import { Country } from "./country"
-import { PaymentProvider } from "./payment-provider"
-import { FulfillmentProvider } from "./fulfillment-provider"
+import { Currency } from "./currency";
+import { Country } from "./country";
+import { PaymentProvider } from "./payment-provider";
+import { FulfillmentProvider } from "./fulfillment-provider";
 
 @Entity()
 export class Region {
   @PrimaryColumn()
-  id: string
+  id: string;
 
   @Column()
-  name: string
+  name: string;
 
   @Column()
-  currency_code: string
+  currency_code: string;
 
   @ManyToOne(() => Currency)
   @JoinColumn({ name: "currency_code", referencedColumnName: "code" })
-  currency: Currency
+  currency: Currency;
 
   @Column({ type: "decimal" })
-  tax_rate: number
+  tax_rate: number;
 
   @Column({ nullable: true })
-  tax_code: string
+  tax_code: string;
 
-  @OneToMany(
-    () => Country,
-    c => c.region
-  )
-  countries: Country[]
+  @OneToMany(() => Country, (c) => c.region)
+  countries: Country[];
 
-  @ManyToMany(() => PaymentProvider, { eager: true, cascade: ['insert', 'update'] })
+  @ManyToMany(() => PaymentProvider, {
+    eager: true,
+    cascade: ["insert", "update"],
+  })
   @JoinTable({
     name: "region_payment_providers",
     joinColumn: {
@@ -59,9 +59,12 @@ export class Region {
       referencedColumnName: "id",
     },
   })
-  payment_providers: PaymentProvider[]
+  payment_providers: PaymentProvider[];
 
-  @ManyToMany(() => FulfillmentProvider, { eager: true, cascade: ['insert', 'update'] })
+  @ManyToMany(() => FulfillmentProvider, {
+    eager: true,
+    cascade: ["insert", "update"],
+  })
   @JoinTable({
     name: "region_fulfillment_providers",
     joinColumn: {
@@ -73,25 +76,25 @@ export class Region {
       referencedColumnName: "id",
     },
   })
-  fulfillment_providers: FulfillmentProvider[]
+  fulfillment_providers: FulfillmentProvider[];
 
   @CreateDateColumn({ type: resolveDbType("timestamptz") })
-  created_at: Date
+  created_at: Date;
 
   @UpdateDateColumn({ type: resolveDbType("timestamptz") })
-  updated_at: Date
+  updated_at: Date;
 
   @DeleteDateColumn({ type: resolveDbType("timestamptz") })
-  deleted_at: Date
+  deleted_at: Date;
 
   @DbAwareColumn({ type: "jsonb", nullable: true })
-  metadata: any
+  metadata: any;
 
   @BeforeInsert()
   private beforeInsert() {
-    if (this.id) return
-    const id = ulid()
-    this.id = `reg_${id}`
+    if (this.id) return;
+    const id = ulid();
+    this.id = `reg_${id}`;
   }
 }
 

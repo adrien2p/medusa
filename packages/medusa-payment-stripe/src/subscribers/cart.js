@@ -5,14 +5,14 @@ class CartSubscriber {
     paymentProviderService,
     eventBusService,
   }) {
-    this.cartService_ = cartService
-    this.customerService_ = customerService
-    this.paymentProviderService_ = paymentProviderService
-    this.eventBus_ = eventBusService
+    this.cartService_ = cartService;
+    this.customerService_ = customerService;
+    this.paymentProviderService_ = paymentProviderService;
+    this.eventBus_ = eventBusService;
 
     this.eventBus_.subscribe("cart.customer_updated", async (cart) => {
-      await this.onCustomerUpdated(cart)
-    })
+      await this.onCustomerUpdated(cart);
+    });
   }
 
   async onCustomerUpdated(cartId) {
@@ -33,20 +33,20 @@ class CartSubscriber {
         "payment_sessions",
         "customer",
       ],
-    })
+    });
 
     if (!cart.payment_sessions?.length) {
-      return Promise.resolve()
+      return Promise.resolve();
     }
 
     const session = cart.payment_sessions.find(
       (ps) => ps.provider_id === "stripe"
-    )
+    );
 
     if (session) {
-      return this.paymentProviderService_.updateSession(session, cart)
+      return this.paymentProviderService_.updateSession(session, cart);
     }
   }
 }
 
-export default CartSubscriber
+export default CartSubscriber;

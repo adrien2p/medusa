@@ -1,25 +1,25 @@
-import { MedusaError } from "medusa-core-utils"
-import { BaseService } from "medusa-interfaces"
-import { TransactionManager } from "typeorm"
+import { MedusaError } from "medusa-core-utils";
+import { BaseService } from "medusa-interfaces";
+import { TransactionManager } from "typeorm";
 
 class NoteService extends BaseService {
   static Events = {
     CREATED: "note.created",
     UPDATED: "note.updated",
     DELETED: "note.deleted",
-  }
+  };
 
   constructor({ manager, noteRepository, eventBusService }) {
-    super()
+    super();
 
     /** @private @const {EntityManager} */
-    this.manager_ = manager
+    this.manager_ = manager;
 
     /** @private @const {NoteRepository} */
-    this.noteRepository_ = noteRepository
+    this.noteRepository_ = noteRepository;
 
     /** @private @const {EventBus} */
-    this.eventBus_ = eventBusService
+    this.eventBus_ = eventBusService;
   }
 
   /**
@@ -29,17 +29,17 @@ class NoteService extends BaseService {
    */
   withTransaction(transactionManager) {
     if (!TransactionManager) {
-      return this
+      return this;
     }
 
     const cloned = new NoteService({
       manager: transactionManager,
       noteRepository: this.noteRepository_,
       eventBusService: this.eventBus_,
-    })
+    });
 
-    cloned.transactionManager_ = transactionManager
-    return cloned
+    cloned.transactionManager_ = transactionManager;
+    return cloned;
   }
 
   /**
@@ -49,21 +49,21 @@ class NoteService extends BaseService {
    * @return {Promise<Note>} which resolves to the requested note.
    */
   async retrieve(id, config = {}) {
-    const noteRepo = this.manager_.getCustomRepository(this.noteRepository_)
+    const noteRepo = this.manager_.getCustomRepository(this.noteRepository_);
 
-    const validatedId = this.validateId_(id)
-    const query = this.buildQuery_({ id: validatedId }, config)
+    const validatedId = this.validateId_(id);
+    const query = this.buildQuery_({ id: validatedId }, config);
 
-    const note = await noteRepo.findOne(query)
+    const note = await noteRepo.findOne(query);
 
     if (!note) {
       throw new MedusaError(
         MedusaError.Types.NOT_FOUND,
         `Note with id: ${id} was not found.`
-      )
+      );
     }
 
-    return note
+    return note;
   }
 
   /** Fetches all notes related to the given selector
@@ -82,11 +82,11 @@ class NoteService extends BaseService {
       relations: [],
     }
   ) {
-    const noteRepo = this.manager_.getCustomRepository(this.noteRepository_)
+    const noteRepo = this.manager_.getCustomRepository(this.noteRepository_);
 
-    const query = this.buildQuery_(selector, config)
+    const query = this.buildQuery_(selector, config);
 
-    return noteRepo.find(query)
+    return noteRepo.find(query);
   }
 
   /**
@@ -96,12 +96,12 @@ class NoteService extends BaseService {
    * @return {Promise} resolves to the creation result
    */
   async create(data, config = { metadata: {} }) {
-    const { metadata } = config
+    const { metadata } = config;
 
-    const { resource_id, resource_type, value, author_id } = data
+    const { resource_id, resource_type, value, author_id } = data;
 
     return this.atomicPhase_(async (manager) => {
-      const noteRepo = manager.getCustomRepository(this.noteRepository_)
+      const noteRepo = manager.getCustomRepository(this.noteRepository_);
 
       const toCreate = {
         resource_id,
@@ -109,17 +109,17 @@ class NoteService extends BaseService {
         value,
         author_id,
         metadata,
-      }
+      };
 
-      const note = await noteRepo.create(toCreate)
-      const result = await noteRepo.save(note)
+      const note = await noteRepo.create(toCreate);
+      const result = await noteRepo.save(note);
 
       await this.eventBus_
         .withTransaction(manager)
-        .emit(NoteService.Events.CREATED, { id: result.id })
+        .emit(NoteService.Events.CREATED, { id: result.id });
 
-      return result
-    })
+      return result;
+    });
   }
 
   /**
@@ -130,20 +130,20 @@ class NoteService extends BaseService {
    */
   async update(noteId, value) {
     return this.atomicPhase_(async (manager) => {
-      const noteRepo = manager.getCustomRepository(this.noteRepository_)
+      const noteRepo = manager.getCustomRepository(this.noteRepository_);
 
-      const note = await this.retrieve(noteId, { relations: ["author"] })
+      const note = await this.retrieve(noteId, { relations: ["author"] });
 
-      note.value = value
+      note.value = value;
 
-      const result = await noteRepo.save(note)
+      const result = await noteRepo.save(note);
 
       await this.eventBus_
         .withTransaction(manager)
-        .emit(NoteService.Events.UPDATED, { id: result.id })
+        .emit(NoteService.Events.UPDATED, { id: result.id });
 
-      return result
-    })
+      return result;
+    });
   }
 
   /**
@@ -153,19 +153,19 @@ class NoteService extends BaseService {
    */
   async delete(noteId) {
     return this.atomicPhase_(async (manager) => {
-      const noteRepo = manager.getCustomRepository(this.noteRepository_)
+      const noteRepo = manager.getCustomRepository(this.noteRepository_);
 
-      const note = await this.retrieve(noteId)
+      const note = await this.retrieve(noteId);
 
-      await noteRepo.softRemove(note)
+      await noteRepo.softRemove(note);
 
       await this.eventBus_
         .withTransaction(manager)
-        .emit(NoteService.Events.DELETED, { id: noteId })
+        .emit(NoteService.Events.DELETED, { id: noteId });
 
-      return Promise.resolve()
-    })
+      return Promise.resolve();
+    });
   }
 }
 
-export default NoteService
+export default NoteService;

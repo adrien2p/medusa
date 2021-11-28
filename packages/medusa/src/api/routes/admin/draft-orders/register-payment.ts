@@ -1,14 +1,14 @@
-import { EntityManager } from "typeorm"
+import { EntityManager } from "typeorm";
 import {
   CartService,
   DraftOrderService,
   OrderService,
   PaymentProviderService,
-} from "../../../../services"
+} from "../../../../services";
 import {
   defaultAdminOrdersFields as defaultOrderFields,
   defaultAdminOrdersRelations as defaultOrderRelations,
-} from "../orders/index"
+} from "../orders/index";
 
 /**
  * @oas [post] /draft-orders/{id}/register-payment
@@ -32,22 +32,22 @@ import {
  */
 
 export default async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params;
 
   const draftOrderService: DraftOrderService =
-    req.scope.resolve("draftOrderService")
+    req.scope.resolve("draftOrderService");
   const paymentProviderService: PaymentProviderService = req.scope.resolve(
     "paymentProviderService"
-  )
-  const orderService: OrderService = req.scope.resolve("orderService")
-  const cartService: CartService = req.scope.resolve("cartService")
-  const entityManager: EntityManager = req.scope.resolve("manager")
+  );
+  const orderService: OrderService = req.scope.resolve("orderService");
+  const cartService: CartService = req.scope.resolve("cartService");
+  const entityManager: EntityManager = req.scope.resolve("manager");
 
-  let result
+  let result;
   await entityManager.transaction(async (manager) => {
     const draftOrder = await draftOrderService
       .withTransaction(manager)
-      .retrieve(id)
+      .retrieve(id);
 
     const cart = await cartService
       .withTransaction(manager)
@@ -61,29 +61,31 @@ export default async (req, res) => {
           "region",
           "items",
         ],
-      })
+      });
 
     await paymentProviderService
       .withTransaction(manager)
-      .createSession("system", cart)
+      .createSession("system", cart);
 
     await cartService
       .withTransaction(manager)
-      .setPaymentSession(cart.id, "system")
+      .setPaymentSession(cart.id, "system");
 
-    await cartService.withTransaction(manager).authorizePayment(cart.id)
+    await cartService.withTransaction(manager).authorizePayment(cart.id);
 
-    result = await orderService.withTransaction(manager).createFromCart(cart.id)
+    result = await orderService
+      .withTransaction(manager)
+      .createFromCart(cart.id);
 
     await draftOrderService
       .withTransaction(manager)
-      .registerCartCompletion(draftOrder.id, result.id)
-  })
+      .registerCartCompletion(draftOrder.id, result.id);
+  });
 
   const order = await orderService.retrieve(result.id, {
     relations: defaultOrderRelations,
     select: defaultOrderFields,
-  })
+  });
 
-  res.status(200).json({ order })
-}
+  res.status(200).json({ order });
+};

@@ -14,109 +14,97 @@ import {
   ManyToMany,
   JoinColumn,
   JoinTable,
-} from "typeorm"
-import { ulid } from "ulid"
-import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column"
+} from "typeorm";
+import { ulid } from "ulid";
+import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column";
 
-import { Order } from "./order"
-import { FulfillmentProvider } from "./fulfillment-provider"
-import { FulfillmentItem } from "./fulfillment-item"
-import { Swap } from "./swap"
-import { ClaimOrder } from "./claim-order"
-import { TrackingLink } from "./tracking-link"
+import { Order } from "./order";
+import { FulfillmentProvider } from "./fulfillment-provider";
+import { FulfillmentItem } from "./fulfillment-item";
+import { Swap } from "./swap";
+import { ClaimOrder } from "./claim-order";
+import { TrackingLink } from "./tracking-link";
 
 @Entity()
 export class Fulfillment {
   @PrimaryColumn()
-  id: string
+  id: string;
 
   @Index()
   @Column({ nullable: true })
-  claim_order_id: string
+  claim_order_id: string;
 
-  @ManyToOne(
-    () => ClaimOrder,
-    co => co.fulfillments
-  )
+  @ManyToOne(() => ClaimOrder, (co) => co.fulfillments)
   @JoinColumn({ name: "claim_order_id" })
-  claim_order: ClaimOrder
+  claim_order: ClaimOrder;
 
   @Index()
   @Column({ nullable: true })
-  swap_id: string
+  swap_id: string;
 
-  @ManyToOne(
-    () => Swap,
-    swap => swap.fulfillments
-  )
+  @ManyToOne(() => Swap, (swap) => swap.fulfillments)
   @JoinColumn({ name: "swap_id" })
-  swap: Swap
+  swap: Swap;
 
   @Index()
   @Column({ nullable: true })
-  order_id: string
+  order_id: string;
 
-  @ManyToOne(
-    () => Order,
-    o => o.fulfillments
-  )
+  @ManyToOne(() => Order, (o) => o.fulfillments)
   @JoinColumn({ name: "order_id" })
-  order: Order
+  order: Order;
 
   @Column({ type: "boolean", nullable: true })
-  no_notification: Boolean
+  no_notification: Boolean;
 
   @Index()
   @Column()
-  provider_id: string
+  provider_id: string;
 
   @ManyToOne(() => FulfillmentProvider)
   @JoinColumn({ name: "provider_id" })
-  provider: FulfillmentProvider
+  provider: FulfillmentProvider;
 
-  @OneToMany(
-    () => FulfillmentItem,
-    i => i.fulfillment,
-    { eager: true, cascade: true }
-  )
-  items: FulfillmentItem[]
+  @OneToMany(() => FulfillmentItem, (i) => i.fulfillment, {
+    eager: true,
+    cascade: true,
+  })
+  items: FulfillmentItem[];
 
-  @OneToMany(
-    () => TrackingLink,
-    tl => tl.fulfillment,
-    { cascade: ["insert"] }
-  )
-  tracking_links: TrackingLink[]
+  @OneToMany(() => TrackingLink, (tl) => tl.fulfillment, {
+    cascade: ["insert"],
+  })
+  tracking_links: TrackingLink[];
 
   @DbAwareColumn({ type: "jsonb", default: [] })
-  tracking_numbers: string[]
+  tracking_numbers: string[];
 
   @DbAwareColumn({ type: "jsonb" })
-  data: any
+  data: any;
 
   @Column({ type: resolveDbType("timestamptz"), nullable: true })
-  shipped_at: Date
+  shipped_at: Date;
 
   @Column({ type: resolveDbType("timestamptz"), nullable: true })
-  canceled_at: Date
+  canceled_at: Date;
 
   @CreateDateColumn({ type: resolveDbType("timestamptz") })
-  created_at: Date
+  created_at: Date;
 
   @UpdateDateColumn({ type: resolveDbType("timestamptz") })
-  updated_at: Date
+  updated_at: Date;
 
   @DbAwareColumn({ type: "jsonb", nullable: true })
-  metadata: any
+  metadata: any;
 
   @Column({ nullable: true })
-  idempotency_key: string
+  idempotency_key: string;
 
   @BeforeInsert()
   private beforeInsert() {
-    if (this.id) return
-    const id = ulid()
-    this.id = `ful_${id}`
+    if (this.id) return;
+    const id = ulid();
+    this.id = `ful_${id}`;
   }
 }
 

@@ -1,13 +1,13 @@
-import { IdMap } from "medusa-test-utils"
-import { request } from "../../../../../helpers/test-request"
+import { IdMap } from "medusa-test-utils";
+import { request } from "../../../../../helpers/test-request";
 import {
   orders,
   OrderServiceMock,
-} from "../../../../../services/__mocks__/order"
+} from "../../../../../services/__mocks__/order";
 
 describe("POST /admin/orders", () => {
   describe("successful creation", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
       subject = await request("POST", "/admin/orders", {
@@ -73,15 +73,15 @@ describe("POST /admin/orders", () => {
             userId: IdMap.getId("admin_user"),
           },
         },
-      })
-    })
+      });
+    });
 
     it("returns 200", () => {
-      expect(subject.status).toEqual(200)
-    })
+      expect(subject.status).toEqual(200);
+    });
 
     it("calls OrderService create", () => {
-      expect(OrderServiceMock.create).toHaveBeenCalledTimes(1)
+      expect(OrderServiceMock.create).toHaveBeenCalledTimes(1);
       expect(OrderServiceMock.create).toHaveBeenCalledWith({
         email: "virgil@vandijk.dk",
         billing_address: {
@@ -138,7 +138,7 @@ describe("POST /admin/orders", () => {
             items: [],
           },
         ],
-      })
-    })
-  })
-})
+      });
+    });
+  });
+});

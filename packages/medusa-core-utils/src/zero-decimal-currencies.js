@@ -15,6 +15,6 @@ const zeroDecimalCurrencies = [
   "xaf",
   "xof",
   "xpf",
-]
+];
 
-export default zeroDecimalCurrencies
+export default zeroDecimalCurrencies;

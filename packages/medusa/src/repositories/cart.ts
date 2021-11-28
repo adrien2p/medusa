@@ -1,6 +1,6 @@
-import { flatten, groupBy, map, merge } from "lodash"
-import { EntityRepository, FindManyOptions, Repository } from "typeorm"
-import { Cart } from "../models/cart"
+import { flatten, groupBy, map, merge } from "lodash";
+import { EntityRepository, FindManyOptions, Repository } from "typeorm";
+import { Cart } from "../models/cart";
 
 @EntityRepository(Cart)
 export class CartRepository extends Repository<Cart> {
@@ -8,16 +8,16 @@ export class CartRepository extends Repository<Cart> {
     relations: Array<keyof Cart> = [],
     optionsWithoutRelations: Omit<FindManyOptions<Cart>, "relations"> = {}
   ): Promise<Cart[]> {
-    const entities = await this.find(optionsWithoutRelations)
-    const entitiesIds = entities.map(({ id }) => id)
+    const entities = await this.find(optionsWithoutRelations);
+    const entitiesIds = entities.map(({ id }) => id);
 
-    const groupedRelations = {}
+    const groupedRelations = {};
     for (const rel of relations) {
-      const [topLevel] = rel.split(".")
+      const [topLevel] = rel.split(".");
       if (groupedRelations[topLevel]) {
-        groupedRelations[topLevel].push(rel)
+        groupedRelations[topLevel].push(rel);
       } else {
-        groupedRelations[topLevel] = [rel]
+        groupedRelations[topLevel] = [rel];
       }
     }
 
@@ -26,15 +26,15 @@ export class CartRepository extends Repository<Cart> {
         return this.findByIds(entitiesIds, {
           select: ["id"],
           relations: rels as string[],
-        })
+        });
       })
-    ).then(flatten)
-    const entitiesAndRelations = entitiesIdsWithRelations.concat(entities)
+    ).then(flatten);
+    const entitiesAndRelations = entitiesIdsWithRelations.concat(entities);
 
-    const entitiesAndRelationsById = groupBy(entitiesAndRelations, "id")
+    const entitiesAndRelationsById = groupBy(entitiesAndRelations, "id");
     return map(entitiesAndRelationsById, (entityAndRelations) =>
       merge({}, ...entityAndRelations)
-    )
+    );
   }
 
   public async findOneWithRelations(
@@ -42,12 +42,12 @@ export class CartRepository extends Repository<Cart> {
     optionsWithoutRelations: Omit<FindManyOptions<Cart>, "relations"> = {}
   ): Promise<Cart> {
     // Limit 1
-    optionsWithoutRelations.take = 1
+    optionsWithoutRelations.take = 1;
 
     const result = await this.findWithRelations(
       relations,
       optionsWithoutRelations
-    )
-    return result[0]
+    );
+    return result[0];
   }
 }

@@ -12,54 +12,54 @@ import {
   OneToOne,
   JoinTable,
   JoinColumn,
-} from "typeorm"
-import { ulid } from "ulid"
-import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column"
+} from "typeorm";
+import { ulid } from "ulid";
+import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column";
 
-import { DiscountRule } from "./discount-rule"
-import { Region } from "./region"
+import { DiscountRule } from "./discount-rule";
+import { Region } from "./region";
 
 @Entity()
 export class Discount {
   @PrimaryColumn()
-  id: string
+  id: string;
 
   @Index({ unique: true, where: "deleted_at IS NULL" })
   @Column()
-  code: string
+  code: string;
 
   @Column()
-  is_dynamic: boolean
+  is_dynamic: boolean;
 
   @Index()
   @Column({ nullable: true })
-  rule_id: string
+  rule_id: string;
 
   @ManyToOne(() => DiscountRule, { cascade: true })
   @JoinColumn({ name: "rule_id" })
-  rule: DiscountRule
+  rule: DiscountRule;
 
   @Column()
-  is_disabled: boolean
+  is_disabled: boolean;
 
   @Column({ nullable: true })
-  parent_discount_id: string
-  
+  parent_discount_id: string;
+
   @ManyToOne(() => Discount)
   @JoinColumn({ name: "parent_discount_id" })
-  parent_discount: Discount
+  parent_discount: Discount;
 
   @Column({
     type: resolveDbType("timestamptz"),
     default: () => "CURRENT_TIMESTAMP",
   })
-  starts_at: Date
+  starts_at: Date;
 
   @Column({ type: resolveDbType("timestamptz"), nullable: true })
-  ends_at: Date
+  ends_at: Date;
 
   @Column({ nullable: true })
-  valid_duration: string
+  valid_duration: string;
 
   @ManyToMany(() => Region, { cascade: true })
   @JoinTable({
@@ -73,32 +73,32 @@ export class Discount {
       referencedColumnName: "id",
     },
   })
-  regions: Region[]
+  regions: Region[];
 
   @Column({ nullable: true })
-  usage_limit: number
+  usage_limit: number;
 
   @Column({ default: 0 })
-  usage_count: number
+  usage_count: number;
 
   @CreateDateColumn({ type: resolveDbType("timestamptz") })
-  created_at: Date
+  created_at: Date;
 
   @UpdateDateColumn({ type: resolveDbType("timestamptz") })
-  updated_at: Date
+  updated_at: Date;
 
   @DeleteDateColumn({ type: resolveDbType("timestamptz") })
-  deleted_at: Date
+  deleted_at: Date;
 
   @DbAwareColumn({ type: "jsonb", nullable: true })
-  metadata: any
+  metadata: any;
 
   @BeforeInsert()
   private beforeInsert() {
-    if (this.id) return
-    const id = ulid()
-    this.id = `disc_${id}`
-    this.code = this.code.toUpperCase()
+    if (this.id) return;
+    const id = ulid();
+    this.id = `disc_${id}`;
+    this.code = this.code.toUpperCase();
   }
 }
 

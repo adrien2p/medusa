@@ -9,51 +9,51 @@ import {
   JoinColumn,
   PrimaryColumn,
   ManyToOne,
-} from "typeorm"
-import { ulid } from "ulid"
-import { User } from "./user"
-import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column"
+} from "typeorm";
+import { ulid } from "ulid";
+import { User } from "./user";
+import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column";
 
 @Entity()
 export class Note {
   @PrimaryColumn()
-  id: string
+  id: string;
 
   @Column()
-  value: string
-
-  @Index()
-  @Column()
-  resource_type: string
+  value: string;
 
   @Index()
   @Column()
-  resource_id: string
+  resource_type: string;
+
+  @Index()
+  @Column()
+  resource_id: string;
 
   @Column({ nullable: true })
-  author_id: string
+  author_id: string;
 
   @ManyToOne(() => User)
   @JoinColumn({ name: "author_id" })
-  author: User
+  author: User;
 
   @CreateDateColumn({ type: resolveDbType("timestamptz") })
-  created_at: Date
+  created_at: Date;
 
   @UpdateDateColumn({ type: resolveDbType("timestamptz") })
-  updated_at: Date
+  updated_at: Date;
 
   @DeleteDateColumn({ type: resolveDbType("timestamptz") })
-  deleted_at: Date
+  deleted_at: Date;
 
   @DbAwareColumn({ type: "jsonb", nullable: true })
-  metadata: any
+  metadata: any;
 
   @BeforeInsert()
   private beforeInsert() {
-    if (this.id) return
-    const id = ulid()
-    this.id = `note_${id}`
+    if (this.id) return;
+    const id = ulid();
+    this.id = `note_${id}`;
   }
 }
 

@@ -1,7 +1,7 @@
-import { defaultStoreCustomersFields, defaultStoreCustomersRelations } from "."
-import CustomerService from "../../../../services/customer"
-import { AddressPayload } from "../../../../types/common"
-import { validator } from "../../../../utils/validator"
+import { defaultStoreCustomersFields, defaultStoreCustomersRelations } from ".";
+import CustomerService from "../../../../services/customer";
+import { AddressPayload } from "../../../../types/common";
+import { validator } from "../../../../utils/validator";
 
 /**
  * @oas [post] /customers/me/addresses/{address_id}
@@ -33,26 +33,26 @@ import { validator } from "../../../../utils/validator"
  *              $ref: "#/components/schemas/customer"
  */
 export default async (req, res) => {
-  const id = req.user.customer_id
-  const { address_id } = req.params
+  const id = req.user.customer_id;
+  const { address_id } = req.params;
 
   const validated = await validator(
     StorePostCustomersCustomerAddressesAddressReq,
     req.body
-  )
+  );
 
   const customerService: CustomerService = req.scope.resolve(
     "customerService"
-  ) as CustomerService
+  ) as CustomerService;
 
-  let customer = await customerService.updateAddress(id, address_id, validated)
+  let customer = await customerService.updateAddress(id, address_id, validated);
 
   customer = await customerService.retrieve(id, {
     relations: defaultStoreCustomersRelations,
     select: defaultStoreCustomersFields,
-  })
+  });
 
-  res.json({ customer })
-}
+  res.json({ customer });
+};
 
 export class StorePostCustomersCustomerAddressesAddressReq extends AddressPayload {}

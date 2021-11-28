@@ -12,117 +12,110 @@ import {
   ManyToMany,
   JoinColumn,
   JoinTable,
-} from "typeorm"
-import { ulid } from "ulid"
-import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column"
+} from "typeorm";
+import { ulid } from "ulid";
+import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column";
 
-import { Product } from "./product"
-import { MoneyAmount } from "./money-amount"
-import { ProductOptionValue } from "./product-option-value"
+import { Product } from "./product";
+import { MoneyAmount } from "./money-amount";
+import { ProductOptionValue } from "./product-option-value";
 
 @Entity()
 export class ProductVariant {
   @PrimaryColumn()
-  id: string
+  id: string;
 
   @Column()
-  title: string
+  title: string;
 
   @Index()
   @Column()
-  product_id: string
+  product_id: string;
 
-  @ManyToOne(
-    () => Product,
-    product => product.variants,
-    { eager: true }
-  )
+  @ManyToOne(() => Product, (product) => product.variants, { eager: true })
   @JoinColumn({ name: "product_id" })
-  product: Product
+  product: Product;
 
-  @OneToMany(
-    () => MoneyAmount,
-    ma => ma.variant,
-    { cascade: true, onDelete: "CASCADE" }
-  )
-  prices: MoneyAmount[]
-
-  @Column({ nullable: true })
-  @Index({ unique: true, where: "deleted_at IS NULL" })
-  sku: string
+  @OneToMany(() => MoneyAmount, (ma) => ma.variant, {
+    cascade: true,
+    onDelete: "CASCADE",
+  })
+  prices: MoneyAmount[];
 
   @Column({ nullable: true })
   @Index({ unique: true, where: "deleted_at IS NULL" })
-  barcode: string
+  sku: string;
 
   @Column({ nullable: true })
   @Index({ unique: true, where: "deleted_at IS NULL" })
-  ean: string
+  barcode: string;
 
   @Column({ nullable: true })
   @Index({ unique: true, where: "deleted_at IS NULL" })
-  upc: string
+  ean: string;
+
+  @Column({ nullable: true })
+  @Index({ unique: true, where: "deleted_at IS NULL" })
+  upc: string;
 
   @Column({ nullable: true, default: 0, select: false })
-  variant_rank: number
+  variant_rank: number;
 
   @Column({ type: "int" })
-  inventory_quantity: number
+  inventory_quantity: number;
 
   @Column({ default: false })
-  allow_backorder: boolean
+  allow_backorder: boolean;
 
   @Column({ default: true })
-  manage_inventory: boolean
+  manage_inventory: boolean;
 
   @Column({ nullable: true })
-  hs_code: string
+  hs_code: string;
 
   @Column({ nullable: true })
-  origin_country: string
+  origin_country: string;
 
   @Column({ nullable: true })
-  mid_code: string
+  mid_code: string;
 
   @Column({ nullable: true })
-  material: string
+  material: string;
 
   @Column({ type: "int", nullable: true })
-  weight: number
+  weight: number;
 
   @Column({ type: "int", nullable: true })
-  length: number
+  length: number;
 
   @Column({ type: "int", nullable: true })
-  height: number
+  height: number;
 
   @Column({ type: "int", nullable: true })
-  width: number
+  width: number;
 
-  @OneToMany(
-    () => ProductOptionValue,
-    optionValue => optionValue.variant,
-    { cascade: true }
-  )
-  options: ProductOptionValue[]
+  @OneToMany(() => ProductOptionValue, (optionValue) => optionValue.variant, {
+    cascade: true,
+  })
+  options: ProductOptionValue[];
 
   @CreateDateColumn({ type: resolveDbType("timestamptz") })
-  created_at: Date
+  created_at: Date;
 
   @UpdateDateColumn({ type: resolveDbType("timestamptz") })
-  updated_at: Date
+  updated_at: Date;
 
   @DeleteDateColumn({ type: resolveDbType("timestamptz") })
-  deleted_at: Date
+  deleted_at: Date;
 
   @DbAwareColumn({ type: "jsonb", nullable: true })
-  metadata: any
+  metadata: any;
 
   @BeforeInsert()
   private beforeInsert() {
-    if (this.id) return
-    const id = ulid()
-    this.id = `variant_${id}`
+    if (this.id) return;
+    const id = ulid();
+    this.id = `variant_${id}`;
   }
 }
 

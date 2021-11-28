@@ -7,48 +7,48 @@ import {
   Index,
   Column,
   PrimaryColumn,
-} from "typeorm"
-import { ulid } from "ulid"
-import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column"
+} from "typeorm";
+import { ulid } from "ulid";
+import { resolveDbType, DbAwareColumn } from "../utils/db-aware-column";
 
 @Entity()
 export class User {
   @PrimaryColumn()
-  id: string
+  id: string;
 
   @Index({ unique: true })
   @Column()
-  email: string
+  email: string;
 
   @Column({ nullable: true })
-  first_name: string
+  first_name: string;
 
   @Column({ nullable: true })
-  last_name: string
+  last_name: string;
 
   @Column({ nullable: true, select: false })
-  password_hash: string
+  password_hash: string;
 
   @Column({ nullable: true })
-  api_token: string
+  api_token: string;
 
   @CreateDateColumn({ type: resolveDbType("timestamptz") })
-  created_at: Date
+  created_at: Date;
 
   @UpdateDateColumn({ type: resolveDbType("timestamptz") })
-  updated_at: Date
+  updated_at: Date;
 
   @DeleteDateColumn({ type: resolveDbType("timestamptz") })
-  deleted_at: Date
+  deleted_at: Date;
 
   @DbAwareColumn({ type: "jsonb", nullable: true })
-  metadata: any
+  metadata: any;
 
   @BeforeInsert()
   private beforeInsert() {
-    if (this.id) return
-    const id = ulid()
-    this.id = `usr_${id}`
+    if (this.id) return;
+    const id = ulid();
+    this.id = `usr_${id}`;
   }
 }
 

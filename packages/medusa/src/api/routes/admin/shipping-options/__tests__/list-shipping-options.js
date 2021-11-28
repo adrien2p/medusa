@@ -1,6 +1,6 @@
-import { IdMap } from "medusa-test-utils"
-import { request } from "../../../../../helpers/test-request"
-import { ShippingOptionServiceMock } from "../../../../../services/__mocks__/shipping-option"
+import { IdMap } from "medusa-test-utils";
+import { request } from "../../../../../helpers/test-request";
+import { ShippingOptionServiceMock } from "../../../../../services/__mocks__/shipping-option";
 
 const defaultFields = [
   "id",
@@ -17,13 +17,13 @@ const defaultFields = [
   "updated_at",
   "deleted_at",
   "metadata",
-]
+];
 
-const defaultRelations = ["region", "profile", "requirements"]
+const defaultRelations = ["region", "profile", "requirements"];
 
 describe("GET /admin/shipping-options", () => {
   describe("successful retrieval", () => {
-    let subject
+    let subject;
 
     beforeAll(async () => {
       subject = await request("GET", `/admin/shipping-options`, {
@@ -32,22 +32,22 @@ describe("GET /admin/shipping-options", () => {
             userId: IdMap.getId("admin_user"),
           },
         },
-      })
-    })
+      });
+    });
 
     it("returns 200", () => {
-      expect(subject.status).toEqual(200)
-    })
+      expect(subject.status).toEqual(200);
+    });
 
     it("calls service retrieve", () => {
-      expect(ShippingOptionServiceMock.list).toHaveBeenCalledTimes(1)
+      expect(ShippingOptionServiceMock.list).toHaveBeenCalledTimes(1);
       expect(ShippingOptionServiceMock.list).toHaveBeenCalledWith(
         {},
         {
           select: defaultFields,
           relations: defaultRelations,
         }
-      )
-    })
-  })
-})
+      );
+    });
+  });
+});

@@ -1,6 +1,6 @@
-import { BaseService } from "medusa-interfaces"
-import { MedusaError } from "medusa-core-utils"
-import { Brackets } from "typeorm"
+import { BaseService } from "medusa-interfaces";
+import { MedusaError } from "medusa-core-utils";
+import { Brackets } from "typeorm";
 
 /**
  * Handles draft orders
@@ -10,7 +10,7 @@ class DraftOrderService extends BaseService {
   static Events = {
     CREATED: "draft_order.created",
     UPDATED: "draft_order.updated",
-  }
+  };
 
   constructor({
     manager,
@@ -23,39 +23,39 @@ class DraftOrderService extends BaseService {
     productVariantService,
     shippingOptionService,
   }) {
-    super()
+    super();
 
     /** @private @const {EntityManager} */
-    this.manager_ = manager
+    this.manager_ = manager;
 
     /** @private @const {DraftOrderRepository} */
-    this.draftOrderRepository_ = draftOrderRepository
+    this.draftOrderRepository_ = draftOrderRepository;
 
     /** @private @const {PaymentRepository} */
-    this.paymentRepository_ = paymentRepository
+    this.paymentRepository_ = paymentRepository;
 
     /** @private @const {OrderRepository} */
-    this.orderRepository_ = orderRepository
+    this.orderRepository_ = orderRepository;
 
     /** @private @const {LineItemService} */
-    this.lineItemService_ = lineItemService
+    this.lineItemService_ = lineItemService;
 
     /** @private @const {CartService} */
-    this.cartService_ = cartService
+    this.cartService_ = cartService;
 
     /** @private @const {ProductVariantService} */
-    this.productVariantService_ = productVariantService
+    this.productVariantService_ = productVariantService;
 
     /** @private @const {ShippingOptionService} */
-    this.shippingOptionService_ = shippingOptionService
+    this.shippingOptionService_ = shippingOptionService;
 
     /** @private @const {EventBusService} */
-    this.eventBus_ = eventBusService
+    this.eventBus_ = eventBusService;
   }
 
   withTransaction(transactionManager) {
     if (!transactionManager) {
-      return this
+      return this;
     }
 
     const cloned = new DraftOrderService({
@@ -68,11 +68,11 @@ class DraftOrderService extends BaseService {
       productVariantService: this.productVariantService_,
       shippingOptionService: this.shippingOptionService_,
       eventBusService: this.eventBus_,
-    })
+    });
 
-    cloned.transactionManager_ = transactionManager
+    cloned.transactionManager_ = transactionManager;
 
-    return cloned
+    return cloned;
   }
 
   /**
@@ -84,22 +84,22 @@ class DraftOrderService extends BaseService {
   async retrieve(id, config = {}) {
     const draftOrderRepo = this.manager_.getCustomRepository(
       this.draftOrderRepository_
-    )
+    );
 
-    const validatedId = this.validateId_(id)
+    const validatedId = this.validateId_(id);
 
-    const query = this.buildQuery_({ id: validatedId }, config)
+    const query = this.buildQuery_({ id: validatedId }, config);
 
-    const draftOrder = await draftOrderRepo.findOne(query)
+    const draftOrder = await draftOrderRepo.findOne(query);
 
     if (!draftOrder) {
       throw new MedusaError(
         MedusaError.Types.NOT_FOUND,
         `Draft order with ${id} was not found`
-      )
+      );
     }
 
-    return draftOrder
+    return draftOrder;
   }
 
   /**
@@ -111,20 +111,20 @@ class DraftOrderService extends BaseService {
   async retrieveByCartId(cartId, config = {}) {
     const draftOrderRepo = this.manager_.getCustomRepository(
       this.draftOrderRepository_
-    )
+    );
 
-    const query = this.buildQuery_({ cart_id: cartId }, config)
+    const query = this.buildQuery_({ cart_id: cartId }, config);
 
-    const draftOrder = await draftOrderRepo.findOne(query)
+    const draftOrder = await draftOrderRepo.findOne(query);
 
     if (!draftOrder) {
       throw new MedusaError(
         MedusaError.Types.NOT_FOUND,
         `Draft order was not found`
-      )
+      );
     }
 
-    return draftOrder
+    return draftOrder;
   }
 
   /**
@@ -136,20 +136,20 @@ class DraftOrderService extends BaseService {
     return this.atomicPhase_(async (manager) => {
       const draftOrderRepo = manager.getCustomRepository(
         this.draftOrderRepository_
-      )
+      );
 
       const draftOrder = await draftOrderRepo.findOne({
         where: { id: draftOrderId },
-      })
+      });
 
       if (!draftOrder) {
-        return Promise.resolve()
+        return Promise.resolve();
       }
 
-      await draftOrderRepo.remove(draftOrder)
+      await draftOrderRepo.remove(draftOrder);
 
-      return Promise.resolve()
-    })
+      return Promise.resolve();
+    });
   }
 
   /**
@@ -164,30 +164,30 @@ class DraftOrderService extends BaseService {
   ) {
     const draftOrderRepository = this.manager_.getCustomRepository(
       this.draftOrderRepository_
-    )
+    );
 
-    let q
+    let q;
     if ("q" in selector) {
-      q = selector.q
-      delete selector.q
+      q = selector.q;
+      delete selector.q;
     }
 
-    const query = this.buildQuery_(selector, config)
+    const query = this.buildQuery_(selector, config);
 
     if (q) {
-      const where = query.where
+      const where = query.where;
 
-      delete where.display_id
+      delete where.display_id;
 
       query.join = {
         alias: "draft_order",
         innerJoin: {
           cart: "draft_order.cart",
         },
-      }
+      };
 
       query.where = (qb) => {
-        qb.where(where)
+        qb.where(where);
 
         qb.andWhere(
           new Brackets((qb) => {
@@ -195,15 +195,15 @@ class DraftOrderService extends BaseService {
               q: `%${q}%`,
             }).orWhere(`draft_order.display_id::varchar(255) ILIKE :dId`, {
               dId: `${q}`,
-            })
+            });
           })
-        )
-      }
+        );
+      };
     }
 
-    const [draftOrders, count] = await draftOrderRepository.findAndCount(query)
+    const [draftOrders, count] = await draftOrderRepository.findAndCount(query);
 
-    return [draftOrders, count]
+    return [draftOrders, count];
   }
 
   /**
@@ -218,11 +218,11 @@ class DraftOrderService extends BaseService {
   ) {
     const draftOrderRepo = this.manager_.getCustomRepository(
       this.draftOrderRepository_
-    )
+    );
 
-    const query = this.buildQuery_(selector, config)
+    const query = this.buildQuery_(selector, config);
 
-    return draftOrderRepo.find(query)
+    return draftOrderRepo.find(query);
   }
 
   /**
@@ -234,20 +234,20 @@ class DraftOrderService extends BaseService {
     return this.atomicPhase_(async (manager) => {
       const draftOrderRepo = manager.getCustomRepository(
         this.draftOrderRepository_
-      )
+      );
 
       if (!data.region_id) {
         throw new MedusaError(
           MedusaError.Types.INVALID_DATA,
           `region_id is required to create a draft order`
-        )
+        );
       }
 
       if (!data.items || !data.items.length) {
         throw new MedusaError(
           MedusaError.Types.INVALID_DATA,
           `Items are required to create a draft order`
-        )
+        );
       }
 
       const {
@@ -256,32 +256,32 @@ class DraftOrderService extends BaseService {
         no_notification_order,
         items,
         ...rest
-      } = data
+      } = data;
 
       if (discounts) {
         for (const { code } of discounts) {
-          rest.discounts = []
+          rest.discounts = [];
           await this.cartService_
             .withTransaction(manager)
-            .applyDiscount(rest, code)
+            .applyDiscount(rest, code);
         }
       }
 
       const createdCart = await this.cartService_
         .withTransaction(manager)
-        .create({ type: "draft_order", ...rest })
+        .create({ type: "draft_order", ...rest });
 
       const draftOrder = draftOrderRepo.create({
         cart_id: createdCart.id,
         no_notification_order,
-      })
-      const result = await draftOrderRepo.save(draftOrder)
+      });
+      const result = await draftOrderRepo.save(draftOrder);
 
       await this.eventBus_
         .withTransaction(manager)
         .emit(DraftOrderService.Events.CREATED, {
           id: result.id,
-        })
+        });
 
       for (const item of items) {
         if (item.variant_id) {
@@ -290,18 +290,18 @@ class DraftOrderService extends BaseService {
             .generate(item.variant_id, data.region_id, item.quantity, {
               metadata: item?.metadata || {},
               unit_price: item.unit_price,
-            })
+            });
 
           await this.lineItemService_.withTransaction(manager).create({
             cart_id: createdCart.id,
             ...line,
-          })
+          });
         } else {
-          let price
+          let price;
           if (typeof item.unit_price === `undefined` || item.unit_price < 0) {
-            price = 0
+            price = 0;
           } else {
-            price = item.unit_price
+            price = item.unit_price;
           }
 
           // custom line items can be added to a draft order
@@ -312,18 +312,18 @@ class DraftOrderService extends BaseService {
             allow_discounts: false,
             unit_price: price,
             quantity: item.quantity,
-          })
+          });
         }
       }
 
       for (const method of shipping_methods) {
         await this.cartService_
           .withTransaction(manager)
-          .addShippingMethod(createdCart.id, method.option_id, method.data)
+          .addShippingMethod(createdCart.id, method.option_id, method.data);
       }
 
-      return result
-    })
+      return result;
+    });
   }
 
   /**
@@ -336,15 +336,15 @@ class DraftOrderService extends BaseService {
     return this.atomicPhase_(async (manager) => {
       const draftOrderRepo = manager.getCustomRepository(
         this.draftOrderRepository_
-      )
-      const draftOrder = await this.retrieve(doId)
+      );
+      const draftOrder = await this.retrieve(doId);
 
-      draftOrder.status = "completed"
-      draftOrder.completed_at = new Date()
-      draftOrder.order_id = orderId
+      draftOrder.status = "completed";
+      draftOrder.completed_at = new Date();
+      draftOrder.order_id = orderId;
 
-      await draftOrderRepo.save(draftOrder)
-    })
+      await draftOrderRepo.save(draftOrder);
+    });
   }
 
   /**
@@ -355,35 +355,35 @@ class DraftOrderService extends BaseService {
    */
   async update(doId, data) {
     return this.atomicPhase_(async (manager) => {
-      const doRepo = manager.getCustomRepository(this.draftOrderRepository_)
-      const draftOrder = await this.retrieve(doId)
-      let touched = false
+      const doRepo = manager.getCustomRepository(this.draftOrderRepository_);
+      const draftOrder = await this.retrieve(doId);
+      let touched = false;
 
       if (draftOrder.status === "completed") {
         throw new MedusaError(
           MedusaError.Types.NOT_ALLOWED,
           "Can't update a draft order which is complete"
-        )
+        );
       }
 
       if (data.no_notification_order !== undefined) {
-        touched = true
-        draftOrder.no_notification_order = data.no_notification_order
+        touched = true;
+        draftOrder.no_notification_order = data.no_notification_order;
       }
 
       if (touched) {
-        doRepo.save(draftOrder)
+        doRepo.save(draftOrder);
 
         await this.eventBus_
           .withTransaction(manager)
           .emit(DraftOrderService.Events.UPDATED, {
             id: draftOrder.id,
-          })
+          });
       }
 
-      return draftOrder
-    })
+      return draftOrder;
+    });
   }
 }
 
-export default DraftOrderService
+export default DraftOrderService;

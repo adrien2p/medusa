@@ -1,26 +1,26 @@
-import fetch from "node-fetch"
-import uuidv4 from "uuid/v4"
-import { getConfigStore } from "./get-config-store"
+import fetch from "node-fetch";
+import uuidv4 from "uuid/v4";
+import { getConfigStore } from "./get-config-store";
 
-const store = getConfigStore()
-const medusaCliVersion = require(`../package.json`).version
+const store = getConfigStore();
+const medusaCliVersion = require(`../package.json`).version;
 
 const analyticsApi =
   process.env.MEDUSA_TELEMETRY_API ||
-  `https://telemetry.medusa-commerce.com/batch`
+  `https://telemetry.medusa-commerce.com/batch`;
 
 const getMachineId = (): string => {
-  let machineId = store.get(`telemetry.machine_id`)
+  let machineId = store.get(`telemetry.machine_id`);
 
   if (typeof machineId !== `string`) {
-    machineId = uuidv4()
-    store.set(`telemetry.machine_id`, machineId)
+    machineId = uuidv4();
+    store.set(`telemetry.machine_id`, machineId);
   }
 
-  return machineId
-}
+  return machineId;
+};
 
-const sessionId = uuidv4()
+const sessionId = uuidv4();
 
 export const track = (eventType: string, args?: any): void => {
   fetch(analyticsApi, {
@@ -43,5 +43,5 @@ export const track = (eventType: string, args?: any): void => {
         },
       ],
     }),
-  }).catch(() => {}) /* do nothing, it's telemetry */
-}
+  }).catch(() => {}); /* do nothing, it's telemetry */
+};

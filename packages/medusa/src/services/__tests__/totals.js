@@ -1,5 +1,5 @@
-import TotalsService from "../totals"
-import { IdMap } from "medusa-test-utils"
+import TotalsService from "../totals";
+import { IdMap } from "medusa-test-utils";
 
 const discounts = {
   total10Percent: {
@@ -57,16 +57,16 @@ const discounts = {
     },
     regions: [{ id: "fr" }],
   },
-}
+};
 
 describe("TotalsService", () => {
   describe("getAllocationItemDiscounts", () => {
-    let res
-    const totalsService = new TotalsService()
+    let res;
+    const totalsService = new TotalsService();
 
     beforeEach(() => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     it("calculates item with percentage discount", async () => {
       const cart = {
@@ -82,7 +82,7 @@ describe("TotalsService", () => {
             },
           },
         ],
-      }
+      };
 
       const discount = {
         rule: {
@@ -90,9 +90,9 @@ describe("TotalsService", () => {
           value: 10,
           valid_for: [{ id: "testp" }],
         },
-      }
+      };
 
-      res = totalsService.getAllocationItemDiscounts(discount, cart)
+      res = totalsService.getAllocationItemDiscounts(discount, cart);
 
       expect(res).toEqual([
         {
@@ -109,8 +109,8 @@ describe("TotalsService", () => {
           variant: "testv",
           amount: 10,
         },
-      ])
-    })
+      ]);
+    });
 
     it("calculates item with fixed discount", async () => {
       const cart = {
@@ -126,7 +126,7 @@ describe("TotalsService", () => {
             quantity: 10,
           },
         ],
-      }
+      };
 
       const discount = {
         rule: {
@@ -134,9 +134,9 @@ describe("TotalsService", () => {
           value: 9,
           valid_for: [{ id: "testp" }],
         },
-      }
+      };
 
-      res = totalsService.getAllocationItemDiscounts(discount, cart)
+      res = totalsService.getAllocationItemDiscounts(discount, cart);
 
       expect(res).toEqual([
         {
@@ -153,8 +153,8 @@ describe("TotalsService", () => {
           variant: "testv",
           amount: 90,
         },
-      ])
-    })
+      ]);
+    });
 
     it("does not apply discount if no valid variants are provided", async () => {
       const cart = {
@@ -170,7 +170,7 @@ describe("TotalsService", () => {
             quantity: 10,
           },
         ],
-      }
+      };
 
       const discount = {
         rule: {
@@ -178,16 +178,16 @@ describe("TotalsService", () => {
           value: 9,
           valid_for: [],
         },
-      }
-      res = totalsService.getAllocationItemDiscounts(discount, cart)
+      };
+      res = totalsService.getAllocationItemDiscounts(discount, cart);
 
-      expect(res).toEqual([])
-    })
-  })
+      expect(res).toEqual([]);
+    });
+  });
 
   describe("getDiscountTotal", () => {
-    let res
-    const totalsService = new TotalsService()
+    let res;
+    const totalsService = new TotalsService();
 
     const discountCart = {
       id: "discount_cart",
@@ -215,67 +215,67 @@ describe("TotalsService", () => {
           quantity: 10,
         },
       ],
-    }
+    };
 
     beforeEach(() => {
-      jest.clearAllMocks()
-      discountCart.discounts = []
-    })
+      jest.clearAllMocks();
+      discountCart.discounts = [];
+    });
 
     it("calculate total precentage discount", async () => {
-      discountCart.discounts.push(discounts.total10Percent)
-      res = totalsService.getDiscountTotal(discountCart)
+      discountCart.discounts.push(discounts.total10Percent);
+      res = totalsService.getDiscountTotal(discountCart);
 
-      expect(res).toEqual(28)
-    })
+      expect(res).toEqual(28);
+    });
 
     it("calculate item fixed discount", async () => {
-      discountCart.discounts.push(discounts.item2Fixed)
-      res = totalsService.getDiscountTotal(discountCart)
+      discountCart.discounts.push(discounts.item2Fixed);
+      res = totalsService.getDiscountTotal(discountCart);
 
-      expect(res).toEqual(20)
-    })
+      expect(res).toEqual(20);
+    });
 
     it("calculate item percentage discount", async () => {
-      discountCart.discounts.push(discounts.item10Percent)
-      res = totalsService.getDiscountTotal(discountCart)
+      discountCart.discounts.push(discounts.item10Percent);
+      res = totalsService.getDiscountTotal(discountCart);
 
-      expect(res).toEqual(10)
-    })
+      expect(res).toEqual(10);
+    });
 
     it("calculate total fixed discount", async () => {
-      discountCart.discounts.push(discounts.total10Fixed)
-      res = totalsService.getDiscountTotal(discountCart)
+      discountCart.discounts.push(discounts.total10Fixed);
+      res = totalsService.getDiscountTotal(discountCart);
 
-      expect(res).toEqual(10)
-    })
+      expect(res).toEqual(10);
+    });
 
     it("ignores discount if expired", async () => {
-      discountCart.discounts.push(discounts.expiredDiscount)
-      res = totalsService.getDiscountTotal(discountCart)
+      discountCart.discounts.push(discounts.expiredDiscount);
+      res = totalsService.getDiscountTotal(discountCart);
 
-      expect(res).toEqual(0)
-    })
+      expect(res).toEqual(0);
+    });
 
     it("returns 0 if no discounts are applied", async () => {
-      res = totalsService.getDiscountTotal(discountCart)
+      res = totalsService.getDiscountTotal(discountCart);
 
-      expect(res).toEqual(0)
-    })
+      expect(res).toEqual(0);
+    });
 
     it("returns 0 if no items are in cart", async () => {
       res = totalsService.getDiscountTotal({
         items: [],
         discounts: [discounts.total10Fixed],
-      })
+      });
 
-      expect(res).toEqual(0)
-    })
-  })
+      expect(res).toEqual(0);
+    });
+  });
 
   describe("getRefundTotal", () => {
-    let res
-    const totalsService = new TotalsService()
+    let res;
+    const totalsService = new TotalsService();
     const orderToRefund = {
       id: "refund-order",
       tax_rate: 25,
@@ -318,12 +318,12 @@ describe("TotalsService", () => {
       ],
       region_id: "fr",
       discounts: [],
-    }
+    };
 
     beforeEach(() => {
-      jest.clearAllMocks()
-      orderToRefund.discounts = []
-    })
+      jest.clearAllMocks();
+      orderToRefund.discounts = [];
+    });
 
     it("calculates refund", async () => {
       res = totalsService.getRefundTotal(orderToRefund, [
@@ -339,13 +339,13 @@ describe("TotalsService", () => {
           returned_quantity: 0,
           metadata: {},
         },
-      ])
+      ]);
 
-      expect(res).toEqual(1250)
-    })
+      expect(res).toEqual(1250);
+    });
 
     it("calculates refund with total precentage discount", async () => {
-      orderToRefund.discounts.push(discounts.total10Percent)
+      orderToRefund.discounts.push(discounts.total10Percent);
       res = totalsService.getRefundTotal(orderToRefund, [
         {
           id: "line2",
@@ -359,13 +359,13 @@ describe("TotalsService", () => {
           metadata: {},
           quantity: 10,
         },
-      ])
+      ]);
 
-      expect(res).toEqual(1125)
-    })
+      expect(res).toEqual(1125);
+    });
 
     it("calculates refund with total fixed discount", async () => {
-      orderToRefund.discounts.push(discounts.total10Fixed)
+      orderToRefund.discounts.push(discounts.total10Fixed);
       res = totalsService.getRefundTotal(orderToRefund, [
         {
           id: "line",
@@ -378,13 +378,13 @@ describe("TotalsService", () => {
           quantity: 10,
           returned_quantity: 0,
         },
-      ])
+      ]);
 
-      expect(res).toEqual(1244)
-    })
+      expect(res).toEqual(1244);
+    });
 
     it("calculates refund with item fixed discount", async () => {
-      orderToRefund.discounts.push(discounts.item2Fixed)
+      orderToRefund.discounts.push(discounts.item2Fixed);
       res = totalsService.getRefundTotal(orderToRefund, [
         {
           id: "line2",
@@ -397,13 +397,13 @@ describe("TotalsService", () => {
           quantity: 10,
           returned_quantity: 0,
         },
-      ])
+      ]);
 
-      expect(res).toEqual(1225)
-    })
+      expect(res).toEqual(1225);
+    });
 
     it("calculates refund with item percentage discount", async () => {
-      orderToRefund.discounts.push(discounts.item10Percent)
+      orderToRefund.discounts.push(discounts.item10Percent);
       res = totalsService.getRefundTotal(orderToRefund, [
         {
           id: "line2",
@@ -416,10 +416,10 @@ describe("TotalsService", () => {
           quantity: 10,
           returned_quantity: 0,
         },
-      ])
+      ]);
 
-      expect(res).toEqual(1125)
-    })
+      expect(res).toEqual(1125);
+    });
 
     it("throws if line items to return is not in order", async () => {
       const work = () =>
@@ -434,18 +434,18 @@ describe("TotalsService", () => {
             },
             quantity: 1,
           },
-        ])
+        ]);
 
-      expect(work).toThrow("Line item does not exist on order")
-    })
-  })
+      expect(work).toThrow("Line item does not exist on order");
+    });
+  });
   describe("getShippingTotal", () => {
-    let res
-    const totalsService = new TotalsService()
+    let res;
+    const totalsService = new TotalsService();
 
     beforeEach(() => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     it("calculates shipping", async () => {
       const order = {
@@ -461,19 +461,19 @@ describe("TotalsService", () => {
             },
           },
         ],
-      }
-      res = totalsService.getShippingTotal(order)
+      };
+      res = totalsService.getShippingTotal(order);
 
-      expect(res).toEqual(100)
-    })
-  })
+      expect(res).toEqual(100);
+    });
+  });
   describe("getTaxTotal", () => {
-    let res
-    const totalsService = new TotalsService()
+    let res;
+    const totalsService = new TotalsService();
 
     beforeEach(() => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     it("calculates tax", async () => {
       const order = {
@@ -498,21 +498,21 @@ describe("TotalsService", () => {
             },
           },
         ],
-      }
+      };
 
-      res = totalsService.getTaxTotal(order)
+      res = totalsService.getTaxTotal(order);
 
-      expect(res).toEqual(35)
-    })
-  })
+      expect(res).toEqual(35);
+    });
+  });
 
   describe("getTotal", () => {
-    let res
-    const totalsService = new TotalsService()
+    let res;
+    const totalsService = new TotalsService();
 
     beforeEach(() => {
-      jest.clearAllMocks()
-    })
+      jest.clearAllMocks();
+    });
 
     it("calculates total", async () => {
       const order = {
@@ -537,9 +537,9 @@ describe("TotalsService", () => {
             },
           },
         ],
-      }
-      res = totalsService.getTotal(order)
-      expect(res).toEqual(175)
-    })
-  })
-})
+      };
+      res = totalsService.getTotal(order);
+      expect(res).toEqual(175);
+    });
+  });
+});
