@@ -20,7 +20,7 @@ import {
   FilterableCartProps,
   LineItemUpdate,
 } from "../types/cart"
-import { FindConfig, TotalField } from "../types/common"
+import { AddressPayload, FindConfig, TotalField } from "../types/common"
 import CustomShippingOptionService from "./custom-shipping-option"
 import CustomerService from "./customer"
 import DiscountService from "./discount"
@@ -403,7 +403,7 @@ class CartService extends BaseService {
 
       for (const k of remainingFields) {
         if (typeof data[k] !== "undefined" && k !== "object") {
-          toCreate[k] = data[k]
+          (toCreate[k] as DeepPartial<Cart>) = data[k]
         }
       }
 
@@ -727,7 +727,7 @@ class CartService extends BaseService {
 
       const addrRepo = manager.getCustomRepository(this.addressRepository_)
       if ("shipping_address_id" in update || "shipping_address" in update) {
-        let address: string | Partial<Address> | undefined
+        let address: string | Partial<Address> | AddressPayload | undefined
         if (typeof update.shipping_address_id !== "undefined") {
           address = update.shipping_address_id
         } else if (typeof update.shipping_address !== "undefined") {
@@ -740,7 +740,7 @@ class CartService extends BaseService {
       }
 
       if ("billing_address_id" in update || "billing_address" in update) {
-        let address: string | Partial<Address> | undefined
+        let address: string | Partial<Address> | AddressPayload | undefined
         if (typeof update.billing_address_id !== "undefined") {
           address = update.billing_address_id
         } else if (typeof update.billing_address !== "undefined") {
@@ -876,7 +876,7 @@ class CartService extends BaseService {
    */
   async updateBillingAddress_(
     cart: Cart,
-    addressOrId: Partial<Address> | string,
+    addressOrId: AddressPayload | Partial<Address> | string,
     addrRepo: AddressRepository
   ): Promise<void> {
     let address: Address
@@ -919,7 +919,7 @@ class CartService extends BaseService {
    */
   async updateShippingAddress_(
     cart: Cart,
-    addressOrId: Partial<Address> | string,
+    addressOrId: AddressPayload | Partial<Address> | string,
     addrRepo: AddressRepository
   ): Promise<void> {
     let address: Address
